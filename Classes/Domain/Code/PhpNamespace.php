@@ -24,11 +24,13 @@ final class PhpNamespace
      */
     private function __construct(string $value)
     {
+        $value = str_replace('/', '\\', $value);
+
         if (!preg_match(
             '/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff\\\\]*[a-zA-Z0-9_\x7f-\xff]$/',
             $value
         )) {
-            throw new \DomainException('@TODO: Invalid namespace');
+            throw new \InvalidArgumentException('Invalid namespace "' . $value . '".');
         }
 
         $this->value = ltrim($value, '\\');
@@ -67,6 +69,15 @@ final class PhpNamespace
     public function getValue(): string
     {
         return $this->value;
+    }
+
+    /**
+     * @return string
+     */
+    public function getImportName(): string
+    {
+        $parts = explode('\\', $this->value);
+        return array_pop($parts);
     }
 
     /**

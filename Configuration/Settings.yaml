@@ -7,9 +7,9 @@ PackageFactory:
 
         'po:enum':
           shortDescription: >
-            Creates an Enum for use in presentation objects.
+            Creates a pseudo-enum for use in presentation objects.
           description: >
-            Creates an Enum for use in presentation objects.
+            Creates a pseudo-enum for use in presentation objects.
           arguments:
             0: A Subnamespace (relative to Vendor\Site\Presentation)
             1: The enum class name
@@ -18,3 +18,17 @@ PackageFactory:
             ./flow code:generate po:enum Vendor.Site Block/Button ButtonSize xs,s,m,l,xl
           generatorClassName: >
             PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Enum\EnumGenerator
+
+        'po:model':
+          shortDescription: >
+            Creates a presentation model.
+          description: >
+            Creates a presentation model.
+          arguments:
+            0: A Subnamespace (relative to Vendor\Site\Presentation)
+            1: The presentation model class name
+            n: Comma-separated list of properties and corresponding types (propertyName:type)
+          usageExample: >
+            ./flow code:generate po:model Vendor.Site Block/Button Button size:ButtonSize,label:string,disabled:?boolean
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Model\ModelGenerator
