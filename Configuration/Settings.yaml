@@ -1,0 +1,20 @@
+PackageFactory:
+  Neos:
+    CodeGenerator:
+      packageResolution:
+        defaultPackageKey: null
+      patterns:
+
+        'po:enum':
+          shortDescription: >
+            Creates an Enum for use in presentation objects.
+          description: >
+            Creates an Enum for use in presentation objects.
+          arguments:
+            0: A Subnamespace (relative to Vendor\Site\Presentation)
+            1: The enum class name
+            n: Comma-separated list of enum values
+          usageExample: >
+            ./flow code:generate po:enum Vendor.Site Block/Button ButtonSize xs,s,m,l,xl
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Enum\EnumGenerator
