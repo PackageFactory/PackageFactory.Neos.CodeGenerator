@@ -57,6 +57,9 @@ class CodeCommandController extends CommandController
         $arguments = $this->request->getExceedingArguments();
 
         $generator->generate($package, $arguments);
+
+        $this->outputLine();
+        $this->outputLine('<success>Done!</success>');
     }
 
     /**
@@ -66,10 +69,10 @@ class CodeCommandController extends CommandController
      */
     public function listPatternsCommand(): void
     {
-        $this->outputLine('');
+        $this->outputLine();
         $this->outputLine('List of all available code patterns');
         $this->outputLine('===================================');
-        $this->outputLine('');
+        $this->outputLine();
 
         $headers = ['Pattern Key', 'Short Description'];
         $rows = [];
@@ -78,7 +81,7 @@ class CodeCommandController extends CommandController
         }
 
         $this->output->outputTable($rows, $headers);
-        $this->outputLine('');
+        $this->outputLine();
         $this->outputLine('Usage:');
         $this->outputFormatted('<b>./flow code:generate <em>{Pattern Key}</em> <em>{Package Key}</em> ...</b>');
     }
@@ -93,26 +96,26 @@ class CodeCommandController extends CommandController
     {
         $pattern = $this->patternResolver->resolve($patternKey);
 
-        $this->outputLine('');
+        $this->outputLine();
         $this->outputFormatted('<em> %s - Summary </em>', [$pattern->getKey()]);
-        $this->outputLine('');
+        $this->outputLine();
 
         $this->outputFormatted('  <b>Short description</b>');
         $this->outputFormatted($pattern->getShortDescription(), [], 4);
-        $this->outputLine('');
+        $this->outputLine();
 
         $this->outputFormatted('  <b>Description</b>');
         $this->outputFormatted($pattern->getDescription(), [], 4);
-        $this->outputLine('');
+        $this->outputLine();
 
         $this->outputFormatted('  <b>Arguments</b>');
         foreach ($pattern->getArguments() as $key => $description) {
             $this->outputFormatted('#' . $key . ' - ' . $description, [], 4);
         }
-        $this->outputLine('');
+        $this->outputLine();
 
         $this->outputFormatted('  <b>Usage Example</b>');
         $this->outputFormatted($pattern->getUsageExample(), [], 4);
-        $this->outputLine('');
+        $this->outputLine();
     }
 }

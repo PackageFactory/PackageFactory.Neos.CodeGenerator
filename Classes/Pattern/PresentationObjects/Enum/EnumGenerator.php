@@ -9,8 +9,8 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
-use PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriter;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
+use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
 
 /**
  * The value generator domain service
@@ -32,13 +32,10 @@ final class EnumGenerator implements GeneratorInterface
      */
     public function generate(FlowPackageInterface $flowPackage, array $arguments): void
     {
-        $namespace = PhpNamespace::fromPath(array_shift($arguments));
+        $namespace = PhpNamespace::fromPath(array_shift($arguments))->prependString('Presentation');
         $enum = Enum::fromArguments($arguments);
-        $phpFile = PhpFile::fromFlowPackageAndNamespace(
-            $flowPackage,
-            $namespace->prependString('Presentation'),
-            $enum->getName()
-        )->withBody($enum->getBody());
+        $phpFile = PhpFile::fromFlowPackageAndNamespace($flowPackage, $namespace, $enum->getName())
+            ->withBody($enum->getBody());
 
         $this->fileWriter->write($phpFile);
     }
