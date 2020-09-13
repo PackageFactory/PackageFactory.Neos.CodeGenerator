@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Model;
+namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
 
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
@@ -17,7 +17,7 @@ use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
  *
  * @Flow\Scope("singleton")
  */
-final class ModelGenerator implements GeneratorInterface
+final class EnumGenerator implements GeneratorInterface
 {
     /**
      * @Flow\Inject
@@ -33,14 +33,10 @@ final class ModelGenerator implements GeneratorInterface
     public function generate(FlowPackageInterface $flowPackage, array $arguments): void
     {
         $namespace = PhpNamespace::fromPath(array_shift($arguments))->prependString('Presentation');
-        $model = Model::fromArguments($arguments, $flowPackage);
+        $enum = Enum::fromArguments($arguments);
+        $phpFile = PhpFile::fromFlowPackageAndNamespace($flowPackage, $namespace, $enum->getName())
+            ->withBody($enum->getBody());
 
-        $phpFileForModel = PhpFile::fromFlowPackageAndNamespace($flowPackage, $namespace, $model->getName())
-            ->withBody($model->getBody());
-        $phpFileForModelInterface = PhpFile::fromFlowPackageAndNamespace($flowPackage, $namespace, $model->getInterfaceName())
-            ->withBody($model->getInterfaceBody());
-
-        $this->fileWriter->write($phpFileForModel);
-        $this->fileWriter->write($phpFileForModelInterface);
+        $this->fileWriter->write($phpFile);
     }
 }

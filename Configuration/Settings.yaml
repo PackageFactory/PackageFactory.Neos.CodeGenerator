@@ -17,7 +17,7 @@ PackageFactory:
           usageExample: >
             ./flow code:generate po:enum Vendor.Site Block/Button ButtonSize xs,s,m,l,xl
           generatorClassName: >
-            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Enum\EnumGenerator
+            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\EnumGenerator
 
         'po:model':
           shortDescription: >
@@ -31,4 +31,4 @@ PackageFactory:
           usageExample: >
             ./flow code:generate po:model Vendor.Site Block/Button Button size:ButtonSize,label:string,disabled:?boolean
           generatorClassName: >
-            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Model\ModelGenerator
+            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\ModelGenerator

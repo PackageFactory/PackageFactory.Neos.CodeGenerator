@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Model;
+namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
 
 /*
  * This file is part of the PackageFactory.AtomicFusion.PresentationObjects package
