@@ -2,12 +2,18 @@
 
 > (Opinionated yet extensible) generator for common code patterns in Neos and Neos.Flow projects
 
+## !WARNING! Still under development
+
+This package is still under development and is not ready for a stable release yet. 
+
 ## Authors
 
 - Wilhelm Behncke (behncke@sitegeist.de)
 - Bernhard Schmitt (schmitt@sitegeist.de)
 
 ## Why?
+
+@TODO
 
 ## Usage
 
@@ -80,11 +86,11 @@ Done!
 
 ### Built-in patterns
 
-TBD.
+@TODO
 
 ### Writing custom patterns
 
-TBD.
+@TODO
 
 ## Contribution & Philosophy
 
