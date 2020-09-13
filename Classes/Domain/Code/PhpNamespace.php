@@ -24,7 +24,7 @@ final class PhpNamespace
      */
     private function __construct(string $value)
     {
-        $value = str_replace('/', '\\', $value);
+        $value = str_replace('/', '\\', trim($value, '/\\'));
 
         if (!preg_match(
             '/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff\\\\]*[a-zA-Z0-9_\x7f-\xff]$/',
@@ -37,6 +37,14 @@ final class PhpNamespace
     }
 
     /**
+     * @return self
+     */
+    public static function empty(): self
+    {
+        return new self('');
+    }
+
+    /**
      * @param string $string
      * @return self
      */
@@ -46,12 +54,12 @@ final class PhpNamespace
     }
 
     /**
-     * @param string $string
+     * @param Path $path
      * @return self
      */
-    public static function fromPath(string $path): self
+    public static function fromPath(Path $path): self
     {
-        return new self(str_replace(DIRECTORY_SEPARATOR, '\\', $path));
+        return new self(str_replace(DIRECTORY_SEPARATOR, '\\', $path->getValue()));
     }
 
     /**
@@ -61,6 +69,22 @@ final class PhpNamespace
     public static function fromFlowPackage(FlowPackageInterface $flowPackage): self
     {
         return new self(str_replace('.', '\\', $flowPackage->getPackageKey()));
+    }
+
+    /**
+     * @return string
+     */
+    public function asKey(): string
+    {
+        return str_replace('\\', '.', $this->value);
+    }
+
+    /**
+     * @return string
+     */
+    public function asAbsoluteNamespaceString(): string
+    {
+        return '\\' . $this->value;
     }
 
     /**
@@ -77,11 +101,25 @@ final class PhpNamespace
     public function getImportName(): string
     {
         $parts = explode('\\', $this->value);
-        return array_pop($parts);
+        $lastPart = array_pop($parts);
+        assert(is_string($lastPart));
+
+        return $lastPart;
     }
 
     /**
-     * @return string
+     * @return self
+     */
+    public function getParentNamespace(): self
+    {
+        $parts = explode('\\', $this->value);
+        array_pop($parts);
+
+        return new self(join('\\', $parts));
+    }
+
+    /**
+     * @return Path
      */
     public function asPath(): Path
     {
@@ -94,9 +132,12 @@ final class PhpNamespace
      */
     public function isSubNamespaceOf(PhpNamespace $other): bool
     {
-        $otherValue = $other->getValue();
-
-        return \mb_substr($this->value, 0, \mb_strlen($otherValue)) === $otherValue;
+        if ($this->value) {
+            $otherValue = $other->getValue();
+            return \mb_substr($this->value, 0, \mb_strlen($otherValue)) === $otherValue;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -106,6 +147,19 @@ final class PhpNamespace
     public function belongsToFlowPackage(FlowPackageInterface $flowPackage): bool
     {
         return $this->isSubNamespaceOf(self::fromFlowPackage($flowPackage));
+    }
+
+    /**
+     * @param PhpNamespace $other
+     * @return self
+     */
+    public function relativeTo(PhpNamespace $other): self
+    {
+        if ($this->isSubNamespaceOf($other)) {
+            return new self(\mb_substr($this->value, \mb_strlen($other->getValue()) + 1));
+        } else {
+            return $this;
+        }
     }
 
     /**
@@ -123,7 +177,11 @@ final class PhpNamespace
      */
     public function prependString(string $string): self
     {
-        return new self($string . '\\' . $this->value);
+        if ($this->value) {
+            return new self($string . '\\' . $this->value);
+        } else {
+            return new self($string);
+        }
     }
 
     /**
@@ -141,6 +199,10 @@ final class PhpNamespace
      */
     public function appendString(string $string): self
     {
-        return new self($this->value . '\\' . $string);
+        if ($this->value) {
+            return new self($this->value . '\\' . $string);
+        } else {
+            return new self($string);
+        }
     }
 }

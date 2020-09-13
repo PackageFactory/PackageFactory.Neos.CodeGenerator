@@ -9,5 +9,10 @@ use Neos\Flow\Package\FlowPackageInterface;
 
 interface GeneratorInterface
 {
+    /**
+     * @param FlowPackageInterface $flowPackage
+     * @param array<string> $arguments
+     * @return void
+     */
     public function generate(FlowPackageInterface $flowPackage, array $arguments): void;
 }

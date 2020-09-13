@@ -46,3 +46,17 @@ PackageFactory:
             ./flow code:generate po:model Vendor.Site Block/Button Button size:ButtonSize,label:string,disabled:?boolean
           generatorClassName: >
             PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\ModelGenerator
+
+        'po:component':
+          shortDescription: >
+            Creates a presentation model and component.
+          description: >
+            Creates a presentation model and component.
+          arguments:
+            0: A Subnamespace (relative to Vendor\Site\Presentation)
+            1: The presentation model class name
+            n: Comma-separated list of properties and corresponding types (propertyName:type)
+          usageExample: >
+            ./flow code:generate po:component Vendor.Site Block/Headline Headline content:string
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\ComponentGenerator

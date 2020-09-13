@@ -28,6 +28,7 @@ final class Pattern
     private $description;
 
     /**
+     * @phpstan-var array<int|string,string>
      * @var array
      */
     private $arguments;
@@ -46,7 +47,7 @@ final class Pattern
      * @param string $key
      * @param string $shortDescription
      * @param string $description
-     * @param array $arguments
+     * @param array<int|string, string> $arguments
      * @param string $usageExample
      * @param string $generatorClassName
      */
@@ -67,27 +68,19 @@ final class Pattern
     }
 
     /**
-     * @param array $configuration
+     * @param array<mixed> $configuration
      * @return self
      */
     public static function fromConfiguration(string $key, array $configuration): self
     {
-        if (!isset($configuration['generatorClassName']) || empty($configuration['generatorClassName'])) {
-            throw PatternConfigurationIsInvalid::
-                becauseItDoesNotProvideAGeneratorClassName($key);
-        }
+        assert(isset($configuration['generatorClassName']), new \InvalidArgumentException('Pattern " ' . $key . ' " dos not provide a generatorClassName.'));
+        assert(!empty($configuration['generatorClassName']), new \InvalidArgumentException('Pattern " ' . $key . ' " has an empty generatorClassName.'));
+        assert(is_string($configuration['generatorClassName']), new \InvalidArgumentException('Pattern " ' . $key . ' " has an invalid generatorClassName.'));
 
         $generatorClassName = trim($configuration['generatorClassName']);
 
-        if (!class_exists($generatorClassName)) {
-            throw PatternConfigurationIsInvalid::
-                becauseItsGeneratorClassDoesNotExist($key, $generatorClassName);
-        }
-
-        if (!is_subclass_of($generatorClassName, GeneratorInterface::class)) {
-            throw PatternConfigurationIsInvalid::
-                becauseItsGeneratorClassDoesNotImplementGeneratorInterface($key, $generatorClassName);
-        }
+        assert(class_exists($generatorClassName), new \InvalidArgumentException('Pattern " ' . $key . ' "\'s generatorClassName "' . $generatorClassName . '" refers to a non-existing class.'));
+        assert(is_subclass_of($generatorClassName, GeneratorInterface::class), new \InvalidArgumentException('Pattern " ' . $key . ' "\'s generatorClassName "' . $generatorClassName . '" refers to a class that does not implement "' . GeneratorInterface::class . '".'));
 
         $shortDescription = trim($configuration['shortDescription'] ?? $configuration['description'] ?? '- No description available -');
         $description = trim($configuration['description'] ?? '- No description available -');
@@ -122,7 +115,7 @@ final class Pattern
     }
 
     /**
-     * @return array
+     * @return array<string|int, string>
      */
     public function getArguments(): array
     {

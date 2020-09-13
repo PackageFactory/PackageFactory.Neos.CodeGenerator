@@ -14,12 +14,12 @@ class PatternRepository
 {
     /**
      * @Flow\InjectConfiguration(path="patterns")
-     * @var array
+     * @var array<mixed>
      */
     protected $patternConfigurations;
 
     /**
-     * @return array
+     * @return array<string>
      */
     public function findAllKeys(): array
     {
@@ -27,7 +27,7 @@ class PatternRepository
     }
 
     /**
-     * @return \Iterator
+     * @return \Iterator<int, Pattern>
      */
     public function findAll(): \Iterator
     {

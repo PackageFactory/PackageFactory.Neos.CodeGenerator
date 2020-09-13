@@ -7,6 +7,7 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
 
 /**
  * @Flow\Proxy(false)
@@ -49,6 +50,28 @@ final class Property
     }
 
     /**
+     * @param \ReflectionMethod $getter
+     * @return null|self
+     */
+    public static function fromGetter(\ReflectionMethod $getter): ?self
+    {
+        $propertyName = lcfirst(\mb_substr($getter->getName(), 3));
+        if ($type = Type::fromReflectionType($getter->getReturnType())) {
+            return new self($propertyName, $type);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
      * @return Type
      */
     public function getType(): Type
@@ -70,6 +93,61 @@ final class Property
     public function asParameter(): string
     {
         return $this->type . ' $' . $this->name;
+    }
+
+    /**
+     * @param PhpNamespace $packageNamespace
+     * @param string $indentation
+     * @return string
+     */
+    public function asSampleForFusionStyleguide(PhpNamespace $packageNamespace, string $indentation): string
+    {
+        return $indentation . $this->name . ' ' . $this->type->asSampleForFusionStyleguide($packageNamespace, $indentation);
+    }
+
+    /**
+     * @param PhpNamespace $packageNamespace
+     * @return string
+     */
+    public function asMarkupForFusionStyleguide(PhpNamespace $packageNamespace): string
+    {
+        if ($this->type->isBuiltIn()) {
+            return join(PHP_EOL, [
+                '            <dt>' . $this->name . '</dt>',
+                '            <dd>{presentationObject.' . $this->name . '}</dd>',
+            ]);
+        } elseif ($this->type->refersToPresentationModel()) {
+            /** @phpstan-var class-string $fullyQualifiedName */
+            $fullyQualifiedName = $this->type->getFullyQualifiedName();
+            $model = Model::fromClassName($fullyQualifiedName, $packageNamespace);
+            $component = Component::fromModel($model);
+            return join(PHP_EOL, [
+                '            <dt>' . $this->name . '</dt>',
+                '            <dd><' . $component->getPrototypeName() . ' presentationObject={presentationObject.' . $this->name . '}/></dd>',
+            ]);
+        } elseif ($this->type->refersToExistingClass()) {
+            if (method_exists($this->type->getFullyQualifiedName(), '__toString')) {
+                return join(PHP_EOL, [
+                    '            <dt>' . $this->name . '</dt>',
+                    '            <dd>{presentationObject.' . $this->name . '}</dd>',
+                ]);
+            } elseif (is_subclass_of($this->type->getFullyQualifiedName(), \JsonSerializable::class)) {
+                return join(PHP_EOL, [
+                    '            <dt>' . $this->name . '</dt>',
+                    '            <dd><pre>{Json.stringify(presentationObject.' . $this->name . ', [\'JSON_PRETTY_PRINT\'])}</pre></dd>',
+                ]);
+            } else {
+                return join(PHP_EOL, [
+                    '            <dt>' . $this->name . '</dt>',
+                    '            <dd><pre>Not renderable: presentationObject.' . $this->name . ' (' . $this->type->getFullyQualifiedName() . ')</pre></dd>',
+                ]);
+            }
+        } else {
+            return join(PHP_EOL, [
+                '            <dt>' . $this->name . '</dt>',
+                '            <dd><pre>Unknown type: presentationObject.' . $this->name . ' (' . $this->type->getFullyQualifiedName() . ')</pre></dd>',
+            ]);
+        }
     }
 
     /**

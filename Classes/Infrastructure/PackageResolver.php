@@ -5,6 +5,7 @@ namespace PackageFactory\Neos\CodeGenerator\Infrastructure;
  * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
+use InvalidArgumentException;
 use Neos\Eel\Helper\StringHelper;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\ConsoleOutput;
@@ -43,7 +44,7 @@ final class PackageResolver
 
     /**
      * @param string $input
-     * @return Pattern
+     * @return FlowPackageInterface
      */
     public function resolve(string $input): FlowPackageInterface
     {
@@ -67,6 +68,7 @@ final class PackageResolver
             foreach ($this->packageManager->getAvailablePackages() as $availablePackage) {
                 /** @var PackageInterface $availablePackage */
                 if ($availablePackage->getComposerManifest('type') === 'neos-site') {
+                    assert($availablePackage instanceof FlowPackageInterface);
                     return $availablePackage;
                 }
             }
@@ -84,20 +86,21 @@ final class PackageResolver
         foreach ($this->packageManager->getAvailablePackages() as $availablePackageKey => $availablePackage) {
             $packagePath = rtrim($availablePackage->getPackagePath(), DIRECTORY_SEPARATOR);
             if (is_link($packagePath)) {
-                $packagePath = realpath($packagePath);
+                $packagePath = realpath($packagePath) ?: '';
             }
 
-            if ($this->stringHelper->startsWith($packagePath, FLOW_PATH_ROOT . 'DistributionPackages')) {
+            if ($this->stringHelper->startsWith($packagePath, FLOW_PATH_ROOT . 'DistributionPackages')) { // @phpstan-ignore-line
                 $availablePackageKeys[] = $availablePackageKey;
             }
         }
 
-        return $this->resolveFromPackageKey(
-            $this->output->select(
-                'In which package?',
-                $availablePackageKeys
-            )
+        /** @var string $packageKey */
+        $packageKey = $this->output->select(
+            'In which package?',
+            $availablePackageKeys
         );
+
+        return $this->resolveFromPackageKey($packageKey);
     }
 
     /**
@@ -106,6 +109,9 @@ final class PackageResolver
      */
     public function resolveFromPackageKey(string $packageKey): FlowPackageInterface
     {
-        return $this->packageManager->getPackage($packageKey);
+        $package = $this->packageManager->getPackage($packageKey);
+        assert($package instanceof FlowPackageInterface, new InvalidArgumentException('Package with key "' . $packageKey . '" is not a flow package.'));
+
+        return $package;
     }
 }

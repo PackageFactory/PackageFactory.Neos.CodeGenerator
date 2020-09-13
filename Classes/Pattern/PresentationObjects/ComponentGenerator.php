@@ -7,15 +7,22 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\FusionFile;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
 
 /**
  * @Flow\Scope("singleton")
  */
-final class ValueGenerator implements GeneratorInterface
+final class ComponentGenerator implements GeneratorInterface
 {
+    /**
+     * @Flow\Inject
+     * @var ModelGenerator
+     */
+    protected $modelGenerator;
+
     /**
      * @Flow\Inject
      * @var FileWriter
@@ -29,11 +36,13 @@ final class ValueGenerator implements GeneratorInterface
      */
     public function generate(FlowPackageInterface $flowPackage, array $arguments): void
     {
-        $value = Value::fromArguments($arguments, $flowPackage);
+        $model = Model::fromArguments($arguments, $flowPackage);
+        $component = Component::fromModel($model);
 
-        $phpFile = PhpFile::fromFlowPackageAndNamespace($flowPackage, $value->getNamespace(), $value->getClassName())
-            ->withBody($value->getBody());
+        $fusionFileForComponent = FusionFile::fromFlowPackage($flowPackage, $component->getLocation(), $model->getClassName())
+        ->withBody($component->getBody());
 
-        $this->fileWriter->write($phpFile);
+        $this->modelGenerator->generate($flowPackage, $arguments);
+        $this->fileWriter->write($fusionFileForComponent);
     }
 }

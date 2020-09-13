@@ -13,7 +13,7 @@ use PackageFactory\Neos\CodeGenerator\Domain\Files\Path;
 /**
  * @Flow\Proxy(false)
  */
-final class PhpFile implements FileInterface
+final class FusionFile implements FileInterface
 {
     /**
      * @var Path
@@ -46,38 +46,35 @@ final class PhpFile implements FileInterface
     }
 
     /**
+     * @return Path
+     */
+    public function getPath(): Path
+    {
+        return $this->path;
+    }
+
+    /**
      * @param FlowPackageInterface $flowPackage
-     * @param PhpNamespace $namespace
+     * @param string $location
      * @param string $name
      * @return self
      */
-    public static function fromFlowPackageAndNamespace(FlowPackageInterface $flowPackage, PhpNamespace $namespace, string $name): self
+    public static function fromFlowPackage(FlowPackageInterface $flowPackage, string $location, string $name): self
     {
         $path = Path::fromFlowPackage($flowPackage)
-            ->appendString('Classes')
-            ->append($namespace->relativeTo(PhpNamespace::fromFlowPackage($flowPackage))->asPath())
-            ->appendString($name . '.php');
+            ->appendString('Resources/Private/Fusion')
+            ->appendString($location)
+            ->appendString($name . '.fusion');
 
         return new self(
             $path,
             join(PHP_EOL, [
-                '<?php declare(strict_types=1);',
-                'namespace ' . $namespace->getValue() . ';',
-                '',
                 '/*',
                 ' * This file is part of the ' . $flowPackage->getPackageKey() . ' package',
                 ' */'
             ]),
             ''
         );
-    }
-
-    /**
-     * @return Path
-     */
-    public function getPath(): Path
-    {
-        return $this->path;
     }
 
     /**

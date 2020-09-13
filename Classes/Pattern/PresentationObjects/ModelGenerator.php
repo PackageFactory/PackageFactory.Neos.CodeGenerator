@@ -25,17 +25,16 @@ final class ModelGenerator implements GeneratorInterface
 
     /**
      * @param FlowPackageInterface $flowPackage
-     * @param array $arguments
+     * @param array<string> $arguments
      * @return void
      */
     public function generate(FlowPackageInterface $flowPackage, array $arguments): void
     {
-        $namespace = PhpNamespace::fromPath(array_shift($arguments))->prependString('Presentation');
         $model = Model::fromArguments($arguments, $flowPackage);
 
-        $phpFileForModel = PhpFile::fromFlowPackageAndNamespace($flowPackage, $namespace, $model->getName())
+        $phpFileForModel = PhpFile::fromFlowPackageAndNamespace($flowPackage, $model->getNamespace(), $model->getClassName())
             ->withBody($model->getBody());
-        $phpFileForModelInterface = PhpFile::fromFlowPackageAndNamespace($flowPackage, $namespace, $model->getInterfaceName())
+        $phpFileForModelInterface = PhpFile::fromFlowPackageAndNamespace($flowPackage, $model->getNamespace(), $model->getInterfaceName())
             ->withBody($model->getInterfaceBody());
 
         $this->fileWriter->write($phpFileForModel);

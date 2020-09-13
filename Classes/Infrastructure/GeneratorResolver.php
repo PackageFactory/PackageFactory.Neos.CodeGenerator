@@ -27,6 +27,9 @@ final class GeneratorResolver
      */
     public function resolve(Pattern $pattern): GeneratorInterface
     {
-        return $this->objectManager->get($pattern->getGeneratorClassName());
+        $generator = $this->objectManager->get($pattern->getGeneratorClassName());
+        assert($generator instanceof GeneratorInterface);
+
+        return $generator;
     }
 }

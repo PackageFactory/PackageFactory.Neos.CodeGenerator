@@ -45,12 +45,13 @@ final class PatternResolver
      */
     public function resolveFromPrompt(): Pattern
     {
-        return $this->resolveFromPatternKey(
-            $this->output->select(
-                'Which code pattern shall be used?',
-                $this->patternRepository->findAllKeys()
-            )
+        /** @var string $patternKey */
+        $patternKey = $this->output->select(
+            'Which code pattern shall be used?',
+            $this->patternRepository->findAllKeys()
         );
+
+        return $this->resolveFromPatternKey($patternKey);
     }
 
     /**
