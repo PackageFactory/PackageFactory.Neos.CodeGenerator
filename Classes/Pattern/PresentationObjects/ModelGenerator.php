@@ -13,8 +13,6 @@ use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
 
 /**
- * The value generator domain service
- *
  * @Flow\Scope("singleton")
  */
 final class ModelGenerator implements GeneratorInterface

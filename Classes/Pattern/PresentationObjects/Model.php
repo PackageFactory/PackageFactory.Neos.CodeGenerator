@@ -78,13 +78,18 @@ final class Model
 
         $result[] = 'use Neos\Flow\Annotations as Flow;';
         if ($this->properties) {
-            $result[] = trim(join(PHP_EOL, array_unique(
+            $imports = trim(join(PHP_EOL, array_unique(
                 array_filter(
                     array_map(function (Property $property) {
                         return $property->getType()->asImportStatement();
                     }, $this->properties)
                 )
             )));
+
+            if ($imports) {
+                $result[] = $imports;
+                $result[] = '';
+            }
         } else {
             $result[] = '';
         }
@@ -105,12 +110,12 @@ final class Model
             $result[] = '';
             $result[] = '    /**';
             $result[] = join(PHP_EOL, array_map(function (Property $property) {
-                return '     * @param ' . $property->getConstructorParameter();
+                return '     * @param ' . $property->asDocBlockString();
             }, $this->properties));
             $result[] = '     */';
             $result[] = '    public function __constructor(';
             $result[] = join(',' . PHP_EOL, array_map(function (Property $property) {
-                return '        ' . $property->getConstructorParameter();
+                return '        ' . $property->asParameter();
             }, $this->properties));
             $result[] = '    ) {';
             $result[] = join(PHP_EOL, array_map(function (Property $property) {

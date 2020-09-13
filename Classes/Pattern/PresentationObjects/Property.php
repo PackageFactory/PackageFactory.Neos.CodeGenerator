@@ -59,6 +59,22 @@ final class Property
     /**
      * @return string
      */
+    public function asDocBlockString(): string
+    {
+        return $this->type->asDocBlockString() . ' $' . $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    public function asParameter(): string
+    {
+        return $this->type . ' $' . $this->name;
+    }
+
+    /**
+     * @return string
+     */
     public function getDeclaration(): string
     {
         return join(PHP_EOL, [
@@ -67,14 +83,6 @@ final class Property
             '     */',
             '    private $' . $this->name . ';',
         ]);
-    }
-
-    /**
-     * @return string
-     */
-    public function getConstructorParameter(): string
-    {
-        return $this->type . ' $' . $this->name;
     }
 
     /**
@@ -92,7 +100,7 @@ final class Property
     {
         return join(PHP_EOL, [
             '    /**',
-            '     * @return ' . $this->type,
+            '     * @return ' . $this->type->asDocBlockString(),
             '     */',
             '    public function get' . ucfirst($this->name) . '(): ' . $this->type . ';'
         ]);
@@ -105,7 +113,7 @@ final class Property
     {
         return join(PHP_EOL, [
             '    /**',
-            '     * @return ' . $this->type,
+            '     * @return ' . $this->type->asDocBlockString(),
             '     */',
             '    public function get' . ucfirst($this->name) . '(): ' . $this->type,
             '    {',
@@ -122,9 +130,10 @@ final class Property
     {
         return join(PHP_EOL, [
             '    /**',
-            '     * @return ' . $this->type,
+            '     * @param ' . $this->asDocBlockString(),
+            '     * @return ' . $model->getInterfaceName(),
             '     */',
-            '    public function with' . ucfirst($this->name) . '(' . $this->type . ' $' . $this->name . '): ' . $model->getInterfaceName() . ';'
+            '    public function with' . ucfirst($this->name) . '(' . $this->asParameter() . '): ' . $model->getInterfaceName() . ';'
         ]);
     }
 
@@ -136,9 +145,10 @@ final class Property
     {
         return join(PHP_EOL, [
             '    /**',
-            '     * @return ' . $this->type,
+            '     * @param ' . $this->asDocBlockString(),
+            '     * @return ' . $model->getInterfaceName(),
             '     */',
-            '    public function with' . ucfirst($this->name) . '(' . $this->type . ' $' . $this->name . '): ' . $model->getInterfaceName(),
+            '    public function with' . ucfirst($this->name) . '(' . $this->asParameter() . '): ' . $model->getInterfaceName(),
             '    {',
             '         $next = clone $this;',
             '         $next->' . $this->name . ' = $' . $this->name . ';',
