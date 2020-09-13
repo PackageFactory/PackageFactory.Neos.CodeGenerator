@@ -19,6 +19,20 @@ PackageFactory:
           generatorClassName: >
             PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\EnumGenerator
 
+        'po:value':
+          shortDescription: >
+            Creates a presentation value object.
+          description: >
+            Creates a presentation value object.
+          arguments:
+            0: A Subnamespace (relative to Vendor\Site\Presentation)
+            1: The presentation value object class name
+            n: Comma-separated list of properties and corresponding types (propertyName:type)
+          usageExample: >
+            ./flow code:generate po:value Vendor.Site Block/Button Href value:string
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\ValueGenerator
+
         'po:model':
           shortDescription: >
             Creates a presentation model.
