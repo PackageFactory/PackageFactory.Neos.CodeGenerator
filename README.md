@@ -4,6 +4,9 @@
 
 ## Authors
 
+- Wilhelm Behncke (behncke@sitegeist.de)
+- Bernhard Schmitt (schmitt@sitegeist.de)
+
 ## Why?
 
 ## Usage

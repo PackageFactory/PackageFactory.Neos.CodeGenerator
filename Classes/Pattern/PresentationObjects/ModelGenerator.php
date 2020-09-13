@@ -6,7 +6,7 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
  */
 
 use Neos\Flow\Annotations as Flow;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\YamlFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
@@ -38,8 +38,11 @@ final class ModelGenerator implements GeneratorInterface
         $flowPackage = $this->packageResolver->resolve($query->getArgument(0, 'No package key was given!'));
 
         $model = Model::fromQuery($query->shiftArgument(), $flowPackage);
+        $settingsFile = YamlFile::fromConfigurationInFlowPackage($flowPackage, 'Settings.PresentationHelpers.yaml');
 
-        $this->fileWriter->write($model->asPhpClassFile());
+        $this->fileWriter->write($model->asPhpClassFileForValueObject());
+        $this->fileWriter->write($model->asPhpClassFileForFactory());
+        $this->fileWriter->write($model->asAppendedSettingForFusionDefaultContext($settingsFile));
         $this->fileWriter->write($model->asPhpInterfaceFile());
     }
 }

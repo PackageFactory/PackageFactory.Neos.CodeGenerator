@@ -44,10 +44,10 @@ final class Component
         $packageKey = $this->model->getPackageNamespace()->asKey();
         $prefix = $this->model->getSubNamespace()->asKey();
 
-        if ($this->model->getSubNamespace()->getImportName() === $this->model->getClassName()) {
+        if ($this->model->getSubNamespace()->getImportName() === $this->model->getValueObjectClassName()) {
             return $packageKey . ':' . $prefix;
         } else {
-            return $packageKey . ':' . $prefix . '.' . $this->model->getClassName();
+            return $packageKey . ':' . $prefix . '.' . $this->model->getValueObjectClassName();
         }
     }
 
@@ -56,7 +56,7 @@ final class Component
      */
     public function getTitle(): string
     {
-        return $this->model->getClassName();
+        return $this->model->getValueObjectClassName();
     }
 
     /**
@@ -97,7 +97,7 @@ final class Component
         return FusionFile::fromFlowPackage(
             $this->model->getFlowPackage(),
             $this->getLocation(),
-            $this->model->getClassName(),
+            $this->model->getValueObjectClassName(),
             join(PHP_EOL, $body)
         );
     }

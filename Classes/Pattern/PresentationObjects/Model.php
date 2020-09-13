@@ -10,6 +10,7 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\YamlFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 
@@ -145,7 +146,7 @@ final class Model
     /**
      * @return string
      */
-    public function getClassName(): string
+    public function getValueObjectClassName(): string
     {
         return $this->className;
     }
@@ -153,9 +154,33 @@ final class Model
     /**
      * @return string
      */
-    public function getFullyQualifiedClassName(): string
+    public function getFullyQualifiedValueObjectClassName(): string
     {
-        return $this->getNamespace()->appendString($this->className)->getValue();
+        return $this->getNamespace()->appendString($this->getValueObjectClassName())->getValue();
+    }
+
+    /**
+     * @return string
+     */
+    public function getFactoryClassName(): string
+    {
+        return $this->className . 'Factory';
+    }
+
+    /**
+     * @return string
+     */
+    public function getFactoryEelHelperName(): string
+    {
+        return $this->getPackageNamespace()->asKey() . '.' . $this->getValueObjectClassName();
+    }
+
+    /**
+     * @return string
+     */
+    public function getFullyQualifiedFactoryClassName(): string
+    {
+        return $this->getNamespace()->appendString($this->getFactoryClassName())->getValue();
     }
 
     /**
@@ -197,7 +222,7 @@ final class Model
     /**
      * @return PhpFile
      */
-    public function asPhpClassFile(): PhpFile
+    public function asPhpClassFileForValueObject(): PhpFile
     {
         $body = [];
 
@@ -222,7 +247,7 @@ final class Model
         $body[] = '/**';
         $body[] = ' * @Flow\Proxy(false)';
         $body[] = ' */';
-        $body[] = 'final class ' . $this->className . ' implements ' . $this->getInterfaceName();
+        $body[] = 'final class ' . $this->getValueObjectClassName() . ' implements ' . $this->getInterfaceName();
         $body[] = '{';
 
         if ($this->properties) {
@@ -261,9 +286,47 @@ final class Model
         return PhpFile::fromFlowPackageAndNamespace(
             $this->flowPackage,
             $this->getNamespace(),
-            $this->getClassName(),
+            $this->getValueObjectClassName(),
             join(PHP_EOL, $body)
         );
+    }
+
+    /**
+     * @return PhpFile
+     */
+    public function asPhpClassFileForFactory(): PhpFile
+    {
+        $body = [];
+
+        $body[] = 'use Neos\Flow\Annotations as Flow;';
+        $body[] = 'use PackageFactory\AtomicFusion\PresentationObjects\Fusion\AbstractComponentPresentationObjectFactory;';
+        $body[] = '';
+
+        $body[] = '/**';
+        $body[] = ' * @Flow\Scope("singleton")';
+        $body[] = ' */';
+        $body[] = 'final class ' . $this->getFactoryClassName() . ' extends AbstractComponentPresentationObjectFactory';
+        $body[] = '{';
+        $body[] = '}';
+
+        return PhpFile::fromFlowPackageAndNamespace(
+            $this->flowPackage,
+            $this->getNamespace(),
+            $this->getFactoryClassName(),
+            join(PHP_EOL, $body)
+        );
+    }
+
+    /**
+     * @param YamlFile $settingsFile
+     * @return YamlFile
+     */
+    public function asAppendedSettingForFusionDefaultContext(YamlFile $settingsFile): YamlFile
+    {
+        $settings = $settingsFile->getData();
+        $settings['Neos']['Fusion']['defaultContext'][$this->getFactoryEelHelperName()] = $this->getFullyQualifiedFactoryClassName();
+
+        return $settingsFile->withData($settings);
     }
 
     /**

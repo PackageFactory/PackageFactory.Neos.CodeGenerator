@@ -75,7 +75,7 @@ final class GeneratorQuery
 
     /**
      * @param integer $offset
-     * @return array<string, string>
+     * @return array<int, string>
      */
     public function getRemainingArguments(int $offset): array
     {
