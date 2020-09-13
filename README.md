@@ -94,15 +94,7 @@ Done!
 
 ## Contribution & Philosophy
 
-This package promises to always stay consistent with the official Neos Best-Practices (https://docs.neos.io/cms/manual/best-practices). Feel free to shout at us if it doesn't :)
-
-It is noteworthy that the maintainers of this package all work at sitegeist neos solutions GmbH in Hamburg (https://sitegeist.de/). The built-in patterns provided here might be biased from that direction. However, if we observe wide-spread use of this package, we might reconsider its composition accordingly.
-
-In the meantime, you can override pretty much everything in here, if you want to adjust the patterns to your needs or create some of your own.
-
-Of course, we also gladly accept your contributions, be it PRs, Issues, Stars, Tweets, ... :)
-
-Your feedback is very important to us, as it gives us opportunity to grow this package and learn from others in the community. Just keep in mind, that maintenance is spare-time business and PRs might take a while ;)
+@TODO
 
 ## License
 
