@@ -2,7 +2,7 @@
 namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
 
 /*
- * This file is part of the PackageFactory.AtomicFusion.PresentationObjects package
+ * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
 use Neos\Flow\Annotations as Flow;
@@ -74,7 +74,7 @@ final class Component
     {
         $body = [];
 
-        $body[] = 'prototype(' . $this->getPrototypeName() . ') < prototype(PackageFactory.AtomicFusion.PresentationObjects:PresentationObjectComponent) {';
+        $body[] = 'prototype(' . $this->getPrototypeName() . ') < prototype(PackageFactory.Neos.CodeGenerator:PresentationObjectComponent) {';
         $body[] = '    @presentationObjectInterface = \'' . str_replace('\\', '\\\\', $this->model->getFullyQualifiedInterfaceName()) . '\'';
         $body[] = '';
         $body[] = '    @styleguide {';

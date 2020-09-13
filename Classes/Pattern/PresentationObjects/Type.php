@@ -2,7 +2,7 @@
 namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
 
 /*
- * This file is part of the PackageFactory.AtomicFusion.PresentationObjects package
+ * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
 use Neos\Eel\Helper\StringHelper;

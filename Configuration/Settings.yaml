@@ -5,6 +5,19 @@ PackageFactory:
         defaultPackageKey: null
       patterns:
 
+        'eel:helper':
+          shortDescription: >
+            Creates an Eel Helper and registers it for use in Fusion.
+          description: >
+            Creates an Eel Helper and registers it for use in Fusion.
+          arguments:
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: The Eel Helper short name ("Helper" will be appended)
+          usageExample: >
+            ./flow code:generate eel:helper MyHelper
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\Eel\HelperGenerator
+
         'po:enum':
           shortDescription: >
             Creates a pseudo-enum for use in presentation objects.
