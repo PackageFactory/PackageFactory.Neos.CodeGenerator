@@ -8,7 +8,6 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 
 /**
  * @Flow\Proxy(false)
@@ -54,17 +53,16 @@ final class Enum
     }
 
     /**
-     * @param GeneratorQuery $query
+     * @param array<string> $arguments
+     * @param FlowPackageInterface $flowPackage
      * @return self
      */
-    public static function fromGeneratorQuery(GeneratorQuery $query): self
+    public static function fromArguments(array $arguments, FlowPackageInterface $flowPackage): self
     {
-        $arguments = $query->getArguments();
-
         assert(isset($arguments[0]), new \InvalidArgumentException('No sub-namespace was given'));
         assert(isset($arguments[1]), new \InvalidArgumentException('No class name was given!'));
 
-        $packageNamespace = PhpNamespace::fromFlowPackage($query->getFlowPackage());
+        $packageNamespace = PhpNamespace::fromFlowPackage($flowPackage);
         $subNamespace = PhpNamespace::fromString($arguments[0]);
         $className = $arguments[1];
         $values = [];

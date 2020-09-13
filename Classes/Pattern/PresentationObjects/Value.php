@@ -6,8 +6,8 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
  */
 
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 
 /**
  * @Flow\Proxy(false)
@@ -53,24 +53,22 @@ final class Value
     }
 
     /**
-     * @param GeneratorQuery $query
+     * @param array<string> $arguments
      * @return self
      */
-    public static function fromGeneratorQuery(GeneratorQuery $query): self
+    public static function fromArguments(array $arguments, FlowPackageInterface $flowPackage): self
     {
-        $arguments = $query->getArguments();
-
         assert(isset($arguments[0]), new \InvalidArgumentException('No sub-namespace was given'));
         assert(isset($arguments[1]), new \InvalidArgumentException('No class name was given!'));
 
-        $packageNamespace = PhpNamespace::fromFlowPackage($query->getFlowPackage());
+        $packageNamespace = PhpNamespace::fromFlowPackage($flowPackage);
         $subNamespace = PhpNamespace::fromString($arguments[0]);
         $className = $arguments[1];
         $properties = [];
 
         foreach (array_slice($arguments, 2) as $argument) {
             foreach (explode(',', $argument) as $descriptor) {
-                $properties[] = Property::fromDescriptor(trim($descriptor), $query->getFlowPackage());
+                $properties[] = Property::fromDescriptor(trim($descriptor), $flowPackage);
             }
         }
 
