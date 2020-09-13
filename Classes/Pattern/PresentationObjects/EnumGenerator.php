@@ -6,9 +6,9 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
 
 /**
@@ -25,14 +25,13 @@ final class EnumGenerator implements GeneratorInterface
     protected $fileWriter;
 
     /**
-     * @param FlowPackageInterface $flowPackage
-     * @param array<string> $arguments
+     * @param GeneratorQuery $query
      * @return void
      */
-    public function generate(FlowPackageInterface $flowPackage, array $arguments): void
+    public function generate(GeneratorQuery $query): void
     {
-        $enum = Enum::fromArguments($arguments, $flowPackage);
-        $phpFile = PhpFile::fromFlowPackageAndNamespace($flowPackage, $enum->getNamespace(), $enum->getClassName())
+        $enum = Enum::fromGeneratorQuery($query);
+        $phpFile = PhpFile::fromFlowPackageAndNamespace($query->getFlowPackage(), $enum->getNamespace(), $enum->getClassName())
             ->withBody($enum->getBody());
 
         $this->fileWriter->write($phpFile);

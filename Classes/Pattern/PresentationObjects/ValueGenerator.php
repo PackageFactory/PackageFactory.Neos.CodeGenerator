@@ -9,6 +9,7 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
 
 /**
@@ -23,15 +24,14 @@ final class ValueGenerator implements GeneratorInterface
     protected $fileWriter;
 
     /**
-     * @param FlowPackageInterface $flowPackage
-     * @param array<string> $arguments
+     * @param GeneratorQuery $query
      * @return void
      */
-    public function generate(FlowPackageInterface $flowPackage, array $arguments): void
+    public function generate(GeneratorQuery $query): void
     {
-        $value = Value::fromArguments($arguments, $flowPackage);
+        $value = Value::fromGeneratorQuery($query);
 
-        $phpFile = PhpFile::fromFlowPackageAndNamespace($flowPackage, $value->getNamespace(), $value->getClassName())
+        $phpFile = PhpFile::fromFlowPackageAndNamespace($query->getFlowPackage(), $value->getNamespace(), $value->getClassName())
             ->withBody($value->getBody());
 
         $this->fileWriter->write($phpFile);

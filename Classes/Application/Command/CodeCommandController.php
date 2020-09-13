@@ -7,6 +7,7 @@ namespace PackageFactory\Neos\CodeGenerator\Application\Command;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
+use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\PatternRepository;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\GeneratorResolver;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
@@ -54,9 +55,9 @@ class CodeCommandController extends CommandController
         $generator = $this->generatorResolver->resolve($pattern);
 
         $package = $this->packageResolver->resolve($packageKey);
-        $arguments = $this->request->getExceedingArguments();
+        $query = GeneratorQuery::fromFlowPackageAndCliRequest($package, $this->request);
 
-        $generator->generate($package, $arguments);
+        $generator->generate($query);
 
         $this->outputLine();
         $this->outputLine('<success>Done!</success>');

@@ -5,14 +5,11 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Pattern;
  * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
-use Neos\Flow\Package\FlowPackageInterface;
-
 interface GeneratorInterface
 {
     /**
-     * @param FlowPackageInterface $flowPackage
-     * @param array<string> $arguments
+     * @param GeneratorQuery $query
      * @return void
      */
-    public function generate(FlowPackageInterface $flowPackage, array $arguments): void;
+    public function generate(GeneratorQuery $query): void;
 }

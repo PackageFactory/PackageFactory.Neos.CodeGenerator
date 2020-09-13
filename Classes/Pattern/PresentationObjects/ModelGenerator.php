@@ -6,10 +6,9 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
 
 /**
@@ -24,17 +23,16 @@ final class ModelGenerator implements GeneratorInterface
     protected $fileWriter;
 
     /**
-     * @param FlowPackageInterface $flowPackage
-     * @param array<string> $arguments
+     * @param GeneratorQuery $query
      * @return void
      */
-    public function generate(FlowPackageInterface $flowPackage, array $arguments): void
+    public function generate(GeneratorQuery $query): void
     {
-        $model = Model::fromArguments($arguments, $flowPackage);
+        $model = Model::fromGeneratorQuery($query);
 
-        $phpFileForModel = PhpFile::fromFlowPackageAndNamespace($flowPackage, $model->getNamespace(), $model->getClassName())
+        $phpFileForModel = PhpFile::fromFlowPackageAndNamespace($query->getFlowPackage(), $model->getNamespace(), $model->getClassName())
             ->withBody($model->getBody());
-        $phpFileForModelInterface = PhpFile::fromFlowPackageAndNamespace($flowPackage, $model->getNamespace(), $model->getInterfaceName())
+        $phpFileForModelInterface = PhpFile::fromFlowPackageAndNamespace($query->getFlowPackage(), $model->getNamespace(), $model->getInterfaceName())
             ->withBody($model->getInterfaceBody());
 
         $this->fileWriter->write($phpFileForModel);

@@ -6,10 +6,9 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\FusionFile;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
 
 /**
@@ -30,19 +29,18 @@ final class ComponentGenerator implements GeneratorInterface
     protected $fileWriter;
 
     /**
-     * @param FlowPackageInterface $flowPackage
-     * @param array<string> $arguments
+     * @param GeneratorQuery $query
      * @return void
      */
-    public function generate(FlowPackageInterface $flowPackage, array $arguments): void
+    public function generate(GeneratorQuery $query): void
     {
-        $model = Model::fromArguments($arguments, $flowPackage);
+        $model = Model::fromGeneratorQuery($query);
         $component = Component::fromModel($model);
 
-        $fusionFileForComponent = FusionFile::fromFlowPackage($flowPackage, $component->getLocation(), $model->getClassName())
+        $fusionFileForComponent = FusionFile::fromFlowPackage($query->getFlowPackage(), $component->getLocation(), $model->getClassName())
         ->withBody($component->getBody());
 
-        $this->modelGenerator->generate($flowPackage, $arguments);
+        $this->modelGenerator->generate($query);
         $this->fileWriter->write($fusionFileForComponent);
     }
 }
