@@ -263,7 +263,7 @@ final class Model
                 return '     * @param ' . $property->asDocBlockString();
             }, $this->properties));
             $body[] = '     */';
-            $body[] = '    public function __constructor(';
+            $body[] = '    public function __construct(';
             $body[] = join(',' . PHP_EOL, array_map(function (Property $property) {
                 return '        ' . $property->asParameter();
             }, $this->properties));

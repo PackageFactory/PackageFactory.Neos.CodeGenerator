@@ -18,6 +18,21 @@ PackageFactory:
           generatorClassName: >
             PackageFactory\Neos\CodeGenerator\Pattern\Eel\HelperGenerator
 
+        'domain:value':
+          shortDescription: >
+            Creates a domain value object.
+          description: >
+            Creates a domain value object.
+          arguments:
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: A Subnamespace (relative to Vendor\Site\Domain)
+            2: The value object class name
+            n: Comma-separated list of properties and corresponding types (propertyName:type)
+          usageExample: >
+            ./flow code:generate domain:value Vendor.Site Order PostalAddress streetAddress:string postalCode:string addressLocality:string
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\Domain\ValueGenerator
+
         'po:enum':
           shortDescription: >
             Creates a pseudo-enum for use in presentation objects.

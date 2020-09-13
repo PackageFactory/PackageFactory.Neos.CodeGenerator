@@ -201,7 +201,7 @@ final class Property
             '     */',
             '    public function get' . ucfirst($this->name) . '(): ' . $this->type,
             '    {',
-            '         return $this->' . $this->name . ';',
+            '        return $this->' . $this->name . ';',
             '    }'
         ]);
     }

@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
+namespace PackageFactory\Neos\CodeGenerator\Pattern\Domain;
 
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
@@ -95,7 +95,7 @@ final class Value
      */
     public function getNamespace(): PhpNamespace
     {
-        return $this->getPackageNamespace()->appendString('Presentation')->append($this->subNamespace);
+        return $this->getPackageNamespace()->appendString('Domain')->append($this->subNamespace);
     }
 
     /**
