@@ -9,6 +9,7 @@ use Neos\Eel\Helper\StringHelper;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
+use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 use Spatie\Enum\Enum;
 
 /**
@@ -73,7 +74,7 @@ final class Type
         $stringHelper = new StringHelper();
 
         if ($stringHelper->startsWith($descriptor, '/') || $stringHelper->startsWith($descriptor, '\\')) {
-            return new self($descriptor, null, $nullable);
+            return new self(str_replace('/', '\\', $descriptor), null, $nullable);
         }
 
         $targetNamespace = PhpNamespace::fromFlowPackage($flowPackage)
@@ -185,9 +186,11 @@ final class Type
     }
 
     /**
+     * @param PackageResolver $packageResolver
+     * @param string $indentation
      * @return string
      */
-    public function asSampleForFusionStyleguide(PhpNamespace $packageNamespace, string $indentation): string
+    public function asSampleForFusionStyleguide(PackageResolver $packageResolver, string $indentation): string
     {
         switch ($this->fullyQualifiedName) {
             case 'bool':
@@ -206,18 +209,20 @@ final class Type
             case 'callable':
                 return '= ${param => param}';
             default:
-                if (is_subclass_of($this->fullyQualifiedName, Enum::class)) {
-                    $class = $this->fullyQualifiedName;
+                /** @phpstan-var class-string $fullyQualifiedName */
+                $fullyQualifiedName = $this->fullyQualifiedName;
+
+                if (is_subclass_of($fullyQualifiedName, Enum::class)) {
+                    $class = $fullyQualifiedName;
                     if ($class::getValues()) {
                         return '= \'' . $class::getValues()[0] . '\'';
                     } else {
                         return '= null';
                     }
-                } elseif (class_exists($this->fullyQualifiedName) && \mb_strlen($indentation) < 16) {
-                    $model = Model::fromClassName($this->fullyQualifiedName, $packageNamespace);
+                } elseif (\mb_strlen($indentation) < 16 && $model = Model::fromClassName($fullyQualifiedName, $packageResolver)) {
                     return join(PHP_EOL, [
                         '{',
-                        $model->asSampleForFusionStyleguide($indentation . '    '),
+                        $model->asSampleForFusionStyleguide($packageResolver, $indentation . '    '),
                         $indentation . '}'
                     ]);
                 } else {

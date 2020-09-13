@@ -8,6 +8,7 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
+use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 
 /**
  * @Flow\Proxy(false)
@@ -96,20 +97,20 @@ final class Property
     }
 
     /**
-     * @param PhpNamespace $packageNamespace
+     * @param PackageResolver $packageResolver
      * @param string $indentation
      * @return string
      */
-    public function asSampleForFusionStyleguide(PhpNamespace $packageNamespace, string $indentation): string
+    public function asSampleForFusionStyleguide(PackageResolver $packageResolver, string $indentation): string
     {
-        return $indentation . $this->name . ' ' . $this->type->asSampleForFusionStyleguide($packageNamespace, $indentation);
+        return $indentation . $this->name . ' ' . $this->type->asSampleForFusionStyleguide($packageResolver, $indentation);
     }
 
     /**
-     * @param PhpNamespace $packageNamespace
+     * @param PackageResolver $packageResolver
      * @return string
      */
-    public function asMarkupForFusionStyleguide(PhpNamespace $packageNamespace): string
+    public function asMarkupForFusionStyleguide(PackageResolver $packageResolver): string
     {
         if ($this->type->isBuiltIn()) {
             return join(PHP_EOL, [
@@ -119,13 +120,18 @@ final class Property
         } elseif ($this->type->refersToPresentationModel()) {
             /** @phpstan-var class-string $fullyQualifiedName */
             $fullyQualifiedName = $this->type->getFullyQualifiedName();
-            $model = Model::fromClassName($fullyQualifiedName, $packageNamespace);
-            $component = Component::fromModel($model);
-            return join(PHP_EOL, [
-                '            <dt>' . $this->name . '</dt>',
-                '            <dd><' . $component->getPrototypeName() . ' presentationObject={presentationObject.' . $this->name . '}/></dd>',
-            ]);
-        } elseif ($this->type->refersToExistingClass()) {
+
+            if ($model = Model::fromClassName($fullyQualifiedName, $packageResolver)) {
+                $component = Component::fromModel($model);
+
+                return join(PHP_EOL, [
+                    '            <dt>' . $this->name . '</dt>',
+                    '            <dd><' . $component->getPrototypeName() . ' presentationObject={presentationObject.' . $this->name . '}/></dd>',
+                ]);
+            }
+        }
+
+        if ($this->type->refersToExistingClass()) {
             if (method_exists($this->type->getFullyQualifiedName(), '__toString')) {
                 return join(PHP_EOL, [
                     '            <dt>' . $this->name . '</dt>',

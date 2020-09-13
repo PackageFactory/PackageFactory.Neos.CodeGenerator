@@ -10,12 +10,19 @@ use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
+use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 
 /**
  * @Flow\Scope("singleton")
  */
 final class ModelGenerator implements GeneratorInterface
 {
+    /**
+     * @Flow\Inject
+     * @var PackageResolver
+     */
+    protected $packageResolver;
+
     /**
      * @Flow\Inject
      * @var FileWriter
@@ -28,14 +35,11 @@ final class ModelGenerator implements GeneratorInterface
      */
     public function generate(GeneratorQuery $query): void
     {
-        $model = Model::fromGeneratorQuery($query);
+        $flowPackage = $this->packageResolver->resolve($query->getArgument(0, 'No package key was given!'));
 
-        $phpFileForModel = PhpFile::fromFlowPackageAndNamespace($query->getFlowPackage(), $model->getNamespace(), $model->getClassName())
-            ->withBody($model->getBody());
-        $phpFileForModelInterface = PhpFile::fromFlowPackageAndNamespace($query->getFlowPackage(), $model->getNamespace(), $model->getInterfaceName())
-            ->withBody($model->getInterfaceBody());
+        $model = Model::fromQuery($query->shiftArgument(), $flowPackage);
 
-        $this->fileWriter->write($phpFileForModel);
-        $this->fileWriter->write($phpFileForModelInterface);
+        $this->fileWriter->write($model->asPhpClassFile());
+        $this->fileWriter->write($model->asPhpInterfaceFile());
     }
 }

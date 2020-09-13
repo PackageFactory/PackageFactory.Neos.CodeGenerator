@@ -46,20 +46,13 @@ final class FusionFile implements FileInterface
     }
 
     /**
-     * @return Path
-     */
-    public function getPath(): Path
-    {
-        return $this->path;
-    }
-
-    /**
      * @param FlowPackageInterface $flowPackage
      * @param string $location
      * @param string $name
+     * @param string $body
      * @return self
      */
-    public static function fromFlowPackage(FlowPackageInterface $flowPackage, string $location, string $name): self
+    public static function fromFlowPackage(FlowPackageInterface $flowPackage, string $location, string $name, string $body): self
     {
         $path = Path::fromFlowPackage($flowPackage)
             ->appendString('Resources/Private/Fusion')
@@ -73,8 +66,16 @@ final class FusionFile implements FileInterface
                 ' * This file is part of the ' . $flowPackage->getPackageKey() . ' package',
                 ' */'
             ]),
-            ''
+            $body
         );
+    }
+
+    /**
+     * @return Path
+     */
+    public function getPath(): Path
+    {
+        return $this->path;
     }
 
     /**
@@ -83,17 +84,5 @@ final class FusionFile implements FileInterface
     public function getContents(): string
     {
         return join(PHP_EOL . PHP_EOL, [$this->head, $this->body]) . PHP_EOL;
-    }
-
-    /**
-     * @param string $body
-     * @return self
-     */
-    public function withBody(string $body): self
-    {
-        $next = clone $this;
-        $next->body = $body;
-
-        return $next;
     }
 }

@@ -43,15 +43,24 @@ final class PackageResolver
     protected $stringHelper;
 
     /**
+     * @var null|FlowPackageInterface
+     */
+    protected $cachedPromptResult = null;
+
+    /**
      * @param string $input
      * @return FlowPackageInterface
      */
     public function resolve(string $input): FlowPackageInterface
     {
-        if ($input === '-') {
+        if ($input === '.') {
             return $this->resolveFromDefault();
-        } elseif ($input === '.') {
-            return $this->resolveFromPrompt();
+        } elseif ($input === '..') {
+            if ($this->cachedPromptResult) {
+                return $this->cachedPromptResult;
+            } else {
+                return $this->cachedPromptResult = $this->resolveFromPrompt();
+            }
         } else {
             return $this->resolveFromPackageKey($input);
         }
@@ -110,8 +119,27 @@ final class PackageResolver
     public function resolveFromPackageKey(string $packageKey): FlowPackageInterface
     {
         $package = $this->packageManager->getPackage($packageKey);
-        assert($package instanceof FlowPackageInterface, new InvalidArgumentException('Package with key "' . $packageKey . '" is not a flow package.'));
+        if (!($package instanceof FlowPackageInterface)) {
+            throw new InvalidArgumentException('Package with key "' . $packageKey . '" is not a flow package.');
+        }
 
         return $package;
+    }
+
+    /**
+     * @param string $packageKey
+     * @return null|FlowPackageInterface
+     */
+    public function gracefullyResolveFromPackageKey(string $packageKey): ?FlowPackageInterface
+    {
+        if ($this->packageManager->isPackageAvailable($packageKey)) {
+            $package = $this->packageManager->getPackage($packageKey);
+
+            if ($package instanceof FlowPackageInterface) {
+                return $package;
+            }
+        }
+
+        return null;
     }
 }

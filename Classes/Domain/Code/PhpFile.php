@@ -49,9 +49,10 @@ final class PhpFile implements FileInterface
      * @param FlowPackageInterface $flowPackage
      * @param PhpNamespace $namespace
      * @param string $name
+     * @param string $body
      * @return self
      */
-    public static function fromFlowPackageAndNamespace(FlowPackageInterface $flowPackage, PhpNamespace $namespace, string $name): self
+    public static function fromFlowPackageAndNamespace(FlowPackageInterface $flowPackage, PhpNamespace $namespace, string $name, string $body): self
     {
         $path = Path::fromFlowPackage($flowPackage)
             ->appendString('Classes')
@@ -68,7 +69,7 @@ final class PhpFile implements FileInterface
                 ' * This file is part of the ' . $flowPackage->getPackageKey() . ' package',
                 ' */'
             ]),
-            ''
+            $body
         );
     }
 
@@ -86,17 +87,5 @@ final class PhpFile implements FileInterface
     public function getContents(): string
     {
         return join(PHP_EOL . PHP_EOL, [$this->head, $this->body]) . PHP_EOL;
-    }
-
-    /**
-     * @param string $body
-     * @return self
-     */
-    public function withBody(string $body): self
-    {
-        $next = clone $this;
-        $next->body = $body;
-
-        return $next;
     }
 }

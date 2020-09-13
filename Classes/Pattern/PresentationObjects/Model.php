@@ -8,7 +8,10 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
 use Neos\Eel\Helper\StringHelper;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
+use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
+use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 
 /**
  * @Flow\Proxy(false)
@@ -16,9 +19,9 @@ use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
 final class Model
 {
     /**
-     * @var PhpNamespace
+     * @var FlowPackageInterface
      */
-    private $packageNamespace;
+    private $flowPackage;
 
     /**
      * @var PhpNamespace
@@ -36,75 +39,83 @@ final class Model
     private $properties;
 
     /**
-     * @param PhpNamespace $packageNamespace
+     * @param FlowPackageInterface $flowPackage
      * @param PhpNamespace $subNamespace
      * @param string $className
      * @param array|Property[] $properties
      */
     public function __construct(
-        PhpNamespace $packageNamespace,
+        FlowPackageInterface $flowPackage,
         PhpNamespace $subNamespace,
         string $className,
         array $properties
     ) {
-        $this->packageNamespace = $packageNamespace;
+        $this->flowPackage = $flowPackage;
         $this->subNamespace = $subNamespace;
         $this->className = $className;
         $this->properties = $properties;
     }
 
     /**
-     * @param array<string> $arguments
+     * @param GeneratorQuery $query
      * @param FlowPackageInterface $flowPackage
      * @return self
      */
-    public static function fromArguments(array $arguments, FlowPackageInterface $flowPackage): self
+    public static function fromQuery(GeneratorQuery $query, FlowPackageInterface $flowPackage): self
     {
-        assert(isset($arguments[0]), new \InvalidArgumentException('No sub-namespace was given'));
-        assert(isset($arguments[1]), new \InvalidArgumentException('No class name was given!'));
-
-        $packageNamespace = PhpNamespace::fromFlowPackage($flowPackage);
-        $subNamespace = PhpNamespace::fromString($arguments[0]);
-        $className = $arguments[1];
+        $subNamespace = PhpNamespace::fromString($query->getArgument(0, 'No sub-namespace was given!'));
+        $className = $query->getArgument(1, 'No class name was given!');
         $properties = [];
 
-        foreach (array_slice($arguments, 2) as $argument) {
+        foreach ($query->getRemainingArguments(2) as $argument) {
             foreach (explode(',', $argument) as $descriptor) {
                 $properties[] = Property::fromDescriptor(trim($descriptor), $flowPackage);
             }
         }
 
-        return new self($packageNamespace, $subNamespace, $className, $properties);
+        return new self($flowPackage, $subNamespace, $className, $properties);
     }
 
     /**
      * @param class-string $className
-     * @param PhpNamespace $packageNamespace
-     * @return self
+     * @param PackageResolver $packageResolver
+     * @return null|self
      */
-    public static function fromClassName(string $className, PhpNamespace $packageNamespace): self
+    public static function fromClassName(string $className, PackageResolver $packageResolver): ?self
     {
-        $stringHelper = new StringHelper();
-        $reflectionClass = new \ReflectionClass($className);
-        $namespace = PhpNamespace::fromString($className);
+        $parts = explode('\\Presentation\\', $className);
+        if (count($parts) === 2) {
+            $packageKey = PhpNamespace::fromString($parts[0])->asKey();
 
-        if ($namespace->isSubNamespaceOf($packageNamespace)) {
-            $subNamespace = $namespace->relativeTo($packageNamespace);
-        } else {
-            $packageNamespace = PhpNamespace::empty();
-            $subNamespace = PhpNamespace::fromString($className)->relativeTo($packageNamespace);
-        }
+            if ($flowPackage = $packageResolver->gracefullyResolveFromPackageKey($packageKey)) {
+                $stringHelper = new StringHelper();
+                $reflectionClass = new \ReflectionClass($className);
+                $subNamespace = PhpNamespace::fromString($parts[0]);
+                $className = $subNamespace->getImportName();
+                $subNamespace = $subNamespace->getParentNamespace();
 
-        $properties = [];
-        foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-            if ($stringHelper->startsWith($method->getName(), 'get')) {
-                if ($property = Property::fromGetter($method)) {
-                    $properties[] = $property;
+                $properties = [];
+                foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+                    if ($stringHelper->startsWith($method->getName(), 'get')) {
+                        if ($property = Property::fromGetter($method)) {
+                            $properties[] = $property;
+                        }
+                    }
                 }
+
+                return new self($flowPackage, $subNamespace, $className, $properties);
             }
         }
 
-        return new self($packageNamespace, $subNamespace->getParentNamespace(), $subNamespace->getImportName(), $properties);
+        return null;
+    }
+
+    /**
+     * @return FlowPackageInterface
+     */
+    public function getFlowPackage(): FlowPackageInterface
+    {
+        return $this->flowPackage;
     }
 
     /**
@@ -112,7 +123,7 @@ final class Model
      */
     public function getPackageNamespace(): PhpNamespace
     {
-        return $this->packageNamespace;
+        return PhpNamespace::fromFlowPackage($this->flowPackage);
     }
 
     /**
@@ -128,7 +139,7 @@ final class Model
      */
     public function getNamespace(): PhpNamespace
     {
-        return $this->packageNamespace->appendString('Presentation')->append($this->subNamespace);
+        return $this->getPackageNamespace()->appendString('Presentation')->append($this->subNamespace);
     }
 
     /**
@@ -172,23 +183,25 @@ final class Model
     }
 
     /**
+     * @param PackageResolver $packageResolver
+     * @param string $indentation
      * @return string
      */
-    public function asSampleForFusionStyleguide(string $indentation): string
+    public function asSampleForFusionStyleguide(PackageResolver $packageResolver, string $indentation): string
     {
-        return join(PHP_EOL, array_map(function (Property $property) use ($indentation) {
-            return $property->asSampleForFusionStyleguide($this->packageNamespace, $indentation);
+        return join(PHP_EOL, array_map(function (Property $property) use ($packageResolver, $indentation) {
+            return $property->asSampleForFusionStyleguide($packageResolver, $indentation);
         }, $this->properties));
     }
 
     /**
-     * @return string
+     * @return PhpFile
      */
-    public function getBody(): string
+    public function asPhpClassFile(): PhpFile
     {
-        $result = [];
+        $body = [];
 
-        $result[] = 'use Neos\Flow\Annotations as Flow;';
+        $body[] = 'use Neos\Flow\Annotations as Flow;';
         if ($this->properties) {
             $imports = trim(join(PHP_EOL, array_unique(
                 array_filter(
@@ -199,64 +212,69 @@ final class Model
             )));
 
             if ($imports) {
-                $result[] = $imports;
-                $result[] = '';
+                $body[] = $imports;
+                $body[] = '';
             }
         } else {
-            $result[] = '';
+            $body[] = '';
         }
 
-        $result[] = '/**';
-        $result[] = ' * @Flow\Proxy(false)';
-        $result[] = ' */';
-        $result[] = 'final class ' . $this->className . ' implements ' . $this->getInterfaceName();
-        $result[] = '{';
+        $body[] = '/**';
+        $body[] = ' * @Flow\Proxy(false)';
+        $body[] = ' */';
+        $body[] = 'final class ' . $this->className . ' implements ' . $this->getInterfaceName();
+        $body[] = '{';
 
         if ($this->properties) {
-            $result[] = join(PHP_EOL . PHP_EOL, array_map(function (Property $property) {
+            $body[] = join(PHP_EOL . PHP_EOL, array_map(function (Property $property) {
                 return $property->getDeclaration();
             }, $this->properties));
         }
 
         if ($this->properties) {
-            $result[] = '';
-            $result[] = '    /**';
-            $result[] = join(PHP_EOL, array_map(function (Property $property) {
+            $body[] = '';
+            $body[] = '    /**';
+            $body[] = join(PHP_EOL, array_map(function (Property $property) {
                 return '     * @param ' . $property->asDocBlockString();
             }, $this->properties));
-            $result[] = '     */';
-            $result[] = '    public function __constructor(';
-            $result[] = join(',' . PHP_EOL, array_map(function (Property $property) {
+            $body[] = '     */';
+            $body[] = '    public function __constructor(';
+            $body[] = join(',' . PHP_EOL, array_map(function (Property $property) {
                 return '        ' . $property->asParameter();
             }, $this->properties));
-            $result[] = '    ) {';
-            $result[] = join(PHP_EOL, array_map(function (Property $property) {
+            $body[] = '    ) {';
+            $body[] = join(PHP_EOL, array_map(function (Property $property) {
                 return  '        ' . $property->getConstructorAssignment();
             }, $this->properties));
-            $result[] = '    }';
+            $body[] = '    }';
         }
 
         if ($this->properties) {
-            $result[] = '';
-            $result[] = join(PHP_EOL . PHP_EOL, array_map(function (Property $property) {
+            $body[] = '';
+            $body[] = join(PHP_EOL . PHP_EOL, array_map(function (Property $property) {
                 return $property->getGetterImplementation() . PHP_EOL . PHP_EOL . $property->getSetterImplementationForModel($this);
             }, $this->properties));
         }
 
-        $result[] = '}';
+        $body[] = '}';
 
-        return join(PHP_EOL, $result);
+        return PhpFile::fromFlowPackageAndNamespace(
+            $this->flowPackage,
+            $this->getNamespace(),
+            $this->getClassName(),
+            join(PHP_EOL, $body)
+        );
     }
 
     /**
-     * @return string
+     * @return PhpFile
      */
-    public function getInterfaceBody(): string
+    public function asPhpInterfaceFile(): PhpFile
     {
-        $result = [];
+        $body = [];
 
         if ($this->properties) {
-            $result[] = join(PHP_EOL, array_unique(
+            $body[] = join(PHP_EOL, array_unique(
                 array_filter(
                     array_map(function (Property $property) {
                         return $property->getType()->asImportStatement();
@@ -264,22 +282,27 @@ final class Model
                 )
             ));
 
-            if (trim($result[0])) {
-                $result[] = '';
+            if (trim($body[0])) {
+                $body[] = '';
             } else {
-                $result = [];
+                $body = [];
             }
         }
 
-        $result[] = 'interface ' . $this->getInterfaceName();
-        $result[] = '{';
+        $body[] = 'interface ' . $this->getInterfaceName();
+        $body[] = '{';
         if ($this->properties) {
-            $result[] = join(PHP_EOL . PHP_EOL, array_map(function (Property $property) {
+            $body[] = join(PHP_EOL . PHP_EOL, array_map(function (Property $property) {
                 return $property->getGetterSignature() . PHP_EOL . PHP_EOL . $property->getSetterSignatureForModel($this);
             }, $this->properties));
         }
-        $result[] = '}';
+        $body[] = '}';
 
-        return join(PHP_EOL, $result);
+        return PhpFile::fromFlowPackageAndNamespace(
+            $this->flowPackage,
+            $this->getNamespace(),
+            $this->getInterfaceName(),
+            join(PHP_EOL, $body)
+        );
     }
 }

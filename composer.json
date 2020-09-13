@@ -8,6 +8,11 @@
             "name": "Wilhelm Behncke",
             "email": "behncke@sitegeist.de",
             "role": "Developer"
+        },
+        {
+            "name": "Bernhard Schmitt",
+            "email": "schmitt@sitegeist.de",
+            "role": "Developer"
         }
     ],
     "require": {

@@ -6,17 +6,23 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
+use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 
 /**
  * @Flow\Scope("singleton")
  */
 final class ValueGenerator implements GeneratorInterface
 {
+    /**
+     * @Flow\Inject
+     * @var PackageResolver
+     */
+    protected $packageResolver;
+
     /**
      * @Flow\Inject
      * @var FileWriter
@@ -29,11 +35,10 @@ final class ValueGenerator implements GeneratorInterface
      */
     public function generate(GeneratorQuery $query): void
     {
-        $value = Value::fromGeneratorQuery($query);
+        $flowPackage = $this->packageResolver->resolve($query->getArgument(0, 'No package key was given!'));
 
-        $phpFile = PhpFile::fromFlowPackageAndNamespace($query->getFlowPackage(), $value->getNamespace(), $value->getClassName())
-            ->withBody($value->getBody());
+        $value = Value::fromQuery($query->shiftArgument(), $flowPackage);
 
-        $this->fileWriter->write($phpFile);
+        $this->fileWriter->write($value->asPhpClassFile());
     }
 }

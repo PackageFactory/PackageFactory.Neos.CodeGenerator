@@ -10,7 +10,6 @@ use Neos\Flow\Cli\CommandController;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\PatternRepository;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\GeneratorResolver;
-use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\PatternResolver;
 
 /**
@@ -30,11 +29,6 @@ class CodeCommandController extends CommandController
      */
     protected $patternRepository;
 
-    /**
-     * @Flow\Inject
-     * @var PackageResolver
-     */
-    protected $packageResolver;
 
     /**
      * @Flow\Inject
@@ -45,17 +39,18 @@ class CodeCommandController extends CommandController
     /**
      * Generates code with the given pattern in the given package
      *
-     * @param string $patternKey A pattern key (see ./flow code:listpatterns) or "?". The latter will result in prompt in which a pattern can be manually selected.
-     * @param string $packageKey A package key, "." or "?". "." will automatically choose a default package, if available. "?" will result in a prompt in which a package can be manually selected.
+     * @param string $patternKey A pattern key (see ./flow code:listpatterns)
      * @return void
      */
-    public function generateCommand(string $patternKey, string $packageKey): void
+    public function generateCommand(string $patternKey): void
     {
         $pattern = $this->patternResolver->resolve($patternKey);
         $generator = $this->generatorResolver->resolve($pattern);
+        $query = GeneratorQuery::fromCliRequest($this->request);
 
-        $package = $this->packageResolver->resolve($packageKey);
-        $query = GeneratorQuery::fromFlowPackageAndCliRequest($package, $this->request);
+        $this->outputLine();
+        $this->outputFormatted('<em> Running %s... </em>', [$pattern->getKey()]);
+        $this->outputLine();
 
         $generator->generate($query);
 

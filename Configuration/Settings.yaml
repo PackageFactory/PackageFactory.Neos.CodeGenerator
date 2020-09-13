@@ -9,10 +9,12 @@ PackageFactory:
           shortDescription: >
             Creates a pseudo-enum for use in presentation objects.
           description: >
-            Creates a pseudo-enum for use in presentation objects.
+            A pseudo-enum will be placed at Vendor\Site\Presentation\{Subnamespace}\{ClassName}. It
+            will consist of the given values which then can be accessed by {ClassName}::{ValueName}().
           arguments:
-            0: A Subnamespace (relative to Vendor\Site\Presentation)
-            1: The enum class name
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: A Subnamespace (relative to Vendor\Site\Presentation)
+            2: The enum class name
             n: Comma-separated list of enum values
           usageExample: >
             ./flow code:generate po:enum Vendor.Site Block/Button ButtonSize xs,s,m,l,xl
@@ -25,8 +27,9 @@ PackageFactory:
           description: >
             Creates a presentation value object.
           arguments:
-            0: A Subnamespace (relative to Vendor\Site\Presentation)
-            1: The presentation value object class name
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: A Subnamespace (relative to Vendor\Site\Presentation)
+            2: The presentation value object class name
             n: Comma-separated list of properties and corresponding types (propertyName:type)
           usageExample: >
             ./flow code:generate po:value Vendor.Site Block/Button Href value:string
@@ -39,8 +42,9 @@ PackageFactory:
           description: >
             Creates a presentation model.
           arguments:
-            0: A Subnamespace (relative to Vendor\Site\Presentation)
-            1: The presentation model class name
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: A Subnamespace (relative to Vendor\Site\Presentation)
+            2: The presentation model class name
             n: Comma-separated list of properties and corresponding types (propertyName:type)
           usageExample: >
             ./flow code:generate po:model Vendor.Site Block/Button Button size:ButtonSize,label:string,disabled:?boolean
@@ -53,8 +57,9 @@ PackageFactory:
           description: >
             Creates a presentation model and component.
           arguments:
-            0: A Subnamespace (relative to Vendor\Site\Presentation)
-            1: The presentation model class name
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: A Subnamespace (relative to Vendor\Site\Presentation)
+            2: The presentation model class name
             n: Comma-separated list of properties and corresponding types (propertyName:type)
           usageExample: >
             ./flow code:generate po:component Vendor.Site Block/Headline Headline content:string

@@ -7,7 +7,9 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
+use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 
 /**
  * @Flow\Proxy(false)
@@ -15,9 +17,9 @@ use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
 final class Enum
 {
     /**
-     * @var PhpNamespace
+     * @var FlowPackageInterface
      */
-    private $packageNamespace;
+    private $flowPackage;
 
     /**
      * @var PhpNamespace
@@ -35,45 +37,41 @@ final class Enum
     private $values;
 
     /**
-     * @param PhpNamespace $packageNamespace
+     * @param FlowPackageInterface $flowPackage
      * @param PhpNamespace $subNamespace
      * @param string $className
      * @param array<string> $values
      */
     public function __construct(
-        PhpNamespace $packageNamespace,
+        FlowPackageInterface $flowPackage,
         PhpNamespace $subNamespace,
         string $className,
         array $values
     ) {
-        $this->packageNamespace = $packageNamespace;
+        $this->flowPackage = $flowPackage;
         $this->subNamespace = $subNamespace;
         $this->className = $className;
         $this->values = $values;
     }
 
     /**
-     * @param array<string> $arguments
+     * @param GeneratorQuery $query
      * @param FlowPackageInterface $flowPackage
      * @return self
      */
-    public static function fromArguments(array $arguments, FlowPackageInterface $flowPackage): self
+    public static function fromQuery(GeneratorQuery $query, FlowPackageInterface $flowPackage): self
     {
-        assert(isset($arguments[0]), new \InvalidArgumentException('No sub-namespace was given'));
-        assert(isset($arguments[1]), new \InvalidArgumentException('No class name was given!'));
-
-        $packageNamespace = PhpNamespace::fromFlowPackage($flowPackage);
-        $subNamespace = PhpNamespace::fromString($arguments[0]);
-        $className = $arguments[1];
+        $subNamespace = PhpNamespace::fromString($query->getArgument(0, 'No sub-namespace was given!'));
+        $className = $query->getArgument(1, 'No class name was given!');
         $values = [];
 
-        foreach (array_slice($arguments, 2) as $argument) {
+        foreach ($query->getRemainingArguments(2) as $argument) {
             foreach (explode(',', $argument) as $value) {
                 $values[] = trim($value);
             }
         }
 
-        return new self($packageNamespace, $subNamespace, $className, $values);
+        return new self($flowPackage, $subNamespace, $className, $values);
     }
 
     /**
@@ -81,7 +79,7 @@ final class Enum
      */
     public function getPackageNamespace(): PhpNamespace
     {
-        return $this->packageNamespace;
+        return PhpNamespace::fromFlowPackage($this->flowPackage);
     }
 
     /**
@@ -97,7 +95,7 @@ final class Enum
      */
     public function getNamespace(): PhpNamespace
     {
-        return $this->packageNamespace->appendString('Presentation')->append($this->subNamespace);
+        return $this->getPackageNamespace()->appendString('Presentation')->append($this->subNamespace);
     }
 
     /**
@@ -125,28 +123,33 @@ final class Enum
     }
 
     /**
-     * @return string
+     * @return PhpFile
      */
-    public function getBody(): string
+    public function asPhpClassFile(): PhpFile
     {
-        $result = [];
+        $body = [];
 
-        $result[] = 'use Neos\Flow\Annotations as Flow;';
-        $result[] = 'use PackageFactory\AtomicFusion\PresentationObjects\Framework\Type\Enum;';
-        $result[] = '';
-        $result[] = '/**';
+        $body[] = 'use Neos\Flow\Annotations as Flow;';
+        $body[] = 'use PackageFactory\AtomicFusion\PresentationObjects\Framework\Type\Enum;';
+        $body[] = '';
+        $body[] = '/**';
 
         foreach ($this->values as $value) {
-            $result[] = ' * @method static self ' . $value . '()';
+            $body[] = ' * @method static self ' . $value . '()';
         }
 
-        $result[] = ' *';
-        $result[] = ' * @Flow\Proxy(false)';
-        $result[] = ' */';
-        $result[] = 'final class ' . $this->className . ' extends Enum';
-        $result[] = '{';
-        $result[] = '}';
+        $body[] = ' *';
+        $body[] = ' * @Flow\Proxy(false)';
+        $body[] = ' */';
+        $body[] = 'final class ' . $this->className . ' extends Enum';
+        $body[] = '{';
+        $body[] = '}';
 
-        return join(PHP_EOL, $result);
+        return PhpFile::fromFlowPackageAndNamespace(
+            $this->flowPackage,
+            $this->getNamespace(),
+            $this->getClassName(),
+            join(PHP_EOL, $body)
+        );
     }
 }

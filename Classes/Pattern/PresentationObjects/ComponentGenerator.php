@@ -6,16 +6,22 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
  */
 
 use Neos\Flow\Annotations as Flow;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\FusionFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
+use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 
 /**
  * @Flow\Scope("singleton")
  */
 final class ComponentGenerator implements GeneratorInterface
 {
+    /**
+     * @Flow\Inject
+     * @var PackageResolver
+     */
+    protected $packageResolver;
+
     /**
      * @Flow\Inject
      * @var ModelGenerator
@@ -34,13 +40,12 @@ final class ComponentGenerator implements GeneratorInterface
      */
     public function generate(GeneratorQuery $query): void
     {
-        $model = Model::fromGeneratorQuery($query);
+        $flowPackage = $this->packageResolver->resolve($query->getArgument(0, 'No package key was given!'));
+
+        $model = Model::fromQuery($query->shiftArgument(), $flowPackage);
         $component = Component::fromModel($model);
 
-        $fusionFileForComponent = FusionFile::fromFlowPackage($query->getFlowPackage(), $component->getLocation(), $model->getClassName())
-        ->withBody($component->getBody());
-
         $this->modelGenerator->generate($query);
-        $this->fileWriter->write($fusionFileForComponent);
+        $this->fileWriter->write($component->asFusionPrototypeFile($this->packageResolver));
     }
 }

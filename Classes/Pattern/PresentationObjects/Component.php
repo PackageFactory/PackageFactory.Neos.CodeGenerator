@@ -6,6 +6,8 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
  */
 
 use Neos\Flow\Annotations as Flow;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\FusionFile;
+use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 
 /**
  * @Flow\Proxy(false)
@@ -66,32 +68,37 @@ final class Component
     }
 
     /**
-     * @return string
+     * @return FusionFile
      */
-    public function getBody(): string
+    public function asFusionPrototypeFile(PackageResolver $packageResolver): FusionFile
     {
-        $result = [];
+        $body = [];
 
-        $result[] = 'prototype(' . $this->getPrototypeName() . ') < prototype(PackageFactory.AtomicFusion.PresentationObjects:PresentationObjectComponent) {';
-        $result[] = '    @presentationObjectInterface = \'' . str_replace('\\', '\\\\', $this->model->getFullyQualifiedInterfaceName()) . '\'';
-        $result[] = '';
-        $result[] = '    @styleguide {';
-        $result[] = '        title = \'' . $this->getTitle() . '\'';
-        $result[] = '';
-        $result[] = '        props {';
-        $result[] = $this->model->asSampleForFusionStyleguide('            ');
-        $result[] = '        }';
-        $result[] = '    }';
-        $result[] = '';
-        $result[] = '    renderer = afx`';
-        $result[] = '        <dl>';
-        $result[] = join(PHP_EOL, array_map(function (Property $property) {
-            return $property->asMarkupForFusionStyleguide($this->model->getPackageNamespace());
+        $body[] = 'prototype(' . $this->getPrototypeName() . ') < prototype(PackageFactory.AtomicFusion.PresentationObjects:PresentationObjectComponent) {';
+        $body[] = '    @presentationObjectInterface = \'' . str_replace('\\', '\\\\', $this->model->getFullyQualifiedInterfaceName()) . '\'';
+        $body[] = '';
+        $body[] = '    @styleguide {';
+        $body[] = '        title = \'' . $this->getTitle() . '\'';
+        $body[] = '';
+        $body[] = '        props {';
+        $body[] = $this->model->asSampleForFusionStyleguide($packageResolver, '            ');
+        $body[] = '        }';
+        $body[] = '    }';
+        $body[] = '';
+        $body[] = '    renderer = afx`';
+        $body[] = '        <dl>';
+        $body[] = join(PHP_EOL, array_map(function (Property $property) use ($packageResolver) {
+            return $property->asMarkupForFusionStyleguide($packageResolver);
         }, $this->model->getProperties()));
-        $result[] = '        </dl>';
-        $result[] = '    `';
-        $result[] = '}';
+        $body[] = '        </dl>';
+        $body[] = '    `';
+        $body[] = '}';
 
-        return join(PHP_EOL, $result);
+        return FusionFile::fromFlowPackage(
+            $this->model->getFlowPackage(),
+            $this->getLocation(),
+            $this->model->getClassName(),
+            join(PHP_EOL, $body)
+        );
     }
 }
