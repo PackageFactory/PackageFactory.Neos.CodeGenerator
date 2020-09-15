@@ -63,11 +63,15 @@ final class Value
     {
         $subNamespace = PhpNamespace::fromString($query->getArgument(0, 'No sub-namespace was given!'));
         $className = $query->getArgument(1, 'No class name was given!');
-        $properties = [];
 
+        $domesticNamespace = PhpNamespace::fromFlowPackage($flowPackage)
+            ->appendString('Presentation')
+            ->append($subNamespace);
+
+        $properties = [];
         foreach ($query->getRemainingArguments(2) as $argument) {
             foreach (explode(',', $argument) as $descriptor) {
-                $properties[] = Property::fromDescriptor(trim($descriptor), $flowPackage);
+                $properties[] = Property::fromDescriptor(trim($descriptor), $flowPackage, $domesticNamespace);
             }
         }
 

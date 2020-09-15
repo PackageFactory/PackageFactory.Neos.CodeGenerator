@@ -38,16 +38,20 @@ final class Property
     /**
      * @param string $descriptor
      * @param FlowPackageInterface $flowPackage
+     * @param PhpNamespace $domesticNamespace
      * @return self
      */
-    public static function fromDescriptor(string $descriptor, FlowPackageInterface $flowPackage): self
-    {
+    public static function fromDescriptor(
+        string $descriptor,
+        FlowPackageInterface $flowPackage,
+        PhpNamespace $domesticNamespace
+    ): self {
         $parts = explode(':', $descriptor);
         if (count($parts) !== 2) {
             throw new \InvalidArgumentException('Descriptor "' . $descriptor . '" has an invalid format. The expected format is: "propertyName:typeName".');
         }
 
-        return new self($parts[0], Type::fromDescriptor($parts[1], $flowPackage));
+        return new self($parts[0], Type::fromDescriptor($parts[1], $flowPackage, $domesticNamespace));
     }
 
     /**

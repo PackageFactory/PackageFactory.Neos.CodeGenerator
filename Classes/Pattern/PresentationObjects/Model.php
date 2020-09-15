@@ -66,11 +66,15 @@ final class Model
     {
         $subNamespace = PhpNamespace::fromString($query->getArgument(0, 'No sub-namespace was given!'));
         $className = $query->getArgument(1, 'No class name was given!');
-        $properties = [];
 
+        $domesticNamespace = PhpNamespace::fromFlowPackage($flowPackage)
+            ->appendString('Presentation')
+            ->append($subNamespace);
+
+        $properties = [];
         foreach ($query->getRemainingArguments(2) as $argument) {
             foreach (explode(',', $argument) as $descriptor) {
-                $properties[] = Property::fromDescriptor(trim($descriptor), $flowPackage);
+                $properties[] = Property::fromDescriptor(trim($descriptor), $flowPackage, $domesticNamespace);
             }
         }
 
@@ -90,21 +94,24 @@ final class Model
 
             if ($flowPackage = $packageResolver->gracefullyResolveFromPackageKey($packageKey)) {
                 $stringHelper = new StringHelper();
-                $reflectionClass = new \ReflectionClass($className);
-                $subNamespace = PhpNamespace::fromString($parts[0]);
-                $className = $subNamespace->getImportName();
-                $subNamespace = $subNamespace->getParentNamespace();
 
-                $properties = [];
-                foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-                    if ($stringHelper->startsWith($method->getName(), 'get')) {
-                        if ($property = Property::fromGetter($method)) {
-                            $properties[] = $property;
+                if (class_exists($className)) {
+                    $reflectionClass = new \ReflectionClass($className);
+                    $subNamespace = PhpNamespace::fromString($parts[0]);
+                    $className = $subNamespace->getImportName();
+                    $subNamespace = $subNamespace->getParentNamespace();
+
+                    $properties = [];
+                    foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+                        if ($stringHelper->startsWith($method->getName(), 'get')) {
+                            if ($property = Property::fromGetter($method)) {
+                                $properties[] = $property;
+                            }
                         }
                     }
-                }
 
-                return new self($flowPackage, $subNamespace, $className, $properties);
+                    return new self($flowPackage, $subNamespace, $className, $properties);
+                }
             }
         }
 

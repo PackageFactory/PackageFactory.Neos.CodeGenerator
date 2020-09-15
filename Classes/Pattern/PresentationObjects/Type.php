@@ -58,10 +58,14 @@ final class Type
     /**
      * @param string $descriptor
      * @param FlowPackageInterface $flowPackage
+     * @param PhpNamespace $domesticNameSpace
      * @return self
      */
-    public static function fromDescriptor(string $descriptor, FlowPackageInterface $flowPackage): self
-    {
+    public static function fromDescriptor(
+        string $descriptor,
+        FlowPackageInterface $flowPackage,
+        PhpNamespace $domesticNameSpace
+    ): self {
         $nullable = \mb_substr($descriptor, 0, 1) === '?';
         if ($nullable) {
             $descriptor = \mb_substr($descriptor, 1);
@@ -74,21 +78,37 @@ final class Type
         $stringHelper = new StringHelper();
 
         if ($stringHelper->startsWith($descriptor, '/') || $stringHelper->startsWith($descriptor, '\\')) {
-            return new self(str_replace('/', '\\', $descriptor), null, $nullable);
+            $targetNamespace = PhpNamespace::fromString($descriptor);
+            $fullyQualifiedName = $targetNamespace->asAbsoluteNamespaceString();
+            $aliasName = $targetNamespace->getImportName();
+
+            return new self($fullyQualifiedName, $aliasName, $nullable);
         }
 
-        $targetNamespace = PhpNamespace::fromFlowPackage($flowPackage)
-            ->appendString('Presentation')
-            ->appendString($descriptor);
-
+        $targetNamespace = $domesticNameSpace->appendString($descriptor);
         $fullyQualifiedName = $targetNamespace->asAbsoluteNamespaceString();
         $aliasName = $targetNamespace->getImportName();
-        if (interface_exists($fullyQualifiedName . 'Interface')) {
-            $fullyQualifiedName .= 'Interface';
+
+        if (class_exists($fullyQualifiedName)) {
+            return new self($aliasName, null, $nullable);
+        } elseif (interface_exists($fullyQualifiedName . 'Interface')) {
             $aliasName .= 'Interface';
+            return new self($aliasName, null, $nullable);
+        } else {
+            $targetNamespace = PhpNamespace::fromFlowPackage($flowPackage)
+                ->appendString('Presentation')
+                ->appendString($descriptor);
+
+            $fullyQualifiedName = $targetNamespace->asAbsoluteNamespaceString();
+            $aliasName = $targetNamespace->getImportName();
+            if (interface_exists($fullyQualifiedName . 'Interface')) {
+                $fullyQualifiedName .= 'Interface';
+                $aliasName .= 'Interface';
+            }
+
+            return new self($fullyQualifiedName, $aliasName, $nullable);
         }
 
-        return new self($fullyQualifiedName, $aliasName, $nullable);
     }
 
     /**
