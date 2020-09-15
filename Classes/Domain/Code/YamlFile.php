@@ -40,7 +40,7 @@ final class YamlFile implements FileInterface
     /**
      * @param FlowPackageInterface $flowPackage
      * @param string $configurationFilePath
-     * @return string
+     * @return self
      */
     public static function fromConfigurationInFlowPackage(FlowPackageInterface $flowPackage, string $configurationFilePath): self
     {
