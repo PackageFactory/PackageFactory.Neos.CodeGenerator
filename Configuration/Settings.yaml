@@ -14,7 +14,7 @@ PackageFactory:
             0: A package key or '.' to use the default package key or '..' to select a package key
             1: The Eel Helper short name ("Helper" will be appended)
           usageExample: >
-            ./flow code:generate eel:helper MyHelper
+            ./flow pattern:generate eel:helper MyHelper
           generatorClassName: >
             PackageFactory\Neos\CodeGenerator\Pattern\Eel\HelperGenerator
 
@@ -29,7 +29,7 @@ PackageFactory:
             2: The value object class name
             n: Comma-separated list of properties and corresponding types (propertyName:type)
           usageExample: >
-            ./flow code:generate domain:value Vendor.Site Order PostalAddress streetAddress:string postalCode:string addressLocality:string
+            ./flow pattern:generate domain:value Vendor.Site Order PostalAddress streetAddress:string postalCode:string addressLocality:string
           generatorClassName: >
             PackageFactory\Neos\CodeGenerator\Pattern\Domain\ValueGenerator
 
@@ -45,7 +45,7 @@ PackageFactory:
             2: The enum class name
             n: Comma-separated list of enum values
           usageExample: >
-            ./flow code:generate po:enum Vendor.Site Block/Button ButtonSize xs,s,m,l,xl
+            ./flow pattern:generate po:enum Vendor.Site Block/Button ButtonSize xs,s,m,l,xl
           generatorClassName: >
             PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\EnumGenerator
 
@@ -60,7 +60,7 @@ PackageFactory:
             2: The presentation value object class name
             n: Comma-separated list of properties and corresponding types (propertyName:type)
           usageExample: >
-            ./flow code:generate po:value Vendor.Site Block/Button Href value:string
+            ./flow pattern:generate po:value Vendor.Site Block/Button Href value:string
           generatorClassName: >
             PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\ValueGenerator
 
@@ -75,7 +75,7 @@ PackageFactory:
             2: The presentation model class name
             n: Comma-separated list of properties and corresponding types (propertyName:type)
           usageExample: >
-            ./flow code:generate po:model Vendor.Site Block/Button Button size:ButtonSize,label:string,disabled:?boolean
+            ./flow pattern:generate po:model Vendor.Site Block/Button Button size:ButtonSize,label:string,disabled:?boolean
           generatorClassName: >
             PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\ModelGenerator
 
@@ -90,6 +90,6 @@ PackageFactory:
             2: The presentation model class name
             n: Comma-separated list of properties and corresponding types (propertyName:type)
           usageExample: >
-            ./flow code:generate po:component Vendor.Site Block/Headline Headline content:string
+            ./flow pattern:generate po:component Vendor.Site Block/Headline Headline content:string
           generatorClassName: >
             PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\ComponentGenerator

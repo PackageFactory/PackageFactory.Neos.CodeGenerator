@@ -15,7 +15,7 @@ use PackageFactory\Neos\CodeGenerator\Infrastructure\PatternResolver;
 /**
  * Command controller for code generation
  */
-class CodeCommandController extends CommandController
+class PatternCommandController extends CommandController
 {
     /**
      * @Flow\Inject
@@ -29,7 +29,6 @@ class CodeCommandController extends CommandController
      */
     protected $patternRepository;
 
-
     /**
      * @Flow\Inject
      * @var GeneratorResolver
@@ -39,7 +38,7 @@ class CodeCommandController extends CommandController
     /**
      * Generates code with the given pattern in the given package
      *
-     * @param string $patternKey A pattern key (see ./flow code:listpatterns)
+     * @param string $patternKey A pattern key (see ./flow pattern:list)
      * @return void
      */
     public function generateCommand(string $patternKey): void
@@ -63,7 +62,7 @@ class CodeCommandController extends CommandController
      *
      * @return void
      */
-    public function listPatternsCommand(): void
+    public function listCommand(): void
     {
         $this->outputLine();
         $this->outputLine('List of all available code patterns');
@@ -79,16 +78,16 @@ class CodeCommandController extends CommandController
         $this->output->outputTable($rows, $headers);
         $this->outputLine();
         $this->outputLine('Usage:');
-        $this->outputFormatted('<b>./flow code:generate <em>{Pattern Key}</em> <em>{Package Key}</em> ...</b>');
+        $this->outputFormatted('<b>./flow pattern:generate <em>{Pattern Key}</em> <em>{Package Key}</em> ...</b>');
     }
 
     /**
      * Show some helpful documentation for the given pattern
      *
-     * @param string $patternKey A pattern key (see ./flow code:listpatterns) or "?". The latter will result in prompt in which a pattern can be manually selected.
+     * @param string $patternKey A pattern key (see ./flow pattern:list) or "?". The latter will result in prompt in which a pattern can be manually selected.
      * @return void
      */
-    public function describePatternCommand(string $patternKey): void
+    public function describeCommand(string $patternKey): void
     {
         $pattern = $this->patternResolver->resolve($patternKey);
 

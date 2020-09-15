@@ -19,7 +19,7 @@ This package is still under development and is not ready for a stable release ye
 
 ### CLI commands
 
-#### `./flow code:listpatterns`
+#### `./flow pattern:list`
 
 This command will give you an overview over all available code patterns.
 
@@ -38,10 +38,10 @@ List of all available code patterns
 +--------------+--------------------------------------------------------+
 
 Usage:
-./flow code:generate {Pattern Key} {Package Key} ...
+./flow pattern:generate {Pattern Key} {Package Key} ...
 ```
 
-#### `./flow code:describepattern {Pattern Key}`
+#### `./flow pattern:describe {Pattern Key}`
 
 This command will give you a detailed documentation for the given code pattern (similar to `./flow help {Command name}`).
 
@@ -65,13 +65,13 @@ This command will give you a detailed documentation for the given code pattern (
     #n - Comma-separated list of enum values
 
   Usage Example
-    ./flow code:generate po:enum Vendor.Site Block/Button ButtonSize
+    ./flow pattern:generate po:enum Vendor.Site Block/Button ButtonSize
     xs,s,m,l,xl
 ```
 
-#### `./flow code:generate {Pattern Key} {...Arguments}`
+#### `./flow pattern:generate {Pattern Key} {...Arguments}`
 
-This command will trigger the actual code generation as configured for `{Pattern Key}`. The available `{...Arguments}` can be viewed via `./flow code:describepattern {Pattern Key}`.
+This command will trigger the actual code generation as configured for `{Pattern Key}`. The available `{...Arguments}` can be viewed via `./flow pattern:describe {Pattern Key}`.
 
 **Example Output:**
 ```
