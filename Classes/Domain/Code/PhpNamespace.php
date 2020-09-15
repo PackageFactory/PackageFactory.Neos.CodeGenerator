@@ -5,6 +5,7 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Code;
  * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
+use Neos\Eel\Helper\StringHelper;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\Path;
@@ -119,11 +120,41 @@ final class PhpNamespace
     }
 
     /**
+     * @return self
+     */
+    public function asInterface(): self
+    {
+        $stringHelper = new StringHelper();
+        if ($stringHelper->endsWith($this->value, 'Interface')) {
+            return $this;
+        } else {
+            return new self($this->value . 'Interface');
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function exists(): bool
+    {
+        return interface_exists($this->value) || class_exists($this->value);
+    }
+
+    /**
      * @return Path
      */
     public function asPath(): Path
     {
         return Path::fromString(str_replace('\\', DIRECTORY_SEPARATOR, $this->value));
+    }
+
+    /**
+     * @param PhpNamespace $other
+     * @return boolean
+     */
+    public function equals(PhpNamespace $other): bool
+    {
+        return $this->value === $other->getValue();
     }
 
     /**

@@ -93,9 +93,8 @@ final class Model
             $packageKey = PhpNamespace::fromString($parts[0])->asKey();
 
             if ($flowPackage = $packageResolver->gracefullyResolveFromPackageKey($packageKey)) {
-                $stringHelper = new StringHelper();
-
-                if (class_exists($className)) {
+                if (class_exists($className) || interface_exists($className)) {
+                    $stringHelper = new StringHelper();
                     $reflectionClass = new \ReflectionClass($className);
                     $subNamespace = PhpNamespace::fromString($parts[0]);
                     $className = $subNamespace->getImportName();
@@ -238,7 +237,7 @@ final class Model
             $imports = trim(join(PHP_EOL, array_unique(
                 array_filter(
                     array_map(function (Property $property) {
-                        return $property->getType()->asImportStatement();
+                        return $property->getType()->asImportStatement($this->getNamespace());
                     }, $this->properties)
                 )
             )));
@@ -347,7 +346,7 @@ final class Model
             $body[] = join(PHP_EOL, array_unique(
                 array_filter(
                     array_map(function (Property $property) {
-                        return $property->getType()->asImportStatement();
+                        return $property->getType()->asImportStatement($this->getNamespace());
                     }, $this->properties)
                 )
             ));

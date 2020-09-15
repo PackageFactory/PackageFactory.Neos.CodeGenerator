@@ -18,16 +18,14 @@ use Spatie\Enum\Enum;
 final class Type
 {
     public const BUILTIN_TYPE_NAMES = ['bool', 'boolean', 'int', 'integer', 'float', 'string', 'array', 'iterable', 'object', 'callable'];
+    public const WELL_KNOWN_TYPES = [
+        'slot' => 'PackageFactory\\AtomicFusion\\PresentationObjects\\Presentation\\Slot\\SlotInterface'
+    ];
 
     /**
      * @var string
      */
-    private $fullyQualifiedName;
-
-    /**
-     * @var null|string
-     */
-    private $aliasName;
+    private $name;
 
     /**
      * @var bool
@@ -35,24 +33,29 @@ final class Type
     private $nullable;
 
     /**
-     * @param string $fullyQualifiedName
-     * @param null|string $aliasName
+     * @var bool
+     */
+    private $builtin;
+
+    /**
+     * @param string $name
      * @param boolean $nullable
+     * @param boolean $builtin
      */
     private function __construct(
-        string $fullyQualifiedName,
-        ?string $aliasName,
-        bool $nullable
+        string $name,
+        bool $nullable,
+        bool $builtin
     ) {
-        if ($fullyQualifiedName === 'boolean') {
-            $fullyQualifiedName = 'bool';
-        } elseif ($fullyQualifiedName === 'integer') {
-            $fullyQualifiedName = 'int';
+        if ($name === 'boolean') {
+            $name = 'bool';
+        } elseif ($name === 'integer') {
+            $name = 'int';
         }
 
-        $this->fullyQualifiedName = $fullyQualifiedName;
-        $this->aliasName = $aliasName;
+        $this->name = $name;
         $this->nullable = $nullable;
+        $this->builtin = $builtin;
     }
 
     /**
@@ -72,43 +75,52 @@ final class Type
         }
 
         if (in_array($descriptor, self::BUILTIN_TYPE_NAMES)) {
-            return new self($descriptor, null, $nullable);
+            return new self($descriptor, $nullable, true);
+        }
+
+        if (array_key_exists($descriptor, self::WELL_KNOWN_TYPES)) {
+            return self::fromPhpNamespace(
+                PhpNamespace::fromString(self::WELL_KNOWN_TYPES[$descriptor]),
+                $nullable
+            );
         }
 
         $stringHelper = new StringHelper();
 
         if ($stringHelper->startsWith($descriptor, '/') || $stringHelper->startsWith($descriptor, '\\')) {
-            $targetNamespace = PhpNamespace::fromString($descriptor);
-            $fullyQualifiedName = $targetNamespace->asAbsoluteNamespaceString();
-            $aliasName = $targetNamespace->getImportName();
-
-            return new self($fullyQualifiedName, $aliasName, $nullable);
+            return self::fromPhpNamespace(
+                PhpNamespace::fromString($descriptor),
+                $nullable
+            );
         }
 
         $targetNamespace = $domesticNameSpace->appendString($descriptor);
-        $fullyQualifiedName = $targetNamespace->asAbsoluteNamespaceString();
-        $aliasName = $targetNamespace->getImportName();
 
-        if (class_exists($fullyQualifiedName)) {
-            return new self($aliasName, null, $nullable);
-        } elseif (interface_exists($fullyQualifiedName . 'Interface')) {
-            $aliasName .= 'Interface';
-            return new self($aliasName, null, $nullable);
+        if ($targetNamespace->asInterface()->exists()) {
+            return self::fromPhpNamespace($targetNamespace->asInterface(), $nullable);
+        } elseif ($targetNamespace->exists()) {
+            return self::fromPhpNamespace($targetNamespace, $nullable);
         } else {
             $targetNamespace = PhpNamespace::fromFlowPackage($flowPackage)
                 ->appendString('Presentation')
                 ->appendString($descriptor);
 
-            $fullyQualifiedName = $targetNamespace->asAbsoluteNamespaceString();
-            $aliasName = $targetNamespace->getImportName();
-            if (interface_exists($fullyQualifiedName . 'Interface')) {
-                $fullyQualifiedName .= 'Interface';
-                $aliasName .= 'Interface';
+            if ($targetNamespace->asInterface()->exists()) {
+                return self::fromPhpNamespace($targetNamespace->asInterface(), $nullable);
+            } else {
+                return self::fromPhpNamespace($targetNamespace, $nullable);
             }
-
-            return new self($fullyQualifiedName, $aliasName, $nullable);
         }
+    }
 
+    /**
+     * @param PhpNamespace $phpNamespace
+     * @param boolean $nullable
+     * @return self
+     */
+    public static function fromPhpNamespace(PhpNamespace $phpNamespace, bool $nullable): self
+    {
+        return new self($phpNamespace->asAbsoluteNamespaceString(), $nullable, false);
     }
 
     /**
@@ -120,33 +132,21 @@ final class Type
         if (!$type || !($type instanceof \ReflectionNamedType) || $type->getName() === 'void') {
             return null;
         } else if ($type->isBuiltin()) {
-            return new self($type->getName(), null, $type->allowsNull());
+            return new self($type->getName(), $type->allowsNull(), $type->isBuiltin());
         } else {
-            $stringHelper = new StringHelper();
-
-            if ($stringHelper->startsWith($type->getName(), '/') || $stringHelper->startsWith($type->getName(), '\\')) {
-                return new self($type->getName(), null, $type->allowsNull());
-            }
-
-            $targetNamespace = PhpNamespace::fromString($type->getName());
-            return new self($targetNamespace->asAbsoluteNamespaceString(), $targetNamespace->getImportName(), $type->allowsNull());
+            return self::fromPhpNamespace(
+                PhpNamespace::fromString($type->getName()),
+                $type->allowsNull()
+            );
         }
     }
 
     /**
      * @return string
      */
-    public function getFullyQualifiedName(): string
+    public function getName(): string
     {
-        return $this->fullyQualifiedName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAliasName(): string
-    {
-        return $this->aliasName ?? $this->fullyQualifiedName;
+        return $this->name;
     }
 
     /**
@@ -154,15 +154,19 @@ final class Type
      */
     public function isBuiltIn(): bool
     {
-        return in_array($this->fullyQualifiedName, self::BUILTIN_TYPE_NAMES);
+        return $this->builtin;
     }
 
     /**
      * @return boolean
      */
-    public function refersToExistingClass(): bool
+    public function refersToExistingClassOrInterface(): bool
     {
-        return class_exists($this->fullyQualifiedName);
+        if ($namespace = $this->asPhpNamespace()) {
+            return $namespace->exists();
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -170,21 +174,37 @@ final class Type
      */
     public function refersToPresentationModel(): bool
     {
-        return \mb_strpos($this->fullyQualifiedName, '\\Presentation\\') !== false;
+        return is_a($this->name, '\\PackageFactory\\AtomicFusion\\PresentationObjects\\Fusion\\ComponentPresentationObjectInterface', true);
     }
 
     /**
-     * @return string|null
+     * @return boolean
      */
-    public function asImportStatement(): ?string
+    public function refersToSlot(): bool
     {
-        if ($this->aliasName) {
-            $stringHelper = new StringHelper();
+        return is_a($this->name, '\\PackageFactory\\AtomicFusion\\PresentationObjects\\Presentation\\Slot\\SlotInterface', true);
+    }
 
-            if ($this->fullyQualifiedName === $this->aliasName || $stringHelper->endsWith($this->fullyQualifiedName, '\\' . $this->aliasName)) {
-                return 'use ' . ltrim($this->fullyQualifiedName, '\\') . ';';
-            } else {
-                return 'use ' . ltrim($this->fullyQualifiedName, '\\') . ' as ' . $this->aliasName . ';';
+    /**
+     * @return null|PhpNamespace
+     */
+    public function asPhpNamespace(): ?PhpNamespace
+    {
+        if ($this->builtin) {
+            return null;
+        } else {
+            return PhpNamespace::fromString($this->name);
+        }
+    }
+
+    /**
+     * @return null|string
+     */
+    public function asImportStatement(PhpNamespace $domesticNameSpace): ?string
+    {
+        if ($namespace = $this->asPhpNamespace()) {
+            if (!$namespace->getParentNamespace()->equals($domesticNameSpace)) {
+                return 'use ' . ltrim($this->name, '\\') . ';';
             }
         }
 
@@ -196,10 +216,36 @@ final class Type
      */
     public function asDocBlockString(): string
     {
-        $name = $this->aliasName ?? $this->fullyQualifiedName;
+        if ($namespace = $this->asPhpNamespace()) {
+            $name = $namespace->getImportName();
+        } elseif ($this->name === 'int') {
+            $name = 'integer';
+        } elseif ($this->name === 'bool') {
+            $name = 'boolean';
+        } else {
+            $name = $this->name;
+        }
 
         if ($this->nullable) {
             return 'null|' . $name;
+        } else {
+            return $name;
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function asTypeHint(): string
+    {
+        if ($namespace = $this->asPhpNamespace()) {
+            $name = $namespace->getImportName();
+        } else {
+            $name = $this->name;
+        }
+
+        if ($this->nullable) {
+            return '?' . $name;
         } else {
             return $name;
         }
@@ -212,7 +258,7 @@ final class Type
      */
     public function asSampleForFusionStyleguide(PackageResolver $packageResolver, string $indentation): string
     {
-        switch ($this->fullyQualifiedName) {
+        switch ($this->name) {
             case 'bool':
                 return '= true';
             case 'int':
@@ -230,8 +276,7 @@ final class Type
                 return '= ${param => param}';
             default:
                 /** @phpstan-var class-string $fullyQualifiedName */
-                $fullyQualifiedName = $this->fullyQualifiedName;
-
+                $fullyQualifiedName = $this->name;
                 if (is_subclass_of($fullyQualifiedName, Enum::class)) {
                     $class = $fullyQualifiedName;
                     if ($class::getValues()) {
@@ -248,20 +293,6 @@ final class Type
                 } else {
                     return '= null';
                 }
-        }
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString(): string
-    {
-        $name = $this->aliasName ?? $this->fullyQualifiedName;
-
-        if ($this->nullable) {
-            return '?' . $name;
-        } else {
-            return $name;
         }
     }
 }

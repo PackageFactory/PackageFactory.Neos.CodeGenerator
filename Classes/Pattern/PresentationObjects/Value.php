@@ -138,7 +138,7 @@ final class Value
             $body[] = trim(join(PHP_EOL, array_unique(
                 array_filter(
                     array_map(function (Property $property) {
-                        return $property->getType()->asImportStatement();
+                        return $property->getType()->asImportStatement($this->getNamespace());
                     }, $this->properties)
                 )
             )));

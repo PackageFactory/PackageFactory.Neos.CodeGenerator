@@ -97,7 +97,7 @@ final class Property
      */
     public function asParameter(): string
     {
-        return $this->type . ' $' . $this->name;
+        return $this->type->asTypeHint() . ' $' . $this->name;
     }
 
     /**
@@ -121,9 +121,14 @@ final class Property
                 '            <dt>' . $this->name . '</dt>',
                 '            <dd>{presentationObject.' . $this->name . '}</dd>',
             ]);
+        } elseif ($this->type->refersToSlot()) {
+            return join(PHP_EOL, [
+                '            <dt>' . $this->name . '</dt>',
+                '            <dd><PackageFactory.AtomicFusion.PresentationObjects:Slot presentationObject={presentationObject.' . $this->name . '}/></dd>',
+            ]);
         } elseif ($this->type->refersToPresentationModel()) {
             /** @phpstan-var class-string $fullyQualifiedName */
-            $fullyQualifiedName = $this->type->getFullyQualifiedName();
+            $fullyQualifiedName = $this->type->getName();
 
             if ($model = Model::fromClassName($fullyQualifiedName, $packageResolver)) {
                 $component = Component::fromModel($model);
@@ -135,13 +140,13 @@ final class Property
             }
         }
 
-        if ($this->type->refersToExistingClass()) {
-            if (method_exists($this->type->getFullyQualifiedName(), '__toString')) {
+        if ($this->type->refersToExistingClassOrInterface()) {
+            if (method_exists($this->type->getName(), '__toString')) {
                 return join(PHP_EOL, [
                     '            <dt>' . $this->name . '</dt>',
                     '            <dd>{presentationObject.' . $this->name . '}</dd>',
                 ]);
-            } elseif (is_subclass_of($this->type->getFullyQualifiedName(), \JsonSerializable::class)) {
+            } elseif (is_subclass_of($this->type->getName(), \JsonSerializable::class)) {
                 return join(PHP_EOL, [
                     '            <dt>' . $this->name . '</dt>',
                     '            <dd><pre>{Json.stringify(presentationObject.' . $this->name . ', [\'JSON_PRETTY_PRINT\'])}</pre></dd>',
@@ -149,13 +154,13 @@ final class Property
             } else {
                 return join(PHP_EOL, [
                     '            <dt>' . $this->name . '</dt>',
-                    '            <dd><pre>Not renderable: presentationObject.' . $this->name . ' (' . $this->type->getFullyQualifiedName() . ')</pre></dd>',
+                    '            <dd><pre>Not renderable: presentationObject.' . $this->name . ' (' . $this->type->getName() . ')</pre></dd>',
                 ]);
             }
         } else {
             return join(PHP_EOL, [
                 '            <dt>' . $this->name . '</dt>',
-                '            <dd><pre>Unknown type: presentationObject.' . $this->name . ' (' . $this->type->getFullyQualifiedName() . ')</pre></dd>',
+                '            <dd><pre>Unknown type: presentationObject.' . $this->name . ' (' . $this->type->getName() . ')</pre></dd>',
             ]);
         }
     }
@@ -190,7 +195,7 @@ final class Property
             '    /**',
             '     * @return ' . $this->type->asDocBlockString(),
             '     */',
-            '    public function get' . ucfirst($this->name) . '(): ' . $this->type . ';'
+            '    public function get' . ucfirst($this->name) . '(): ' . $this->type->asTypeHint() . ';'
         ]);
     }
 
@@ -203,7 +208,7 @@ final class Property
             '    /**',
             '     * @return ' . $this->type->asDocBlockString(),
             '     */',
-            '    public function get' . ucfirst($this->name) . '(): ' . $this->type,
+            '    public function get' . ucfirst($this->name) . '(): ' . $this->type->asTypeHint(),
             '    {',
             '        return $this->' . $this->name . ';',
             '    }'
