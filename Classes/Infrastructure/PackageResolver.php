@@ -5,18 +5,18 @@ namespace PackageFactory\Neos\CodeGenerator\Infrastructure;
  * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
-use InvalidArgumentException;
 use Neos\Eel\Helper\StringHelper;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\ConsoleOutput;
 use Neos\Flow\Package\FlowPackageInterface;
 use Neos\Flow\Package\PackageInterface;
 use Neos\Flow\Package\PackageManager;
+use PackageFactory\Neos\CodeGenerator\Domain\Flow\PackageResolverInterface;
 
 /**
  * @Flow\Scope("singleton")
  */
-final class PackageResolver
+final class PackageResolver implements PackageResolverInterface
 {
     /**
      * @Flow\Inject
@@ -48,14 +48,14 @@ final class PackageResolver
     protected $cachedPromptResult = null;
 
     /**
-     * @param string $input
+     * @param null|string $input
      * @return FlowPackageInterface
      */
-    public function resolve(string $input): FlowPackageInterface
+    public function resolve(?string $input): FlowPackageInterface
     {
-        if ($input === '.') {
+        if ($input === null) {
             return $this->resolveFromDefault();
-        } elseif ($input === '..') {
+        } elseif ($input === '.') {
             if ($this->cachedPromptResult) {
                 return $this->cachedPromptResult;
             } else {
@@ -120,7 +120,7 @@ final class PackageResolver
     {
         $package = $this->packageManager->getPackage($packageKey);
         if (!($package instanceof FlowPackageInterface)) {
-            throw new InvalidArgumentException('Package with key "' . $packageKey . '" is not a flow package.');
+            throw new \InvalidArgumentException('Package with key "' . $packageKey . '" is not a flow package.');
         }
 
         return $package;

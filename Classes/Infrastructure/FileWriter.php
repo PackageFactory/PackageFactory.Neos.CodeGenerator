@@ -9,12 +9,13 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\ConsoleOutput;
 use Neos\Utility\Files;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriterInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 /**
  * @Flow\Scope("singleton")
  */
-final class FileWriter
+final class FileWriter implements FileWriterInterface
 {
     /**
      * @Flow\Inject

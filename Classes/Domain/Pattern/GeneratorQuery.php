@@ -6,7 +6,8 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Pattern;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Cli\Request as CliRequest;
+use Neos\Utility\ObjectAccess;
+use Symfony\Component\Yaml;
 
 /**
  * @Flow\Proxy(false)
@@ -14,85 +15,52 @@ use Neos\Flow\Cli\Request as CliRequest;
 final class GeneratorQuery
 {
     /**
-     * @phpstan-var array<int, string>
-     * @var array
+     * @var array<mixed>
      */
-    private $arguments;
+    private $data;
 
     /**
-     * @phpstan-var array<string, string>
-     * @var array
+     * @param array $data
      */
-    private $options;
-
-    /**
-     * @param array<int, string> $arguments
-     * @param array<string, string> $options
-     */
-    private function __construct(
-        array $arguments,
-        array $options
-    ) {
-        $this->arguments = $arguments;
-        $this->options = $options;
+    private function __construct(array $data)
+    {
+        $this->data = $data;
     }
 
     /**
-     * @param CliRequest $cliRequest
+     * @param string $string
      * @return self
      */
-    public static function fromCliRequest(CliRequest $cliRequest): self
+    public static function fromString(string $string): self
     {
-        /** @phpstan-var array<int, string> $arguments */
-        $arguments = $cliRequest->getExceedingArguments();
-        /** @phpstan-var array<string, string> $options */
-        $options = $cliRequest->getArguments();
-
-        return new self($arguments, $options);
+        $parser = new Yaml\Parser();
+        return self::fromArray($parser->parse($string));
     }
 
     /**
-     * @param integer $index
-     * @param string $errorMessage
-     * @return string
-     */
-    public function getArgument(int $index, string $errorMessage): string
-    {
-        if (isset($this->arguments[$index])) {
-            return $this->arguments[$index];
-        }
-
-        throw new \InvalidArgumentException($errorMessage);
-    }
-
-    /**
+     * @param array $array
      * @return self
      */
-    public function shiftArgument(): self
+    public static function fromArray(array $array): self
     {
-        return new self(array_slice($this->arguments, 1), $this->options);
+        return new self($array);
     }
 
     /**
-     * @param integer $offset
-     * @return array<int, string>
+     * @param string $path
+     * @return Required
      */
-    public function getRemainingArguments(int $offset): array
+    public function required(string $path): Required
     {
-        return array_slice($this->arguments, $offset);
+        return new Required($path, ObjectAccess::getPropertyPath($this->data, $path));
     }
 
     /**
-     * @param string $key
-     * @param string $default
-     * @return string
+     * @param string $path
+     * @return Optional
      */
-    public function getOption(string $key, string $default): string
+    public function optional(string $path): Optional
     {
-        if (isset($this->options[$key])) {
-            return $this->options[$key];
-        } else {
-            return $default;
-        }
+        return new Optional($path, ObjectAccess::getPropertyPath($this->data, $path));
     }
 }

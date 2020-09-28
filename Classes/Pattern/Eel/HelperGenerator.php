@@ -6,11 +6,9 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Eel;
  */
 
 use Neos\Flow\Annotations as Flow;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\YamlFile;
+use PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriterInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
-use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
-use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 
 /**
  * @Flow\Scope("singleton")
@@ -19,13 +17,13 @@ final class HelperGenerator implements GeneratorInterface
 {
     /**
      * @Flow\Inject
-     * @var PackageResolver
+     * @var HelperFactory
      */
-    protected $packageResolver;
+    protected $helperFactory;
 
     /**
      * @Flow\Inject
-     * @var FileWriter
+     * @var FileWriterInterface
      */
     protected $fileWriter;
 
@@ -35,12 +33,9 @@ final class HelperGenerator implements GeneratorInterface
      */
     public function generate(GeneratorQuery $query): void
     {
-        $flowPackage = $this->packageResolver->resolve($query->getArgument(0, 'No package key was given!'));
-
-        $helper = Helper::fromQuery($query->shiftArgument(), $flowPackage);
-        $settingsFile = YamlFile::fromConfigurationInFlowPackage($flowPackage, 'Settings.Eel.Helpers.yaml');
+        $helper = $this->helperFactory->fromGeneratorQuery($query);
 
         $this->fileWriter->write($helper->asPhpClassFile());
-        $this->fileWriter->write($helper->asAppendedSettingForFusionDefaultContext($settingsFile));
+        $this->fileWriter->write($helper->asAppendedSettingForFusionDefaultContext());
     }
 }

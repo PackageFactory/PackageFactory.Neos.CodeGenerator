@@ -5,14 +5,11 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Eel;
  * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
-use Neos\Eel\Helper\StringHelper;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\YamlFile;
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
-use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 
 /**
  * @Flow\Proxy(false)
@@ -39,18 +36,6 @@ final class Helper
     ) {
         $this->flowPackage = $flowPackage;
         $this->shortName = $shortName;
-    }
-
-    /**
-     * @param GeneratorQuery $query
-     * @param FlowPackageInterface $flowPackage
-     * @return self
-     */
-    public static function fromQuery(GeneratorQuery $query, FlowPackageInterface $flowPackage): self
-    {
-        $shortName = $query->getArgument(0, 'No short name was given!');
-
-        return new self($flowPackage, $shortName);
     }
 
     /**
@@ -137,11 +122,12 @@ final class Helper
     }
 
     /**
-     * @param YamlFile $settingsFile
      * @return YamlFile
      */
-    public function asAppendedSettingForFusionDefaultContext(YamlFile $settingsFile): YamlFile
+    public function asAppendedSettingForFusionDefaultContext(): YamlFile
     {
+        $settingsFile = YamlFile::fromConfigurationInFlowPackage($this->flowPackage, 'Settings.Eel.Helpers.yaml');
+
         $settings = $settingsFile->getData();
         $settings['Neos']['Fusion']['defaultContext'][$this->getEelName()] = $this->getFullyQualifiedClassName();
 
