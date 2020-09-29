@@ -23,6 +23,11 @@ interface ImportInterface
     public function getName(): string;
 
     /**
+     * @return string
+     */
+    public function asPhpUseStatement(): string;
+
+    /**
      * @param string $alias
      * @return ImportInterface
      */

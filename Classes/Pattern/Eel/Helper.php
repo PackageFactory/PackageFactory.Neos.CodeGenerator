@@ -7,8 +7,11 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Eel;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpNamespace;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpClassName;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\Import;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFile;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFileBuilder;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\YamlFile;
 
 /**
@@ -22,68 +25,36 @@ final class Helper
     private $flowPackage;
 
     /**
+     * @var PhpClassName
+     */
+    private $className;
+
+    /**
+     * @var SignatureInterface
+     */
+    private $signature;
+
+    /**
      * @var string
      */
-    private $shortName;
+    private $defaultContextIdentifier;
 
     /**
      * @param FlowPackageInterface $flowPackage
-     * @param string $shortName
+     * @param PhpClassName $className
+     * @param SignatureInterface $signature
+     * @param string $defaultContextIdentifier
      */
     public function __construct(
         FlowPackageInterface $flowPackage,
-        string $shortName
+        PhpClassName $className,
+        SignatureInterface $signature,
+        string $defaultContextIdentifier
     ) {
         $this->flowPackage = $flowPackage;
-        $this->shortName = $shortName;
-    }
-
-    /**
-     * @return PhpNamespace
-     */
-    public function getPackageNamespace(): PhpNamespace
-    {
-        return PhpNamespace::fromFlowPackage($this->flowPackage);
-    }
-
-    /**
-     * @return PhpNamespace
-     */
-    public function getNamespace(): PhpNamespace
-    {
-        return $this->getPackageNamespace()->appendString('Application')->appendString('Eel');
-    }
-
-    /**
-     * @return string
-     */
-    public function getShortName(): string
-    {
-        return $this->shortName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getClassName(): string
-    {
-        return $this->getShortName() . 'Helper';
-    }
-
-    /**
-     * @return string
-     */
-    public function getFullyQualifiedClassName(): string
-    {
-        return $this->getNamespace()->appendString($this->getClassName())->getValue();
-    }
-
-    /**
-     * @return string
-     */
-    public function getEelName(): string
-    {
-        return $this->getPackageNamespace()->asKey() . '.' . $this->getShortName();
+        $this->className = $className;
+        $this->signature = $signature;
+        $this->defaultContextIdentifier = $defaultContextIdentifier;
     }
 
     /**
@@ -91,34 +62,36 @@ final class Helper
      */
     public function asPhpClassFile(): PhpFile
     {
-        $body = [];
+        $builder = new PhpFileBuilder();
 
-        $body[] = 'use Neos\Flow\Annotations as Flow;';
-        $body[] = 'use Neos\Eel\ProtectedContextAwareInterface;';
-        $body[] = '';
+        $builder->setPath($this->className->asClassFilePathInFlowPackage($this->flowPackage));
+        $builder->setNamespace($this->className->asNamespace()->getParentNamespace());
+        $builder->setSignature($this->signature);
+        $builder->getImportCollectionBuilder()
+            ->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'))
+            ->addImport(new Import('Neos\\Eel\\ProtectedContextAwareInterface', null));
 
-        $body[] = '/**';
-        $body[] = ' * @Flow\Scope("singleton")';
-        $body[] = ' */';
-        $body[] = 'final class ' . $this->getClassName() . ' implements ProtectedContextAwareInterface';
-        $body[] = '{';
-        $body[] = '    /**';
-        $body[] = '     * All methods are considered safe';
-        $body[] = '     *';
-        $body[] = '     * @return boolean';
-        $body[] = '     */';
-        $body[] = '    public function allowsCallOfMethod($methodName)';
-        $body[] = '    {';
-        $body[] = '        return true;';
-        $body[] = '    }';
-        $body[] = '}';
+        $code = [];
 
-        return PhpFile::fromFlowPackageAndNamespace(
-            $this->flowPackage,
-            $this->getNamespace(),
-            $this->getClassName(),
-            join(PHP_EOL, $body)
-        );
+        $code[] = '/**';
+        $code[] = ' * @Flow\Scope("singleton")';
+        $code[] = ' */';
+        $code[] = 'final class ' . $this->className->asDeclarationNameString() . ' implements ProtectedContextAwareInterface';
+        $code[] = '{';
+        $code[] = '    /**';
+        $code[] = '     * All methods are considered safe';
+        $code[] = '     *';
+        $code[] = '     * @return boolean';
+        $code[] = '     */';
+        $code[] = '    public function allowsCallOfMethod($methodName)';
+        $code[] = '    {';
+        $code[] = '        return true;';
+        $code[] = '    }';
+        $code[] = '}';
+
+        $builder->setCode(join(PHP_EOL, $code));
+
+        return $builder->build();
     }
 
     /**
@@ -129,7 +102,7 @@ final class Helper
         $settingsFile = YamlFile::fromConfigurationInFlowPackage($this->flowPackage, 'Settings.Eel.Helpers.yaml');
 
         $settings = $settingsFile->getData();
-        $settings['Neos']['Fusion']['defaultContext'][$this->getEelName()] = $this->getFullyQualifiedClassName();
+        $settings['Neos']['Fusion']['defaultContext'][$this->defaultContextIdentifier] = $this->className->asNamespace()->asString();
 
         return $settingsFile->withData($settings);
     }

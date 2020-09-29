@@ -70,6 +70,20 @@ final class Import implements ImportInterface
     }
 
     /**
+     * @return string
+     */
+    public function asPhpUseStatement(): string
+    {
+        $result = 'use ' . $this->fullyQualifiedName;
+
+        if ($this->alias !== null) {
+            $result .= ' as ' . $this->alias;
+        }
+
+        return $result . ';';
+    }
+
+    /**
      * @param string $alias
      * @return ImportInterface
      */

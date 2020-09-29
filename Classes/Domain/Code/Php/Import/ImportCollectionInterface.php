@@ -5,12 +5,9 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import;
  * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
-interface ImportCollectionInterface
+/**
+ * @extends \IteratorAggregate<string, ImportInterface>
+ */
+interface ImportCollectionInterface extends \Countable, \IteratorAggregate
 {
-    /**
-     * @template T
-     * @param callable(ImportInterface):T $mapFn
-     * @return T[]
-     */
-    public function map(callable $mapFn): array;
 }

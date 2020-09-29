@@ -3,9 +3,11 @@ namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern;
 
 use Neos\Flow\Package\FlowPackageInterface;
 use Neos\Flow\Tests\UnitTestCase;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureFactoryInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriterInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Flow\PackageResolverInterface;
+use PackageFactory\Neos\CodeGenerator\Infrastructure\SignatureFactory;
 use Spatie\Snapshots\MatchesSnapshots;
 
 abstract class PatternTestCase extends UnitTestCase
@@ -21,6 +23,11 @@ abstract class PatternTestCase extends UnitTestCase
      * @var PackageResolverInterface
      */
     protected $packageResolver;
+
+    /**
+     * @var SignatureFactoryInterface
+     */
+    protected $signatureFactory;
 
     protected function setUp(): void
     {
@@ -62,7 +69,7 @@ abstract class PatternTestCase extends UnitTestCase
                     public function getNamespaces() { throw new \BadMethodCallException('Not implemented.'); }
                     public function getPackagePath() { return $this->input ?? 'Vendor.Default'; }
                     public function getInstalledVersion() { throw new \BadMethodCallException('Not implemented.'); }
-                    public function getComposerManifest($key = null) { throw new \BadMethodCallException('Not implemented.'); }
+                    public function getComposerManifest($key = null) { return json_decode(file_get_contents(__DIR__ . '/Fixtures/sample-composer.json'), true); }
                     public function getPackageKey() { return $this->input ?? 'Vendor.Default'; }
                     public function getResourcesPath() { throw new \BadMethodCallException('Not implemented.'); }
                     public function getConfigurationPath() { throw new \BadMethodCallException('Not implemented.'); }
@@ -71,6 +78,8 @@ abstract class PatternTestCase extends UnitTestCase
                 };
             }
         };
+
+        $this->signatureFactory = new SignatureFactory();
     }
 
     protected function assertFileWasWritten(string $filePath): void

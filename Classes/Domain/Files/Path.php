@@ -29,6 +29,7 @@ final class Path
     }
 
     /**
+     * @deprecated
      * @param FlowPackageInterface $flowPackage
      * @return self
      */
@@ -47,6 +48,7 @@ final class Path
     }
 
     /**
+     * @deprecated
      * @return string
      */
     public function getValue(): string
@@ -55,9 +57,17 @@ final class Path
     }
 
     /**
+     * @return string
+     */
+    public function asString(): string
+    {
+        return $this->value;
+    }
+
+    /**
      * @return Path
      */
-    public function getParentDirectoryPath(): Path
+    public function getParentDirectoryPath(): self
     {
         return new self(dirname($this->value));
     }
@@ -66,17 +76,30 @@ final class Path
      * @param Path $other
      * @return Path
      */
-    public function append(Path $other): Path
+    public function append(Path $other): self
     {
-        return $this->appendString($other->getValue());
+        return $this->appendString($other->asString());
     }
 
     /**
      * @param string $string
      * @return Path
      */
-    public function appendString(string $string): Path
+    public function appendString(string $string): self
     {
         return new self($this->value . DIRECTORY_SEPARATOR . ltrim($string, DIRECTORY_SEPARATOR));
+    }
+
+    /**
+     * @param string $extension
+     * @return self
+     */
+    public function withExtension(string $extension): self
+    {
+        if ($extension[0] === '.' || strpos($extension, DIRECTORY_SEPARATOR) !== false) {
+            throw new \DomainException('"' . $extension . '" is not a valid extension.');
+        }
+
+        return new self(substr($this->value, 0, strlen($this->value) - strrpos($this->value, '0')) . '.' . $extension);
     }
 }

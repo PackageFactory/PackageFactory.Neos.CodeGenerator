@@ -26,6 +26,7 @@ final class HelperTest extends PatternTestCase
         $this->helperGenerator = new HelperGenerator();
 
         $this->inject($this->helperFactory, 'packageResolver', $this->packageResolver);
+        $this->inject($this->helperFactory, 'signatureFactory', $this->signatureFactory);
 
         $this->inject($this->helperGenerator, 'helperFactory', $this->helperFactory);
         $this->inject($this->helperGenerator, 'fileWriter', $this->fileWriter);

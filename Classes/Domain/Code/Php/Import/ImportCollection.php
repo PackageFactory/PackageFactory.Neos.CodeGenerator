@@ -26,12 +26,18 @@ final class ImportCollection implements ImportCollectionInterface
     }
 
     /**
-     * @template T
-     * @param callable(ImportInterface):T $mapFn
-     * @return T[]
+     * @return ImportInterface[]
      */
-    public function map(callable $mapFn): array
+    public function getIterator()
     {
-        return array_map($mapFn, $this->imports);
+        return new \ArrayIterator($this->imports);
+    }
+
+    /**
+     * @return integer
+     */
+    public function count()
+    {
+        return count($this->imports);
     }
 }

@@ -45,7 +45,7 @@ class PatternCommandController extends CommandController
     {
         $pattern = $this->patternResolver->resolve($patternKey);
         $generator = $this->generatorResolver->resolve($pattern);
-        $query = GeneratorQuery::fromCliRequest($this->request);
+        $query = GeneratorQuery::fromString(file_get_contents('php://stdin'));
 
         $this->outputLine();
         $this->outputFormatted('<em> Running %s... </em>', [$pattern->getKey()]);

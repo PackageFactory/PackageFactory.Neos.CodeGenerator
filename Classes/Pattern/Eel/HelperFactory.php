@@ -6,6 +6,9 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Eel;
  */
 
 use Neos\Flow\Annotations as Flow;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureFactoryInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpNamespace;
+use PackageFactory\Neos\CodeGenerator\Domain\Flow\PackageResolverInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 
 /**
@@ -20,14 +23,27 @@ final class HelperFactory
     protected $packageResolver;
 
     /**
+     * @Flow\Inject
+     * @var SignatureFactoryInterface
+     */
+    protected $signatureFactory;
+
+    /**
      * @param GeneratorQuery $query
      * @return Helper
      */
     public function fromGeneratorQuery(GeneratorQuery $query): Helper
     {
         $flowPackage = $this->packageResolver->resolve($query->optional('package')->string());
-        $name = $query->required('name')->string();
+        $name = ucfirst($query->required('name')->string());
 
-        return new Helper($flowPackage, $name);
+        $className = PhpNamespace::fromFlowPackage($flowPackage)
+            ->append('Application\\Eel')
+            ->append($name . 'Helper')
+            ->asClassName();
+        $signature = $this->signatureFactory->forFlowPackage($flowPackage);
+        $defaultContextIdentifier = $flowPackage->getPackageKey() . '.' . $name;
+
+        return new Helper($flowPackage, $className, $signature, $defaultContextIdentifier);
     }
 }
