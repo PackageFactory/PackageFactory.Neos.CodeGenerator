@@ -133,7 +133,7 @@ final class Optional
                     throw new \InvalidArgumentException('"' . $this->name . '" was expected to be dictionary or null but key of type ' . gettype($key) . ' was found.');
                 }
 
-                yield new self($this->name . '.' . $key, $child);
+                yield $key => new self($this->name . '.' . $key, $child);
             }
         } elseif ($this->value === null) {
             return null;

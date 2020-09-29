@@ -1,0 +1,68 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Domain\Order;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Neos\Flow\Annotations as Flow;
+
+/**
+ * @Flow\Proxy(false)
+ */
+final class PostalAddress
+{
+    /**
+     * @var string
+     */
+    private $streetAddress;
+
+    /**
+     * @var string
+     */
+    private $addressLocality;
+
+    /**
+     * @var PostalCode
+     */
+    private $postalCode;
+
+    /**
+     * @param string $streetAddress
+     * @param string $addressLocality
+     * @param PostalCode $postalCode
+     */
+    public function __construct(
+        string $streetAddress,
+        string $addressLocality,
+        PostalCode $postalCode
+    ) {
+        $this->streetAddress = $streetAddress;
+        $this->addressLocality = $addressLocality;
+        $this->postalCode = $postalCode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStreetAddress(): string
+    {
+        return $this->streetAddress;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAddressLocality(): string
+    {
+        return $this->addressLocality;
+    }
+
+    /**
+     * @return PostalCode
+     */
+    public function getPostalCode(): PostalCode
+    {
+        return $this->postalCode;
+    }
+}

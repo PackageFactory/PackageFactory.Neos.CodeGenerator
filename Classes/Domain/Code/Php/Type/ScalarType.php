@@ -103,6 +103,22 @@ final class ScalarType implements TypeInterface
     }
 
     /**
+     * @return string
+     */
+    public function asDocBlockString(): string
+    {
+        return ($this->nullable ? 'null|' : '') . $this->getPhpDocName();
+    }
+
+    /**
+     * @return string
+     */
+    public function asPhpTypeHint(): string
+    {
+        return ($this->nullable ? '?' : '') . $this->getNativeName();
+    }
+
+    /**
      * @param TypeInterface $other
      * @return boolean
      */

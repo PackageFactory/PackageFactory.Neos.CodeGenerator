@@ -74,6 +74,19 @@ final class ImportCollectionBuilder
     }
 
     /**
+     * @param ImportCollectionInterface $importCollection
+     * @return self
+     */
+    public function addImportCollection(ImportCollectionInterface $importCollection): self
+    {
+        foreach ($importCollection as $import) {
+            $this->addImport($this->resolvePotentialNamingConflictForImport($import));
+        }
+
+        return $this;
+    }
+
+    /**
      * @return ImportCollectionInterface
      */
     public function build(): ImportCollectionInterface

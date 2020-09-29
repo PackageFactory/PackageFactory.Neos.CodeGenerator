@@ -18,4 +18,34 @@ interface PropertyInterface
      * @return string
      */
     public function getName(): string;
+
+    /**
+     * @return string
+     */
+    public function asClassPropertyDeclaration(): string;
+
+    /**
+     * @return string
+     */
+    public function asFunctionParameterDeclaration(): string;
+
+    /**
+     * @return string
+     */
+    public function asDocBlockString(): string;
+
+    /**
+     * @return string
+     */
+    public function asConstructorAssignment(): string;
+
+    /**
+     * @return string
+     */
+    public function asGetterSignature(): string;
+
+    /**
+     * @return string
+     */
+    public function asGetterImplementation(): string;
 }

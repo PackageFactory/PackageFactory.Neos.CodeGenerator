@@ -123,7 +123,7 @@ final class Required
                     throw new \InvalidArgumentException('"' . $this->name . '" was expected to be dictionary but key of type ' . gettype($key) . ' was found.');
                 }
 
-                yield new self($this->name . '.' . $key, $child);
+                yield $key => new self($this->name . '.' . $key, $child);
             }
         }
 

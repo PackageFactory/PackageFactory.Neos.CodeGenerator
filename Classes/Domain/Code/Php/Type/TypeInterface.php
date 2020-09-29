@@ -28,6 +28,16 @@ interface TypeInterface
     public function asNullable(): TypeInterface;
 
     /**
+     * @return string
+     */
+    public function asDocBlockString(): string;
+
+    /**
+     * @return string
+     */
+    public function asPhpTypeHint(): string;
+
+    /**
      * @param TypeInterface $other
      * @return boolean
      */

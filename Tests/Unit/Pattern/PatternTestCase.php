@@ -4,6 +4,8 @@ namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern;
 use Neos\Flow\Package\FlowPackageInterface;
 use Neos\Flow\Tests\UnitTestCase;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureFactoryInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property\PropertyFactory;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Type\TypeFactory;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriterInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Flow\PackageResolverInterface;
@@ -28,6 +30,16 @@ abstract class PatternTestCase extends UnitTestCase
      * @var SignatureFactoryInterface
      */
     protected $signatureFactory;
+
+    /**
+     * @var TypeFactory
+     */
+    protected $typeFactory;
+
+    /**
+     * @var PropertyFactory
+     */
+    protected $propertyFactory;
 
     protected function setUp(): void
     {
@@ -64,15 +76,19 @@ abstract class PatternTestCase extends UnitTestCase
                     private $input;
 
                     public function __construct(?string $input) { $this->input = $input; }
+                    /* @phpstan-ignore-next-line */
                     public function getClassFiles() { throw new \BadMethodCallException('Not implemented.'); }
                     public function getComposerName() { throw new \BadMethodCallException('Not implemented.'); }
+                    /* @phpstan-ignore-next-line */
                     public function getNamespaces() { throw new \BadMethodCallException('Not implemented.'); }
                     public function getPackagePath() { return $this->input ?? 'Vendor.Default'; }
                     public function getInstalledVersion() { throw new \BadMethodCallException('Not implemented.'); }
+                    /* @phpstan-ignore-next-line */
                     public function getComposerManifest($key = null) { return json_decode(file_get_contents(__DIR__ . '/Fixtures/sample-composer.json'), true); }
                     public function getPackageKey() { return $this->input ?? 'Vendor.Default'; }
                     public function getResourcesPath() { throw new \BadMethodCallException('Not implemented.'); }
                     public function getConfigurationPath() { throw new \BadMethodCallException('Not implemented.'); }
+                    /* @phpstan-ignore-next-line */
                     public function getFunctionalTestsClassFiles() { throw new \BadMethodCallException('Not implemented.'); }
                     public function getFunctionalTestsPath() { throw new \BadMethodCallException('Not implemented.'); }
                 };
@@ -80,6 +96,10 @@ abstract class PatternTestCase extends UnitTestCase
         };
 
         $this->signatureFactory = new SignatureFactory();
+
+        $this->typeFactory = new TypeFactory();
+        $this->propertyFactory = new PropertyFactory();
+        $this->inject($this->propertyFactory, 'typeFactory', $this->typeFactory);
     }
 
     protected function assertFileWasWritten(string $filePath): void

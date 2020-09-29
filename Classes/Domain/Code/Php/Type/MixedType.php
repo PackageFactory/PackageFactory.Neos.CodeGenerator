@@ -36,4 +36,20 @@ final class MixedType implements TypeInterface
     {
         return $other instanceof MixedType;
     }
+
+    /**
+     * @return string
+     */
+    public function asDocBlockString(): string
+    {
+        return $this->getPhpDocName();
+    }
+
+    /**
+     * @return string
+     */
+    public function asPhpTypeHint(): string
+    {
+        throw new \BadMethodCallException();
+    }
 }
