@@ -37,7 +37,7 @@ final class ValueTest extends PatternTestCase
      * @test
      * @return void
      */
-    public function createsEelHelperInDefaultPackage(): void
+    public function createsValueObjectInDefaultPackage(): void
     {
         $query = GeneratorQuery::fromArray([
             'name' => 'Order/PostalAddress',
@@ -51,5 +51,44 @@ final class ValueTest extends PatternTestCase
         $this->valueGenerator->generate($query);
 
         $this->assertFileWasWritten('Vendor.Default/Classes/Domain/Order/PostalAddress.php');
+    }
+
+    /**
+     * @test
+     * @return void
+     */
+    public function createsValueObjectInDefaultPackageWithDependenciesInDomain(): void
+    {
+        $query = GeneratorQuery::fromArray([
+            'name' => 'Cinema/Movie',
+            'properties' => [
+                'actors' => 'Actor[]',
+                'musicBy' => 'Music/MusicGroup'
+            ]
+        ]);
+
+        $this->valueGenerator->generate($query);
+
+        $this->assertFileWasWritten('Vendor.Default/Classes/Domain/Cinema/Movie.php');
+    }
+
+    /**
+     * @test
+     * @return void
+     */
+    public function createsValueObjectInDefaultPackageWithDependenciesInOtherPackage(): void
+    {
+        $query = GeneratorQuery::fromArray([
+            'name' => 'Archive/Image/Photograph',
+            'properties' => [
+                'uri' => '/Vendor/Shared/Domain/Uri',
+                'abstract' => 'string',
+                'author' => '/Vendor/Shared/Domain/Person'
+            ]
+        ]);
+
+        $this->valueGenerator->generate($query);
+
+        $this->assertFileWasWritten('Vendor.Default/Classes/Domain/Archive/Image/Photograph.php');
     }
 }
