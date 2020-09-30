@@ -125,9 +125,9 @@ final class Required
 
                 yield $key => new self($this->name . '.' . $key, $child);
             }
+        } else {
+            throw new \InvalidArgumentException('"' . $this->name . '" was expected to be dictionary but was ' . gettype($this->value) . '.');
         }
-
-        throw new \InvalidArgumentException('"' . $this->name . '" was expected to be dictionary but was ' . gettype($this->value) . '.');
     }
 
     /**
@@ -143,8 +143,8 @@ final class Required
 
                 yield new self($this->name . '.' . $key, $child);
             }
+        } else {
+            throw new \InvalidArgumentException('"' . $this->name . '" was expected to be list but was ' . gettype($this->value) . '.');
         }
-
-        throw new \InvalidArgumentException('"' . $this->name . '" was expected to be list but was ' . gettype($this->value) . '.');
     }
 }

@@ -1,16 +1,14 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects;
+namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Enum;
 
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
 use Neos\Flow\Annotations as Flow;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
-use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 
 /**
  * The value generator domain service
@@ -21,9 +19,9 @@ final class EnumGenerator implements GeneratorInterface
 {
     /**
      * @Flow\Inject
-     * @var PackageResolver
+     * @var EnumFactory
      */
-    protected $packageResolver;
+    protected $enumFactory;
 
     /**
      * @Flow\Inject
@@ -37,9 +35,7 @@ final class EnumGenerator implements GeneratorInterface
      */
     public function generate(GeneratorQuery $query): void
     {
-        $flowPackage = $this->packageResolver->resolve($query->getArgument(0, 'No package key was given!'));
-
-        $enum = Enum::fromQuery($query->shiftArgument(), $flowPackage);
+        $enum = $this->enumFactory->fromGeneratorQuery($query);
 
         $this->fileWriter->write($enum->asPhpClassFile());
     }
