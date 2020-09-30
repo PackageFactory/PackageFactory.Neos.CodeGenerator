@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\Eel;
+namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\Domain\Value;
 
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Pattern\Domain\Value\ValueFactory;

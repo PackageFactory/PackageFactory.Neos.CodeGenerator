@@ -1,0 +1,52 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Presentation\Alignment;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Neos\Flow\Annotations as Flow;
+
+/**
+ * @Flow\Proxy(false)
+ */
+final class Alignment
+{
+    /**
+     * @var HorizontalAlignment
+     */
+    private $horizontal;
+
+    /**
+     * @var VerticalAlignment
+     */
+    private $vertical;
+
+    /**
+     * @param HorizontalAlignment $horizontal
+     * @param VerticalAlignment $vertical
+     */
+    public function __construct(
+        HorizontalAlignment $horizontal,
+        VerticalAlignment $vertical
+    ) {
+        $this->horizontal = $horizontal;
+        $this->vertical = $vertical;
+    }
+
+    /**
+     * @return HorizontalAlignment
+     */
+    public function getHorizontal(): HorizontalAlignment
+    {
+        return $this->horizontal;
+    }
+
+    /**
+     * @return VerticalAlignment
+     */
+    public function getVertical(): VerticalAlignment
+    {
+        return $this->vertical;
+    }
+}
