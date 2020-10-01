@@ -1,0 +1,31 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Presentation\Button;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Vendor\Default\Presentation\Alignment\HorizontalAlignment;
+
+interface ButtonInterface
+{
+    /**
+     * @return ButtonType
+     */
+    public function getType(): ButtonType;
+
+    /**
+     * @return ButtonLook
+     */
+    public function getLook(): ButtonLook;
+
+    /**
+     * @return string
+     */
+    public function getLabel(): string;
+
+    /**
+     * @return null|HorizontalAlignment
+     */
+    public function getHorizontalAlignment(): ?HorizontalAlignment;
+}

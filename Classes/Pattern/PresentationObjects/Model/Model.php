@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Value;
+namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Model;
 
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
@@ -18,7 +18,7 @@ use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property\PropertyInterface
 /**
  * @Flow\Proxy(false)
  */
-final class Value
+final class Model
 {
     /**
      * @var FlowPackageInterface
@@ -69,7 +69,7 @@ final class Value
     /**
      * @return PhpFile
      */
-    public function asPhpClassFile(): PhpFile
+    public function asPhpClassFileForValueObject(): PhpFile
     {
         $builder = new PhpFileBuilder();
 
@@ -122,6 +122,73 @@ final class Value
             }, $this->properties));
         }
 
+        $code[] = '}';
+        $code[] = '';
+
+        $builder->setCode(join(PHP_EOL, $code));
+
+        return $builder->build();
+    }
+
+    /**
+     * @return PhpFile
+     */
+    public function asPhpInterfaceFile(): PhpFile
+    {
+        $builder = new PhpFileBuilder();
+        $className = $this->className->append('Interface');
+
+        $builder->setPath($className->asClassFilePathInFlowPackage($this->flowPackage));
+
+        $namespace = $this->className->asNamespace()->getParentNamespace();
+        assert($namespace !== null);
+        $builder->setNamespace($namespace);
+
+        $builder->setSignature($this->signature);
+        $builder->getImportCollectionBuilder()->addImportCollection($this->imports);
+
+        $code = [];
+
+        $code[] = 'interface ' . $this->className->asDeclarationNameString() . 'Interface';
+        $code[] = '{';
+        if ($this->properties) {
+            $code[] = join(PHP_EOL . PHP_EOL, array_map(function (PropertyInterface $property) {
+                return $property->asGetterSignature();
+            }, $this->properties));
+        }
+        $code[] = '}';
+        $code[] = '';
+
+        $builder->setCode(join(PHP_EOL, $code));
+
+        return $builder->build();
+    }
+
+    /**
+     * @return PhpFile
+     */
+    public function asPhpClassFileForFactory(): PhpFile
+    {
+        $builder = new PhpFileBuilder();
+        $className = $this->className->append('Factory');
+
+        $builder->setPath($className->asClassFilePathInFlowPackage($this->flowPackage));
+
+        $namespace = $this->className->asNamespace()->getParentNamespace();
+        assert($namespace !== null);
+        $builder->setNamespace($namespace);
+
+        $builder->setSignature($this->signature);
+        $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
+        $builder->getImportCollectionBuilder()->addImport(new Import('PackageFactory\\AtomicFusion\\PresentationObjects\\Fusion\\AbstractComponentPresentationObjectFactory', null));
+
+        $code = [];
+
+        $code[] = '/**';
+        $code[] = ' * @Flow\Scope("singleton")';
+        $code[] = ' */';
+        $code[] = 'final class ' . $className->asDeclarationNameString() . ' extends AbstractComponentPresentationObjectFactory';
+        $code[] = '{';
         $code[] = '}';
         $code[] = '';
 

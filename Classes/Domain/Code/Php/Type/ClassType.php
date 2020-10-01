@@ -59,6 +59,15 @@ final class ClassType implements TypeInterface
     }
 
     /**
+     * @param string $name
+     * @return self
+     */
+    public function withNativeName(string $name): self
+    {
+        return new self($name, $this->parameterTypes, $this->nullable);
+    }
+
+    /**
      * @return string
      */
     public function getPhpDocName(): string

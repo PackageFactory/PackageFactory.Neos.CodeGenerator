@@ -26,7 +26,7 @@ final class ImportCollection implements ImportCollectionInterface
     }
 
     /**
-     * @return ImportInterface[]
+     * @return \Iterator<mixed, ImportInterface>
      */
     public function getIterator()
     {

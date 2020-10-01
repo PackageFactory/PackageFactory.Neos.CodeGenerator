@@ -48,7 +48,11 @@ final class PhpClassName
     public function asDeclarationNameString(): string
     {
         $segments = explode('\\', $this->value);
-        return array_pop($segments);
+        $lastSegment = array_pop($segments);
+
+        assert($lastSegment !== null);
+
+        return $lastSegment;
     }
 
     /**
@@ -57,6 +61,15 @@ final class PhpClassName
     public function asNamespace(): PhpNamespace
     {
         return new PhpNamespace(ltrim($this->value, '\\'));
+    }
+
+    /**
+     * @param string $suffix
+     * @return PhpClassName
+     */
+    public function append(string $suffix): PhpClassName
+    {
+        return new self($this->value . $suffix);
     }
 
     /**

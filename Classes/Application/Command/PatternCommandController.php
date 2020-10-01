@@ -45,16 +45,27 @@ class PatternCommandController extends CommandController
     {
         $pattern = $this->patternResolver->resolve($patternKey);
         $generator = $this->generatorResolver->resolve($pattern);
-        $query = GeneratorQuery::fromString(file_get_contents('php://stdin'));
 
-        $this->outputLine();
-        $this->outputFormatted('<em> Running %s... </em>', [$pattern->getKey()]);
-        $this->outputLine();
+        $input = file_get_contents('php://stdin');
 
-        $generator->generate($query);
+        if (!$input) {
+            $this->outputLine();
+            $this->outputLine('<error> No Input given for %s. </error>', [$pattern->getKey()]);
+            $this->outputLine('<em> See ./flow pattern:describe %s for usage information. </em>', [$pattern->getKey()]);
+            $this->outputLine();
+            $this->quit(-1);
+        } else {
+            $query = GeneratorQuery::fromString($input);
 
-        $this->outputLine();
-        $this->outputLine('<success>Done!</success>');
+            $this->outputLine();
+            $this->outputLine('<em> Running %s... </em>', [$pattern->getKey()]);
+            $this->outputLine();
+
+            $generator->generate($query);
+
+            $this->outputLine();
+            $this->outputLine('<success> Done! </success>');
+        }
     }
 
     /**

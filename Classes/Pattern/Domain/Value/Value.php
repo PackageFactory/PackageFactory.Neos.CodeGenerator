@@ -9,6 +9,7 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpClassName;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\Import;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\ImportCollectionInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFile;
@@ -74,11 +75,14 @@ final class Value
         $builder = new PhpFileBuilder();
 
         $builder->setPath($this->className->asClassFilePathInFlowPackage($this->flowPackage));
-        $builder->setNamespace($this->className->asNamespace()->getParentNamespace());
+
+        $namespace = $this->className->asNamespace()->getParentNamespace();
+        assert($namespace !== null);
+        $builder->setNamespace($namespace);
+
         $builder->setSignature($this->signature);
-        $builder->getImportCollectionBuilder()
-            ->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'))
-            ->addImportCollection($this->imports);
+        $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
+        $builder->getImportCollectionBuilder()->addImportCollection($this->imports);
 
         $code = [];
 

@@ -10,6 +10,7 @@ use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\Import;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\ImportCollectionBuilder;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property\PropertyFactory;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Type\ClassType;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\SignatureFactory;
@@ -39,7 +40,7 @@ final class ValueFactory
 
     /**
      * @param GeneratorQuery $query
-     * @return void
+     * @return Value
      */
     public function fromGeneratorQuery(GeneratorQuery $query): Value
     {
@@ -54,22 +55,14 @@ final class ValueFactory
         $importCollectionBuilder = new ImportCollectionBuilder();
         $properties = [];
 
-        foreach ($query->optional('properties')->dictionary() as $propertyName => $propertyType) {
-            $propertyType = str_replace('/', '\\', $propertyType->string());
+        foreach ($query->optional('properties')->dictionary() as $propertyName => $typeName) {
+            $typeName = str_replace('/', '\\', $typeName->string());
+            $property = $this->propertyFactory->fromKeyValuePair([$propertyName, $typeName]);
+            $type = $property->getType();
 
-            if (strpos($propertyType, '\\') !== false) {
-                if ($propertyType[0] === '\\') {
-                    $import = new Import(substr($propertyType, 1), null);
-                } else {
-                    $import = new Import($presentationNamespace->append($propertyType)->asString(), null);
-                }
-
-                $import = $importCollectionBuilder->resolvePotentialNamingConflictForImport($import);
-                $importCollectionBuilder->addImport($import);
-
-                $property = $this->propertyFactory->fromKeyValuePair([$propertyName, $import->getName()]);
-            } else {
-                $property = $this->propertyFactory->fromKeyValuePair([$propertyName, $propertyType]);
+            if ($type instanceof ClassType && $import = Import::fromClassType($type, $presentationNamespace)) {
+                $import = $importCollectionBuilder->addImport($import);
+                $property = $property->withType($type->withNativeName($import->getName()));
             }
 
             $properties[] = $property;

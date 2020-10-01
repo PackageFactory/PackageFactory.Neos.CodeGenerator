@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Pattern\Domain\Value;
+namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Model;
 
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
@@ -18,7 +18,7 @@ use PackageFactory\Neos\CodeGenerator\Infrastructure\SignatureFactory;
 /**
  * @Flow\Scope("singleton")
  */
-final class ValueFactory
+final class ModelFactory
 {
     /**
      * @Flow\Inject
@@ -40,14 +40,14 @@ final class ValueFactory
 
     /**
      * @param GeneratorQuery $query
-     * @return Value
+     * @return Model
      */
-    public function fromGeneratorQuery(GeneratorQuery $query): Value
+    public function fromGeneratorQuery(GeneratorQuery $query): Model
     {
         $flowPackage = $this->packageResolver->resolve($query->optional('package')->string());
-        $domainNamespace = PhpNamespace::fromFlowPackage($flowPackage)->append('Domain');
+        $presentationNamespace = PhpNamespace::fromFlowPackage($flowPackage)->append('Presentation');
 
-        $className = $domainNamespace
+        $className = $presentationNamespace
             ->append(ucfirst(str_replace('/', '\\', $query->required('name')->string())))
             ->asClassName();
         $signature = $this->signatureFactory->forFlowPackage($flowPackage);
@@ -60,7 +60,7 @@ final class ValueFactory
             $property = $this->propertyFactory->fromKeyValuePair([$propertyName, $typeName]);
             $type = $property->getType();
 
-            if ($type instanceof ClassType && $import = Import::fromClassType($type, $domainNamespace)) {
+            if ($type instanceof ClassType && $import = Import::fromClassType($type, $presentationNamespace)) {
                 $import = $importCollectionBuilder->addImport($import);
                 $property = $property->withType($type->withNativeName($import->getName()));
             }
@@ -70,6 +70,6 @@ final class ValueFactory
 
         $imports = $importCollectionBuilder->build();
 
-        return new Value($flowPackage, $className, $signature, $imports, $properties);
+        return new Model($flowPackage, $className, $signature, $imports, $properties);
     }
 }

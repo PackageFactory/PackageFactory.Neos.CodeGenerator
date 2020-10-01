@@ -42,7 +42,7 @@ final class Enum
      * @param FlowPackageInterface $flowPackage
      * @param PhpClassName $className
      * @param SignatureInterface $signature
-     * @param array $values
+     * @param string[] $values
      */
     public function __construct(
         FlowPackageInterface $flowPackage,
@@ -64,7 +64,11 @@ final class Enum
         $builder = new PhpFileBuilder();
 
         $builder->setPath($this->className->asClassFilePathInFlowPackage($this->flowPackage));
-        $builder->setNamespace($this->className->asNamespace()->getParentNamespace());
+
+        $namespace = $this->className->asNamespace()->getParentNamespace();
+        assert($namespace !== null);
+        $builder->setNamespace($namespace);
+
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()
             ->addImport(new Import('PackageFactory\\AtomicFusion\\PresentationObjects\\Framework\\Type\\Enum', null));

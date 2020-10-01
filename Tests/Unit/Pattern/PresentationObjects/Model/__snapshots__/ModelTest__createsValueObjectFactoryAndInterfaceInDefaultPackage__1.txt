@@ -1,0 +1,85 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Presentation\Button;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Neos\Flow\Annotations as Flow;
+use Vendor\Default\Presentation\Alignment\HorizontalAlignment;
+
+/**
+ * @Flow\Proxy(false)
+ */
+final class Button
+{
+    /**
+     * @var ButtonType
+     */
+    private $type;
+
+    /**
+     * @var ButtonLook
+     */
+    private $look;
+
+    /**
+     * @var string
+     */
+    private $label;
+
+    /**
+     * @var null|HorizontalAlignment
+     */
+    private $horizontalAlignment;
+
+    /**
+     * @param ButtonType $type
+     * @param ButtonLook $look
+     * @param string $label
+     * @param null|HorizontalAlignment $horizontalAlignment
+     */
+    public function __construct(
+        ButtonType $type,
+        ButtonLook $look,
+        string $label,
+        ?HorizontalAlignment $horizontalAlignment
+    ) {
+        $this->type = $type;
+        $this->look = $look;
+        $this->label = $label;
+        $this->horizontalAlignment = $horizontalAlignment;
+    }
+
+    /**
+     * @return ButtonType
+     */
+    public function getType(): ButtonType
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return ButtonLook
+     */
+    public function getLook(): ButtonLook
+    {
+        return $this->look;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabel(): string
+    {
+        return $this->label;
+    }
+
+    /**
+     * @return null|HorizontalAlignment
+     */
+    public function getHorizontalAlignment(): ?HorizontalAlignment
+    {
+        return $this->horizontalAlignment;
+    }
+}

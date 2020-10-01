@@ -15,6 +15,12 @@ interface PropertyInterface
     public function getType(): TypeInterface;
 
     /**
+     * @param TypeInterface $type
+     * @return PropertyInterface
+     */
+    public function withType(TypeInterface $type): PropertyInterface;
+
+    /**
      * @return string
      */
     public function getName(): string;

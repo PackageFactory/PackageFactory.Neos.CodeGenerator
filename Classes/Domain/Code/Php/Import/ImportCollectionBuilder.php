@@ -30,8 +30,6 @@ final class ImportCollectionBuilder
     {
         if (array_key_exists($import->getFullyQualifiedName(), $this->importsByFullyQualifiedName)) {
             throw new \DomainException('Duplicate import: ' . $import->getFullyQualifiedName());
-        } elseif ($import->getAlias() !== null) {
-            throw new \DomainException('Unable to resolve naming conflict for import with alias: ' . $import->getAlias());
         } elseif (array_key_exists($import->getName(), $this->importsByName)) {
             $fullyQualifiedName = $import->getFullyQualifiedName();
             $segments = explode('\\', $fullyQualifiedName);
@@ -55,22 +53,16 @@ final class ImportCollectionBuilder
 
     /**
      * @param ImportInterface $import
-     * @return self
+     * @return ImportInterface
      */
-    public function addImport(ImportInterface $import): self
+    public function addImport(ImportInterface $import): ImportInterface
     {
-        if (array_key_exists($import->getFullyQualifiedName(), $this->importsByFullyQualifiedName)) {
-            throw new \DomainException('Duplicate import: ' . $import->getFullyQualifiedName());
-        }
-
-        if (array_key_exists($import->getName(), $this->importsByName)) {
-            throw new \DomainException('Import naming conflict: ' . $import->getName());
-        }
+        $import = $this->resolvePotentialNamingConflictForImport($import);
 
         $this->importsByFullyQualifiedName[$import->getFullyQualifiedName()] = $import;
         $this->importsByName[$import->getName()] = $import;
 
-        return $this;
+        return $import;
     }
 
     /**
@@ -80,7 +72,7 @@ final class ImportCollectionBuilder
     public function addImportCollection(ImportCollectionInterface $importCollection): self
     {
         foreach ($importCollection as $import) {
-            $this->addImport($this->resolvePotentialNamingConflictForImport($import));
+            $this->addImport($import);
         }
 
         return $this;

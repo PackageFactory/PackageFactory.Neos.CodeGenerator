@@ -65,11 +65,14 @@ final class Helper
         $builder = new PhpFileBuilder();
 
         $builder->setPath($this->className->asClassFilePathInFlowPackage($this->flowPackage));
-        $builder->setNamespace($this->className->asNamespace()->getParentNamespace());
+
+        $namespace = $this->className->asNamespace()->getParentNamespace();
+        assert($namespace !== null);
+        $builder->setNamespace($namespace);
+
         $builder->setSignature($this->signature);
-        $builder->getImportCollectionBuilder()
-            ->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'))
-            ->addImport(new Import('Neos\\Eel\\ProtectedContextAwareInterface', null));
+        $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
+        $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Eel\\ProtectedContextAwareInterface', null));
 
         $code = [];
 
