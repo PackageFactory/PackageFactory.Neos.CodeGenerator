@@ -6,9 +6,9 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Code;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\Path;
+use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageInterface;
 use Symfony\Component\Yaml;
 
 /**
@@ -38,19 +38,19 @@ final class YamlFile implements FileInterface
     }
 
     /**
-     * @param FlowPackageInterface $flowPackage
+     * @param DistributionPackageInterface $distributionPackage
      * @param string $configurationFilePath
      * @return self
      */
-    public static function fromConfigurationInFlowPackage(FlowPackageInterface $flowPackage, string $configurationFilePath): self
+    public static function fromConfigurationInDistributionPackage(DistributionPackageInterface $distributionPackage, string $configurationFilePath): self
     {
-        $path = Path::fromFlowPackage($flowPackage)
-            ->appendString(FlowPackageInterface::DIRECTORY_CONFIGURATION)
+        $path = $distributionPackage->getPackagePath()
+            ->appendString('Configuration')
             ->appendString($configurationFilePath);
 
-        if (file_exists($path->getValue())) {
+        if (file_exists($path->asString())) {
             $parser = new Yaml\Parser();
-            return new self($path, $parser->parseFile($path->getValue()) ?? []);
+            return new self($path, $parser->parseFile($path->asString()) ?? []);
         } else {
             return new self($path, []);
         }

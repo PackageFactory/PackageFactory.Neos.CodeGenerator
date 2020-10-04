@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier;
+namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass;
 
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
@@ -7,6 +7,7 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Package\FlowPackageInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpNamespace\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\Path;
 
 /**
@@ -22,16 +23,34 @@ final class PhpClassName
     /**
      * @param string $value
      */
-    public function __construct(string $value)
+    private function __construct(string $value)
     {
-        if (!preg_match(
-            '/^[\\\\][a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff\\\\]*[a-zA-Z0-9_\x7f-\xff]$/',
-            $value
-        )) {
-            throw new \InvalidArgumentException('Invalid namespace "' . $value . '".');
+        if (!self::isValid($value)) {
+            throw new \InvalidArgumentException('Invalid PhpClassName "' . $value . '".');
         }
 
         $this->value = $value;
+    }
+
+    /**
+     * @param string $string
+     * @return self
+     */
+    public static function fromString(string $string): self
+    {
+        return new self($string);
+    }
+
+    /**
+     * @param string $string
+     * @return boolean
+     */
+    public static function isValid(string $string): bool
+    {
+        return (bool) preg_match(
+            '/^[\\\\][a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff\\\\]*[a-zA-Z0-9_\x7f-\xff]$/',
+            $string
+        );
     }
 
     /**
@@ -60,7 +79,7 @@ final class PhpClassName
      */
     public function asNamespace(): PhpNamespace
     {
-        return new PhpNamespace(ltrim($this->value, '\\'));
+        return PhpNamespace::fromString(ltrim($this->value, '\\'));
     }
 
     /**
@@ -82,7 +101,7 @@ final class PhpClassName
 
         if (isset($composerManifest['autoload']['psr-4'])) {
             foreach ($composerManifest['autoload']['psr-4'] as $namespaceAsString => $pathAsString) {
-                $psr4Namespace = new PhpNamespace(rtrim($namespaceAsString, '\\'));
+                $psr4Namespace = PhpNamespace::fromString(rtrim($namespaceAsString, '\\'));
 
                 if ($this->asNamespace()->isDescendantOf($psr4Namespace)) {
                     return Path::fromString($flowPackage->getPackagePath())

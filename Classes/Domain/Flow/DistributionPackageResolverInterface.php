@@ -1,17 +1,15 @@
 <?php declare(strict_types=1);
 namespace PackageFactory\Neos\CodeGenerator\Domain\Flow;
 
-use Neos\Flow\Package\FlowPackageInterface;
-
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
-interface PackageResolverInterface
+interface DistributionPackageResolverInterface
 {
     /**
      * @param null|string $input
-     * @return FlowPackageInterface
+     * @return DistributionPackageInterface
      */
-    public function resolve(?string $input): FlowPackageInterface;
+    public function resolve(?string $input): DistributionPackageInterface;
 }

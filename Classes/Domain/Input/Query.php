@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Domain\Pattern;
+namespace PackageFactory\Neos\CodeGenerator\Domain\Input;
 
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
@@ -7,12 +7,11 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Pattern;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Utility\ObjectAccess;
-use Symfony\Component\Yaml;
 
 /**
  * @Flow\Proxy(false)
  */
-final class GeneratorQuery
+final class Query
 {
     /**
      * @var array<mixed>
@@ -20,7 +19,7 @@ final class GeneratorQuery
     private $data;
 
     /**
-     * @param array $data
+     * @param array<mixed> $data
      */
     private function __construct(array $data)
     {
@@ -28,17 +27,7 @@ final class GeneratorQuery
     }
 
     /**
-     * @param string $string
-     * @return self
-     */
-    public static function fromString(string $string): self
-    {
-        $parser = new Yaml\Parser();
-        return self::fromArray($parser->parse($string));
-    }
-
-    /**
-     * @param array $array
+     * @param array<mixed> $array
      * @return self
      */
     public static function fromArray(array $array): self

@@ -7,9 +7,9 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Eel;
 
 use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureFactoryInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpNamespace;
-use PackageFactory\Neos\CodeGenerator\Domain\Flow\PackageResolverInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpNamespace\PhpNamespace;
+use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageResolverInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 
 /**
  * @Flow\Scope("singleton")
@@ -18,9 +18,9 @@ final class HelperFactory
 {
     /**
      * @Flow\Inject
-     * @var PackageResolverInterface
+     * @var DistributionPackageResolverInterface
      */
-    protected $packageResolver;
+    protected $distributionPackageResolver;
 
     /**
      * @Flow\Inject
@@ -29,21 +29,21 @@ final class HelperFactory
     protected $signatureFactory;
 
     /**
-     * @param GeneratorQuery $query
+     * @param Query $query
      * @return Helper
      */
-    public function fromGeneratorQuery(GeneratorQuery $query): Helper
+    public function fromQuery(Query $query): Helper
     {
-        $flowPackage = $this->packageResolver->resolve($query->optional('package')->string());
+        $distributionPackage = $this->distributionPackageResolver->resolve($query->optional('package')->string());
         $name = ucfirst($query->required('name')->string());
 
-        $className = PhpNamespace::fromFlowPackage($flowPackage)
+        $className = $distributionPackage->getPackageKey()->asPhpNamespace()
             ->append('Application\\Eel')
             ->append($name . 'Helper')
             ->asClassName();
-        $signature = $this->signatureFactory->forFlowPackage($flowPackage);
-        $defaultContextIdentifier = $flowPackage->getPackageKey() . '.' . $name;
+        $signature = $this->signatureFactory->forDistributionPackage($distributionPackage);
+        $defaultContextIdentifier = $distributionPackage->getPackageKey()->asString() . '.' . $name;
 
-        return new Helper($flowPackage, $className, $signature, $defaultContextIdentifier);
+        return new Helper($distributionPackage, $name, $signature, $defaultContextIdentifier);
     }
 }

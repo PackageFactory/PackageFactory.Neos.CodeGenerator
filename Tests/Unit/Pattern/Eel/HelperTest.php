@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\Eel;
 
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 use PackageFactory\Neos\CodeGenerator\Pattern\Eel\HelperFactory;
 use PackageFactory\Neos\CodeGenerator\Pattern\Eel\HelperGenerator;
 use PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\PatternTestCase;
@@ -25,7 +25,7 @@ final class HelperTest extends PatternTestCase
         $this->helperFactory = new HelperFactory();
         $this->helperGenerator = new HelperGenerator();
 
-        $this->inject($this->helperFactory, 'packageResolver', $this->packageResolver);
+        $this->inject($this->helperFactory, 'distributionPackageResolver', $this->distributionPackageResolver);
         $this->inject($this->helperFactory, 'signatureFactory', $this->signatureFactory);
 
         $this->inject($this->helperGenerator, 'helperFactory', $this->helperFactory);
@@ -38,7 +38,7 @@ final class HelperTest extends PatternTestCase
      */
     public function createsEelHelperInDefaultPackage(): void
     {
-        $query = GeneratorQuery::fromArray(['name' => 'Essentials']);
+        $query = Query::fromArray(['name' => 'Essentials']);
 
         $this->helperGenerator->generate($query);
 

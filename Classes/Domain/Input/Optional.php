@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Domain\Pattern;
+namespace PackageFactory\Neos\CodeGenerator\Domain\Input;
 
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
@@ -7,6 +7,8 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Pattern;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Utility\ObjectAccess;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\TypeDescription\TypeDescription;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\TypeDescription\TypeDescriptionInterface;
 
 /**
  * @Flow\Proxy(false)
@@ -23,6 +25,10 @@ final class Optional
      */
     private $value;
 
+    /**
+     * @param string $name
+     * @param mixed $value
+     */
     public function __construct(string $name, $value)
     {
         $this->name = $name;
@@ -81,6 +87,18 @@ final class Optional
     }
 
     /**
+     * @return null|TypeDescriptionInterface
+     */
+    public function type(): ?TypeDescriptionInterface
+    {
+        if ($string = $this->string()) {
+            return TypeDescription::fromString($string);
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * @return null|integer
      */
     public function integer(): ?int
@@ -109,9 +127,9 @@ final class Optional
     }
 
     /**
-     * @return boolean
+     * @return null|boolean
      */
-    public function boolean(): bool
+    public function boolean(): ?bool
     {
         if (is_bool($this->value)) {
             return $this->value;
@@ -123,9 +141,9 @@ final class Optional
     }
 
     /**
-     * @return iterable<string, Required>
+     * @return \Iterator<string, Required>
      */
-    public function dictionary(): iterable
+    public function dictionary(): \Iterator
     {
         if (is_iterable($this->value)) {
             foreach ($this->value as $key => $child) {
@@ -133,7 +151,7 @@ final class Optional
                     throw new \InvalidArgumentException('"' . $this->name . '" was expected to be dictionary or null but key of type ' . gettype($key) . ' was found.');
                 }
 
-                yield $key => new self($this->name . '.' . $key, $child);
+                yield $key => new Required($this->name . '.' . $key, $child);
             }
         } elseif ($this->value === null) {
             return null;
@@ -143,9 +161,9 @@ final class Optional
     }
 
     /**
-     * @return iterable<int, Required>
+     * @return \Iterator<int, Required>
      */
-    public function list(): iterable
+    public function list(): \Iterator
     {
         if (is_iterable($this->value)) {
             foreach ($this->value as $key => $child) {
@@ -153,7 +171,7 @@ final class Optional
                     throw new \InvalidArgumentException('"' . $this->name . '" was expected to be list or null but key of type ' . gettype($key) . ' was found.');
                 }
 
-                yield new self($this->name . '.' . $key, $child);
+                yield new Required($this->name . '.' . $key, $child);
             }
         } elseif ($this->value === null) {
             return null;

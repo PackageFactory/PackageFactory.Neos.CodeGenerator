@@ -6,10 +6,10 @@ namespace PackageFactory\Neos\CodeGenerator\Infrastructure;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\Signature;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureFactoryInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageInterface;
 
 /**
  * @Flow\Scope("singleton")
@@ -17,11 +17,11 @@ use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInte
 final class SignatureFactory implements SignatureFactoryInterface
 {
     /**
-     * @param FlowPackageInterface $flowPackage
+     * @param DistributionPackageInterface $distributionPackage
      * @return SignatureInterface
      */
-    public function forFlowPackage(FlowPackageInterface $flowPackage): SignatureInterface
+    public function forDistributionPackage(DistributionPackageInterface $distributionPackage): SignatureInterface
     {
-        return new Signature($flowPackage->getPackageKey());
+        return new Signature($distributionPackage->getPackageKey()->asString());
     }
 }

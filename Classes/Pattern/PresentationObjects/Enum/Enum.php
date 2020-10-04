@@ -6,27 +6,28 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Enum;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpClassName;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\Import;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFileBuilder;
+use PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Presentation;
 
 /**
  * @Flow\Proxy(false)
  */
-final class Enum
+final class Enum implements PhpClassInterface
 {
     /**
-     * @var FlowPackageInterface
+     * @var Presentation
      */
-    private $flowPackage;
+    private $presentation;
 
     /**
-     * @var PhpClassName
+     * @var string
      */
-    private $className;
+    private $name;
 
     /**
      * @var SignatureInterface
@@ -39,21 +40,37 @@ final class Enum
     private $values;
 
     /**
-     * @param FlowPackageInterface $flowPackage
-     * @param PhpClassName $className
+     * @param Presentation $presentation
+     * @param string $name
      * @param SignatureInterface $signature
      * @param string[] $values
      */
     public function __construct(
-        FlowPackageInterface $flowPackage,
-        PhpClassName $className,
+        Presentation $presentation,
+        string $name,
         SignatureInterface $signature,
         array $values
     ) {
-        $this->flowPackage = $flowPackage;
-        $this->className = $className;
+        $this->presentation = $presentation;
+        $this->name = $name;
         $this->signature = $signature;
         $this->values = $values;
+    }
+
+    /**
+     * @return PhpClassName
+     */
+    public function getClassName(): PhpClassName
+    {
+        return $this->presentation->getPhpNamespace()->append($this->name)->asClassName();
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getValues(): array
+    {
+        return $this->values;
     }
 
     /**
@@ -62,13 +79,10 @@ final class Enum
     public function asPhpClassFile(): PhpFile
     {
         $builder = new PhpFileBuilder();
+        $className = $this->getClassName();
 
-        $builder->setPath($this->className->asClassFilePathInFlowPackage($this->flowPackage));
-
-        $namespace = $this->className->asNamespace()->getParentNamespace();
-        assert($namespace !== null);
-        $builder->setNamespace($namespace);
-
+        $builder->setPath($this->presentation->getPhpFilePathForClassName($className));
+        $builder->setNamespaceFromClassName($className);
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()
             ->addImport(new Import('PackageFactory\\AtomicFusion\\PresentationObjects\\Framework\\Type\\Enum', null));
@@ -85,7 +99,7 @@ final class Enum
         $code[] = ' *';
         $code[] = ' * @Flow\Proxy(false)';
         $code[] = ' */';
-        $code[] = 'final class ' . $this->className->asDeclarationNameString() . ' extends Enum';
+        $code[] = 'final class ' . $className->asDeclarationNameString() . ' extends Enum';
         $code[] = '{';
         $code[] = '}';
         $code[] = '';

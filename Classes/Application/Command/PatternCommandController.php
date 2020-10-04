@@ -7,10 +7,12 @@ namespace PackageFactory\Neos\CodeGenerator\Application\Command;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\PatternRepository;
+use PackageFactory\Neos\CodeGenerator\Framework\IO\ConsoleIO;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\GeneratorResolver;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\PatternResolver;
+use Symfony\Component\Yaml;
 
 /**
  * Command controller for code generation
@@ -36,35 +38,48 @@ class PatternCommandController extends CommandController
     protected $generatorResolver;
 
     /**
+     * @Flow\Inject
+     * @var ConsoleIO
+     */
+    protected $io;
+
+    /**
      * Generates code with the given pattern in the given package
      *
-     * @param string $patternKey A pattern key (see ./flow pattern:list)
+     * @param string $fileName
      * @return void
      */
-    public function generateCommand(string $patternKey): void
+    public function generateCommand(string $fileName): void
     {
-        $pattern = $this->patternResolver->resolve($patternKey);
-        $generator = $this->generatorResolver->resolve($pattern);
+        $input = file_get_contents($fileName);
 
-        $input = file_get_contents('php://stdin');
+        if ($input = file_get_contents($fileName)) {
+            $parser = new Yaml\Parser();
+            $data = $parser->parse($input);
 
-        if (!$input) {
+            foreach ($data as $item) {
+                foreach ($item as $patternKey => $options) {
+                    $pattern = $this->patternResolver->resolve($patternKey);
+                    $generator = $this->generatorResolver->resolve($pattern);
+                    $query = Query::fromArray($options);
+
+                    $this->outputLine();
+                    $this->outputLine('<em> Running %s... </em>', [$pattern->getKey()]);
+                    $this->outputLine();
+
+                    $generator->generate($query);
+
+                    $this->outputLine();
+                }
+            }
+
+            $this->outputLine('<success> Done! </success>');
+        } else {
             $this->outputLine();
-            $this->outputLine('<error> No Input given for %s. </error>', [$pattern->getKey()]);
-            $this->outputLine('<em> See ./flow pattern:describe %s for usage information. </em>', [$pattern->getKey()]);
+            $this->outputLine('<error> No Input given for %s. </error>');
+            $this->outputLine('<em> See ./flow pattern:list a list of patterns. </em>');
             $this->outputLine();
             $this->quit(-1);
-        } else {
-            $query = GeneratorQuery::fromString($input);
-
-            $this->outputLine();
-            $this->outputLine('<em> Running %s... </em>', [$pattern->getKey()]);
-            $this->outputLine();
-
-            $generator->generate($query);
-
-            $this->outputLine();
-            $this->outputLine('<success> Done! </success>');
         }
     }
 
@@ -123,5 +138,13 @@ class PatternCommandController extends CommandController
         $this->outputFormatted('  <b>Usage Example</b>');
         $this->outputFormatted($pattern->getUsageExample(), [], 4);
         $this->outputLine();
+    }
+
+    /**
+     * @return void
+     */
+    public function configtestCommand(): void
+    {
+        throw new \Exception('@TODO: configtestCommand');
     }
 }

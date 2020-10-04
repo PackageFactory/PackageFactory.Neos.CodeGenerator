@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Domain\Pattern;
+namespace PackageFactory\Neos\CodeGenerator\Domain\Input;
 
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
@@ -7,6 +7,8 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Pattern;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Utility\ObjectAccess;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\TypeDescription\TypeDescription;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\TypeDescription\TypeDescriptionInterface;
 
 /**
  * @Flow\Proxy(false)
@@ -23,6 +25,10 @@ final class Required
      */
     private $value;
 
+    /**
+     * @param string $name
+     * @param mixed $value
+     */
     public function __construct(string $name, $value)
     {
         if ($value === null) {
@@ -77,6 +83,14 @@ final class Required
     }
 
     /**
+     * @return TypeDescriptionInterface
+     */
+    public function type(): TypeDescriptionInterface
+    {
+        return TypeDescription::fromString($this->string());
+    }
+
+    /**
      * @return integer
      */
     public function integer(): int
@@ -113,9 +127,9 @@ final class Required
     }
 
     /**
-     * @return iterable<string, Required>
+     * @return \Iterator<string, Required>
      */
-    public function dictionary(): iterable
+    public function dictionary(): \Iterator
     {
         if (is_iterable($this->value)) {
             foreach ($this->value as $key => $child) {
@@ -131,9 +145,9 @@ final class Required
     }
 
     /**
-     * @return iterable<int, Required>
+     * @return \Iterator<int, Required>
      */
-    public function list(): iterable
+    public function list(): \Iterator
     {
         if (is_iterable($this->value)) {
             foreach ($this->value as $key => $child) {

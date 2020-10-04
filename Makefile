@@ -7,3 +7,9 @@ test::
 		--enforce-time-limit \
 		--coverage-html Build/Reports/coverage \
 		Tests
+
+test-isolated::
+	@bin/phpunit -c phpunit.xml \
+		--enforce-time-limit \
+		--group isolated \
+		Tests

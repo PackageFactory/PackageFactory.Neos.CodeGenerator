@@ -47,7 +47,7 @@ final class Property implements PropertyInterface
      * @param TypeInterface $type
      * @return self
      */
-    public function withType(TypeInterface $type): self
+    public function withType(TypeInterface $type): PropertyInterface
     {
         return new self($type, $this->name);
     }

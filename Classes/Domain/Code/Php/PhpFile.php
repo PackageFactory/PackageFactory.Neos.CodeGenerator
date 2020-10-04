@@ -7,7 +7,7 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php;
 
 use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpNamespace;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpNamespace\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\ImportCollectionInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\ImportInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileInterface;

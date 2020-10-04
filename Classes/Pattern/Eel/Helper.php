@@ -6,13 +6,13 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Eel;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\Import;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFileBuilder;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\YamlFile;
+use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageInterface;
 
 /**
  * @Flow\Proxy(false)
@@ -20,14 +20,14 @@ use PackageFactory\Neos\CodeGenerator\Domain\Code\YamlFile;
 final class Helper
 {
     /**
-     * @var FlowPackageInterface
+     * @var DistributionPackageInterface
      */
-    private $flowPackage;
+    private $distributionPackage;
 
     /**
-     * @var PhpClassName
+     * @var string
      */
-    private $className;
+    private $name;
 
     /**
      * @var SignatureInterface
@@ -40,21 +40,31 @@ final class Helper
     private $defaultContextIdentifier;
 
     /**
-     * @param FlowPackageInterface $flowPackage
-     * @param PhpClassName $className
+     * @var PhpClassName
+     */
+    private $className;
+
+    /**
+     * @param DistributionPackageInterface $distributionPackage
+     * @param string $name
      * @param SignatureInterface $signature
      * @param string $defaultContextIdentifier
      */
     public function __construct(
-        FlowPackageInterface $flowPackage,
-        PhpClassName $className,
+        DistributionPackageInterface $distributionPackage,
+        string $name,
         SignatureInterface $signature,
         string $defaultContextIdentifier
     ) {
-        $this->flowPackage = $flowPackage;
-        $this->className = $className;
+        $this->distributionPackage = $distributionPackage;
+        $this->name = $name;
         $this->signature = $signature;
         $this->defaultContextIdentifier = $defaultContextIdentifier;
+
+        $this->className = $this->distributionPackage->getPackageKey()->asPhpNamespace()
+            ->append('Application\\Eel')
+            ->append($this->name . 'Helper')
+            ->asClassName();
     }
 
     /**
@@ -64,12 +74,8 @@ final class Helper
     {
         $builder = new PhpFileBuilder();
 
-        $builder->setPath($this->className->asClassFilePathInFlowPackage($this->flowPackage));
-
-        $namespace = $this->className->asNamespace()->getParentNamespace();
-        assert($namespace !== null);
-        $builder->setNamespace($namespace);
-
+        $builder->setPath($this->distributionPackage->getPhpFilePathForClassName($this->className));
+        $builder->setNamespaceFromClassName($this->className);
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
         $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Eel\\ProtectedContextAwareInterface', null));
@@ -102,7 +108,7 @@ final class Helper
      */
     public function asAppendedSettingForFusionDefaultContext(): YamlFile
     {
-        $settingsFile = YamlFile::fromConfigurationInFlowPackage($this->flowPackage, 'Settings.Eel.Helpers.yaml');
+        $settingsFile = YamlFile::fromConfigurationInDistributionPackage($this->distributionPackage, 'Settings.Eel.Helpers.yaml');
 
         $settings = $settingsFile->getData();
         $settings['Neos']['Fusion']['defaultContext'][$this->defaultContextIdentifier] = $this->className->asNamespace()->asString();

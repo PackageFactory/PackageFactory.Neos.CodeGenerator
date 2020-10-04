@@ -1,13 +1,17 @@
 <?php declare(strict_types=1);
 namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature;
 
-use Neos\Flow\Package\FlowPackageInterface;
-
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
+use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageInterface;
+
 interface SignatureFactoryInterface
 {
-    public function forFlowPackage(FlowPackageInterface $flowPackage): SignatureInterface;
+    /**
+     * @param DistributionPackageInterface $distributionPackage
+     * @return SignatureInterface
+     */
+    public function forDistributionPackage(DistributionPackageInterface $distributionPackage): SignatureInterface;
 }

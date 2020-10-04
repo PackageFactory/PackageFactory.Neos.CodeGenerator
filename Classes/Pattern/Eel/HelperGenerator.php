@@ -8,7 +8,7 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Eel;
 use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriterInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 
 /**
  * @Flow\Scope("singleton")
@@ -28,12 +28,12 @@ final class HelperGenerator implements GeneratorInterface
     protected $fileWriter;
 
     /**
-     * @param GeneratorQuery $query
+     * @param Query $query
      * @return void
      */
-    public function generate(GeneratorQuery $query): void
+    public function generate(Query $query): void
     {
-        $helper = $this->helperFactory->fromGeneratorQuery($query);
+        $helper = $this->helperFactory->fromQuery($query);
 
         $this->fileWriter->write($helper->asPhpClassFile());
         $this->fileWriter->write($helper->asAppendedSettingForFusionDefaultContext());

@@ -1,0 +1,40 @@
+PackageFactory:
+  Neos:
+    CodeGenerator:
+      shorthands:
+        string:
+          type: string
+          example: >
+            'Lorem ipsum...'
+        lorem:
+          type: string
+          example: |
+            '
+                Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
+                eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
+                voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita
+                kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+            '
+        int:
+          type: integer
+          example: '42'
+        integer:
+          type: integer
+          example: '42'
+        float:
+          type: float
+          example: '12.3'
+        boolean:
+          type: boolean
+          example: 'true'
+        bool:
+          type: boolean
+          example: 'true'
+        imagesource:
+          type: Sitegeist\Kaleidoscope\EelHelpers\ImageSourceHelperInterface
+          example: |
+            Sitegeist.Kaleidoscope:DummyImageSource {
+                width = 300
+                height = 200
+            }
+

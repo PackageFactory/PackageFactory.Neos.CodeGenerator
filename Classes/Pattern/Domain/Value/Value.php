@@ -6,15 +6,13 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Domain\Value;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpClassName;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\Import;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\ImportCollectionInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFileBuilder;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property\PropertyInterface;
+use PackageFactory\Neos\CodeGenerator\Pattern\Domain\Domain;
 
 /**
  * @Flow\Proxy(false)
@@ -22,14 +20,14 @@ use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property\PropertyInterface
 final class Value
 {
     /**
-     * @var FlowPackageInterface
+     * @var Domain
      */
-    private $flowPackage;
+    private $domain;
 
     /**
-     * @var PhpClassName
+     * @var string
      */
-    private $className;
+    private $name;
 
     /**
      * @var SignatureInterface
@@ -47,21 +45,21 @@ final class Value
     private $properties;
 
     /**
-     * @param FlowPackageInterface $flowPackage
-     * @param PhpClassName $className
+     * @param Domain $domain
+     * @param string $name
      * @param SignatureInterface $signature
      * @param ImportCollectionInterface $imports
      * @param PropertyInterface[] $properties
      */
     public function __construct(
-        FlowPackageInterface $flowPackage,
-        PhpClassName $className,
+        Domain $domain,
+        string $name,
         SignatureInterface $signature,
         ImportCollectionInterface $imports,
         array $properties
     ) {
-        $this->flowPackage = $flowPackage;
-        $this->className = $className;
+        $this->domain = $domain;
+        $this->name = $name;
         $this->signature = $signature;
         $this->imports = $imports;
         $this->properties = $properties;
@@ -73,13 +71,10 @@ final class Value
     public function asPhpClassFile(): PhpFile
     {
         $builder = new PhpFileBuilder();
+        $className = $this->domain->getPhpNamespace()->append($this->name)->asClassName();
 
-        $builder->setPath($this->className->asClassFilePathInFlowPackage($this->flowPackage));
-
-        $namespace = $this->className->asNamespace()->getParentNamespace();
-        assert($namespace !== null);
-        $builder->setNamespace($namespace);
-
+        $builder->setPath($this->domain->getPhpFilePathForClassName($className));
+        $builder->setNamespaceFromClassName($className);
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
         $builder->getImportCollectionBuilder()->addImportCollection($this->imports);
@@ -89,7 +84,7 @@ final class Value
         $code[] = '/**';
         $code[] = ' * @Flow\Proxy(false)';
         $code[] = ' */';
-        $code[] = 'final class ' . $this->className->asDeclarationNameString();
+        $code[] = 'final class ' . $className->asDeclarationNameString();
         $code[] = '{';
 
         if ($this->properties) {

@@ -6,9 +6,9 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Model;
  */
 
 use Neos\Flow\Annotations as Flow;
+use PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriterInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
-use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 
 /**
  * @Flow\Scope("singleton")
@@ -23,17 +23,17 @@ final class ModelGenerator implements GeneratorInterface
 
     /**
      * @Flow\Inject
-     * @var FileWriter
+     * @var FileWriterInterface
      */
     protected $fileWriter;
 
     /**
-     * @param GeneratorQuery $query
+     * @param Query $query
      * @return void
      */
-    public function generate(GeneratorQuery $query): void
+    public function generate(Query $query): void
     {
-        $model = $this->modelFactory->fromGeneratorQuery($query);
+        $model = $this->modelFactory->fromQuery($query);
 
         $this->fileWriter->write($model->asPhpClassFileForValueObject());
         $this->fileWriter->write($model->asPhpInterfaceFile());

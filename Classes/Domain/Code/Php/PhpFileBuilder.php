@@ -7,8 +7,9 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php;
 
 use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpNamespace;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpNamespace\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\ImportCollectionBuilder;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\Path;
 
 /**
@@ -66,6 +67,19 @@ final class PhpFileBuilder
     public function setNamespace(PhpNamespace $namespace): self
     {
         $this->namespace = $namespace;
+        return $this;
+    }
+
+    /**
+     * @param PhpClassName $className
+     * @return self
+     */
+    public function setNamespaceFromClassName(PhpClassName $className): self
+    {
+        if ($namespace = $className->asNamespace()->getParentNamespace()) {
+            $this->namespace = $namespace;
+        }
+
         return $this;
     }
 

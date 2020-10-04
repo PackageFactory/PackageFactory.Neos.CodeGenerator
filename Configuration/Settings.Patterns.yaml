@@ -1,0 +1,93 @@
+PackageFactory:
+  Neos:
+    CodeGenerator:
+      patterns:
+
+        'eel:helper':
+          shortDescription: >
+            Creates an Eel Helper and registers it for use in Fusion.
+          description: >
+            Creates an Eel Helper and registers it for use in Fusion.
+          arguments:
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: The Eel Helper short name ("Helper" will be appended)
+          usageExample: >
+            ./flow pattern:generate eel:helper MyHelper
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\Eel\HelperGenerator
+
+        'domain:value':
+          shortDescription: >
+            Creates a domain value object.
+          description: >
+            Creates a domain value object.
+          arguments:
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: A Subnamespace (relative to Vendor\Site\Domain)
+            2: The value object class name
+            n: Comma-separated list of properties and corresponding types (propertyName:type)
+          usageExample: >
+            ./flow pattern:generate domain:value Vendor.Site Order PostalAddress streetAddress:string postalCode:string addressLocality:string
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\Domain\ValueGenerator
+
+        'presentation:enum':
+          shortDescription: >
+            Creates a pseudo-enum for use in presentation objects.
+          description: >
+            A pseudo-enum will be placed at Vendor\Site\Presentation\{Subnamespace}\{ClassName}. It
+            will consist of the given values which then can be accessed by {ClassName}::{ValueName}().
+          arguments:
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: A Subnamespace (relative to Vendor\Site\Presentation)
+            2: The enum class name
+            n: Comma-separated list of enum values
+          usageExample: >
+            ./flow pattern:generate po:enum Vendor.Site Block/Button ButtonSize xs,s,m,l,xl
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Enum\EnumGenerator
+
+        'presentation:value':
+          shortDescription: >
+            Creates a presentation value object.
+          description: >
+            Creates a presentation value object.
+          arguments:
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: A Subnamespace (relative to Vendor\Site\Presentation)
+            2: The presentation value object class name
+            n: Comma-separated list of properties and corresponding types (propertyName:type)
+          usageExample: >
+            ./flow pattern:generate po:value Vendor.Site Block/Button Href value:string
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Value\ValueGenerator
+
+        'presentation:model':
+          shortDescription: >
+            Creates a presentation model.
+          description: >
+            Creates a presentation model.
+          arguments:
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: A Subnamespace (relative to Vendor\Site\Presentation)
+            2: The presentation model class name
+            n: Comma-separated list of properties and corresponding types (propertyName:type)
+          usageExample: >
+            ./flow pattern:generate po:model Vendor.Site Block/Button Button size:ButtonSize,label:string,disabled:?boolean
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Model\ModelGenerator
+
+        'presentation:component':
+          shortDescription: >
+            Creates a presentation model and component.
+          description: >
+            Creates a presentation model and component.
+          arguments:
+            0: A package key or '.' to use the default package key or '..' to select a package key
+            1: A Subnamespace (relative to Vendor\Site\Presentation)
+            2: The presentation model class name
+            n: Comma-separated list of properties and corresponding types (propertyName:type)
+          usageExample: >
+            ./flow pattern:generate po:component Vendor.Site Block/Headline Headline content:string
+          generatorClassName: >
+            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Component\ComponentGenerator

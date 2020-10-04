@@ -6,7 +6,6 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import;
  */
 
 use Neos\Flow\Annotations as Flow;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Type\ClassType;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Type\TypeInterface;
 
@@ -49,19 +48,20 @@ final class Import implements ImportInterface
     }
 
     /**
-     * @param ClassType $type
-     * @param null|PhpNamespace $referenceNamespace
-     * @return self|null
+     * @param TypeInterface $type
+     * @return null|self
      */
-    public static function fromClassType(ClassType $type, ?PhpNamespace $referenceNamespace = null): ?self
+    public static function fromType(TypeInterface $type): ?self
     {
-        $typeName = $type->getNativeName();
+        if ($type instanceof ClassType) {
+            $typeName = $type->getNativeName();
 
-        if (strpos($typeName, '\\') !== false) {
-            if ($typeName[0] === '\\') {
-                return new Import(substr($typeName, 1), null);
-            } elseif ($referenceNamespace) {
-                return new Import($referenceNamespace->append($typeName)->asString(), null);
+            if (strpos($typeName, '\\') !== false) {
+                if ($typeName[0] === '\\') {
+                    return new Import(substr($typeName, 1), null);
+                } else {
+                    return new Import($typeName, null);
+                }
             }
         }
 

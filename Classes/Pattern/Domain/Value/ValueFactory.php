@@ -6,14 +6,14 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Domain\Value;
  */
 
 use Neos\Flow\Annotations as Flow;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpNamespace;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureFactoryInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\Import;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\ImportCollectionBuilder;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property\PropertyFactory;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Type\ClassType;
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
-use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
-use PackageFactory\Neos\CodeGenerator\Infrastructure\SignatureFactory;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
+use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageResolverInterface;
+use PackageFactory\Neos\CodeGenerator\Pattern\Domain\Domain;
 
 /**
  * @Flow\Scope("singleton")
@@ -22,13 +22,13 @@ final class ValueFactory
 {
     /**
      * @Flow\Inject
-     * @var PackageResolver
+     * @var DistributionPackageResolverInterface
      */
-    protected $packageResolver;
+    protected $distributionPackageResolver;
 
     /**
      * @Flow\Inject
-     * @var SignatureFactory
+     * @var SignatureFactoryInterface
      */
     protected $signatureFactory;
 
@@ -39,28 +39,25 @@ final class ValueFactory
     protected $propertyFactory;
 
     /**
-     * @param GeneratorQuery $query
+     * @param Query $query
      * @return Value
      */
-    public function fromGeneratorQuery(GeneratorQuery $query): Value
+    public function fromQuery(Query $query): Value
     {
-        $flowPackage = $this->packageResolver->resolve($query->optional('package')->string());
-        $domainNamespace = PhpNamespace::fromFlowPackage($flowPackage)->append('Domain');
-
-        $className = $domainNamespace
-            ->append(ucfirst(str_replace('/', '\\', $query->required('name')->string())))
-            ->asClassName();
-        $signature = $this->signatureFactory->forFlowPackage($flowPackage);
+        $distributionPackage = $this->distributionPackageResolver->resolve($query->optional('package')->string());
+        $domain = Domain::fromDistributionPackage($distributionPackage);
+        $name = $query->required('name')->type()->asString();
+        $signature = $this->signatureFactory->forDistributionPackage($distributionPackage);
 
         $importCollectionBuilder = new ImportCollectionBuilder();
         $properties = [];
 
-        foreach ($query->optional('properties')->dictionary() as $propertyName => $typeName) {
-            $typeName = str_replace('/', '\\', $typeName->string());
-            $property = $this->propertyFactory->fromKeyValuePair([$propertyName, $typeName]);
+        foreach ($query->optional('properties')->dictionary() as $propertyName => $typeDescription) {
+            $typeDescription = $typeDescription->type()->withTemplate($domain);
+            $property = $this->propertyFactory->fromKeyValuePair([$propertyName, $typeDescription->asString()]);
             $type = $property->getType();
 
-            if ($type instanceof ClassType && $import = Import::fromClassType($type, $domainNamespace)) {
+            if ($type instanceof ClassType && $import = Import::fromType($type)) {
                 $import = $importCollectionBuilder->addImport($import);
                 $property = $property->withType($type->withNativeName($import->getName()));
             }
@@ -70,6 +67,6 @@ final class ValueFactory
 
         $imports = $importCollectionBuilder->build();
 
-        return new Value($flowPackage, $className, $signature, $imports, $properties);
+        return new Value($domain, $name, $signature, $imports, $properties);
     }
 }

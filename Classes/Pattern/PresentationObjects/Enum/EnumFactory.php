@@ -6,10 +6,10 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Enum;
  */
 
 use Neos\Flow\Annotations as Flow;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Identifier\PhpNamespace;
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
-use PackageFactory\Neos\CodeGenerator\Infrastructure\PackageResolver;
-use PackageFactory\Neos\CodeGenerator\Infrastructure\SignatureFactory;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureFactoryInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
+use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageResolverInterface;
+use PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Presentation;
 
 /**
  * @Flow\Scope("singleton")
@@ -18,35 +18,32 @@ final class EnumFactory
 {
     /**
      * @Flow\Inject
-     * @var PackageResolver
+     * @var DistributionPackageResolverInterface
      */
-    protected $packageResolver;
+    protected $distributionPackageResolver;
 
     /**
      * @Flow\Inject
-     * @var SignatureFactory
+     * @var SignatureFactoryInterface
      */
     protected $signatureFactory;
 
     /**
-     * @param GeneratorQuery $query
+     * @param Query $query
      * @return Enum
      */
-    public function fromGeneratorQuery(GeneratorQuery $query): Enum
+    public function fromQuery(Query $query): Enum
     {
-        $flowPackage = $this->packageResolver->resolve($query->optional('package')->string());
-        $presentationNamespace = PhpNamespace::fromFlowPackage($flowPackage)->append('Presentation');
-
-        $className = $presentationNamespace
-            ->append(ucfirst(str_replace('/', '\\', $query->required('name')->string())))
-            ->asClassName();
-        $signature = $this->signatureFactory->forFlowPackage($flowPackage);
+        $distributionPackage = $this->distributionPackageResolver->resolve($query->optional('package')->string());
+        $presentation = Presentation::fromDistributionPackage($distributionPackage);
+        $name = $query->required('name')->type()->asString();
+        $signature = $this->signatureFactory->forDistributionPackage($distributionPackage);
 
         $values = [];
         foreach ($query->required('values')->list() as $value) {
             $values[] = $value->string();
         }
 
-        return new Enum($flowPackage, $className, $signature, $values);
+        return new Enum($presentation, $name, $signature, $values);
     }
 }

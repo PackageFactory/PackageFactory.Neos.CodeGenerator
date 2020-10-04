@@ -6,13 +6,12 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Enum;
  */
 
 use Neos\Flow\Annotations as Flow;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassRepositoryInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriterInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
-use PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 
 /**
- * The value generator domain service
- *
  * @Flow\Scope("singleton")
  */
 final class EnumGenerator implements GeneratorInterface
@@ -25,18 +24,25 @@ final class EnumGenerator implements GeneratorInterface
 
     /**
      * @Flow\Inject
-     * @var FileWriter
+     * @var PhpClassRepositoryInterface
+     */
+    protected $phpClassRepository;
+
+    /**
+     * @Flow\Inject
+     * @var FileWriterInterface
      */
     protected $fileWriter;
 
     /**
-     * @param GeneratorQuery $query
+     * @param Query $query
      * @return void
      */
-    public function generate(GeneratorQuery $query): void
+    public function generate(Query $query): void
     {
-        $enum = $this->enumFactory->fromGeneratorQuery($query);
+        $enum = $this->enumFactory->fromQuery($query);
 
         $this->fileWriter->write($enum->asPhpClassFile());
+        $this->phpClassRepository->add($enum);
     }
 }

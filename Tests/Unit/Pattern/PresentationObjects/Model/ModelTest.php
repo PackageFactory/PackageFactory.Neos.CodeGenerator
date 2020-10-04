@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\PresentationObjects\Model;
 
-use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorQuery;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 use PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Model\ModelFactory;
 use PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Model\ModelGenerator;
 use PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\PatternTestCase;
@@ -25,7 +25,7 @@ final class ModelTest extends PatternTestCase
         $this->modelFactory = new ModelFactory();
         $this->modelGenerator = new ModelGenerator();
 
-        $this->inject($this->modelFactory, 'packageResolver', $this->packageResolver);
+        $this->inject($this->modelFactory, 'distributionPackageResolver', $this->distributionPackageResolver);
         $this->inject($this->modelFactory, 'signatureFactory', $this->signatureFactory);
         $this->inject($this->modelFactory, 'propertyFactory', $this->propertyFactory);
 
@@ -39,9 +39,9 @@ final class ModelTest extends PatternTestCase
      */
     public function createsValueObjectFactoryAndInterfaceInDefaultPackage(): void
     {
-        $query = GeneratorQuery::fromArray([
+        $query = Query::fromArray([
             'name' => 'Button/Button',
-            'properties' => [
+            'props' => [
                 'type' => 'ButtonType',
                 'look' => 'ButtonLook',
                 'label' => 'string',
