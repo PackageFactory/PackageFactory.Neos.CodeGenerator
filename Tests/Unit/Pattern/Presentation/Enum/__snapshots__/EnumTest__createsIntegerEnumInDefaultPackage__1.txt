@@ -1,0 +1,138 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Presentation\Alert;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Neos\Flow\Annotations as Flow;
+
+/**
+ * @Flow\Proxy(false)
+ */
+final class Severity
+{
+    public const SEVERITY_INFO = 1;
+    public const SEVERITY_WARNING = 2;
+    public const SEVERITY_ERROR = 3;
+    public const SEVERITY_FATAL = 4;
+
+    /**
+     * @var integer
+     */
+    private $value;
+
+    /**
+     * @param integer $value
+     */
+    private function __construct(int $value)
+    {
+        $this->value = $value;
+    }
+
+    /**
+     * @param integer $integer
+     * @return self
+     */
+    public static function fromInteger(int $integer): self
+    {
+        if (!in_array($integer, self::getValues())) {
+            throw SeverityIsInvalid::becauseItMustBeOneOfTheDefinedConstants($integer);
+        }
+
+        return new self($integer);
+    }
+
+    /**
+     * @return self
+     */
+    public static function info(): self
+    {
+        return new self(self::SEVERITY_INFO);
+    }
+
+    /**
+     * @return self
+     */
+    public static function warning(): self
+    {
+        return new self(self::SEVERITY_WARNING);
+    }
+
+    /**
+     * @return self
+     */
+    public static function error(): self
+    {
+        return new self(self::SEVERITY_ERROR);
+    }
+
+    /**
+     * @return self
+     */
+    public static function fatal(): self
+    {
+        return new self(self::SEVERITY_FATAL);
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isInfo(): bool
+    {
+        return $this->value === self::SEVERITY_INFO;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isWarning(): bool
+    {
+        return $this->value === self::SEVERITY_WARNING;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isError(): bool
+    {
+        return $this->value === self::SEVERITY_ERROR;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isFatal(): bool
+    {
+        return $this->value === self::SEVERITY_FATAL;
+    }
+
+    /**
+     * @return array|integer[]
+     */
+    public static function getValues(): array
+    {
+        return [
+            self::SEVERITY_INFO,
+            self::SEVERITY_WARNING,
+            self::SEVERITY_ERROR,
+            self::SEVERITY_FATAL,
+        ];
+    }
+
+    /**
+     * @return integer
+     */
+    public function getValue(): int
+    {
+        return $this->value;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return (string) $this->value;
+    }
+}

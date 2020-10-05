@@ -1,0 +1,23 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Presentation\Alert;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Neos\Flow\Annotations as Flow;
+
+/**
+ * @Flow\Proxy(false)
+ */
+final class SeverityIsInvalid extends \DomainException
+{
+    /**
+     * @param integer $attemptedValue
+     * @return self
+     */
+    public static function becauseItMustBeOneOfTheDefinedConstants(int $attemptedValue): self
+    {
+        return new self('The given value "' . $attemptedValue . '" is no valid Severity, must be one of the defined constants. ', 1143235320);
+    }
+}

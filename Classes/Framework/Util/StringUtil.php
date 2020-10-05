@@ -57,4 +57,26 @@ final class StringUtil
 
         return $tail;
     }
+
+    /**
+     * @param string $string
+     * @return string
+     */
+    public static function camelCaseToSnakeCase(string $string): string
+    {
+        return preg_replace('/(?<!^)[A-Z]/', '_$0', $string);
+    }
+
+    /**
+     * @param string $string
+     * @return string
+     */
+    public static function kebabCase(string $string): string
+    {
+        $string = preg_replace('/\s+/', '-', ucwords($string));
+        $string = str_replace(['_', '.', '\\', '/'], '-', $string);
+        $string = preg_replace('~(?<=\\w)([A-Z])~', '-$1', $string);
+
+        return $string;
+    }
 }

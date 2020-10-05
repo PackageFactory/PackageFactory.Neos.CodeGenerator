@@ -1,0 +1,61 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Application\DataSource;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Neos\Flow\Annotations as Flow;
+use Neos\ContentRepository\Domain\Model\NodeInterface;
+use Neos\Flow\I18n\Translator;
+use Neos\Neos\Service\DataSource\AbstractDataSource;
+use Neos\Eel\ProtectedContextAwareInterface;
+use Vendor\Default\Presentation\Alert\Severity;
+
+/**
+ * @Flow\Scope("singleton")
+ */
+class SeverityProvider extends AbstractDataSource implements ProtectedContextAwareInterface
+{
+    /**
+     * @Flow\Inject
+     * @var Translator
+     */
+    protected $translator;
+
+    /**
+     * @var string
+     */
+    protected static $identifier = 'vendor-default-alert-severity';
+
+    /**
+     * @param null|NodeInterface $node
+     * @param array<mixed> $arguments
+     * @return array<mixed>
+     */
+    public function getData(NodeInterface $node = null, array $arguments = []): array
+    {
+        $result = [];
+        foreach (Severity::getValues() as $value) {
+            $result[$value]['label'] = $this->translator->translateById('severity.' . $value, [], null, null, 'Alert.Severity', 'Vendor.Default') ?? $value;
+        }
+        return $result;
+    }
+
+    /**
+     * @return array|integer[]
+     */
+    public function getValues(): array
+    {
+        return Severity::getValues();
+    }
+
+    /**
+     * @param string $methodName
+     * @return boolean
+     */
+    public function allowsCallOfMethod($methodName): bool
+    {
+        return true;
+    }
+}

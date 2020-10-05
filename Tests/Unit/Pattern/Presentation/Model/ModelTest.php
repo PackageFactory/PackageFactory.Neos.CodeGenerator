@@ -39,7 +39,7 @@ final class ModelTest extends PatternTestCase
      */
     public function createsValueObjectFactoryAndInterfaceInDefaultPackage(): void
     {
-        $query = Query::fromArray([
+        $query = Query::fromArrayAtSpecificPointInTime([
             'name' => 'Button/Button',
             'props' => [
                 'type' => 'ButtonType',
@@ -47,7 +47,7 @@ final class ModelTest extends PatternTestCase
                 'label' => 'string',
                 'horizontalAlignment' => '?Alignment/HorizontalAlignment'
             ]
-        ]);
+        ], new \DateTimeImmutable('2006-03-24 22:22:00', new \DateTimeZone('Europe/Berlin')));
 
         $this->modelGenerator->generate($query);
 

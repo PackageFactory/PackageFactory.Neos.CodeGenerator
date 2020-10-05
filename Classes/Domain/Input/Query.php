@@ -19,11 +19,17 @@ final class Query
     private $data;
 
     /**
+     * @var \DateTimeImmutable
+     */
+    private $dateTime;
+
+    /**
      * @param array<mixed> $data
      */
-    private function __construct(array $data)
+    private function __construct(array $data, \DateTimeImmutable $dateTime)
     {
         $this->data = $data;
+        $this->dateTime = $dateTime;
     }
 
     /**
@@ -32,7 +38,27 @@ final class Query
      */
     public static function fromArray(array $array): self
     {
-        return new self($array);
+        return new self($array, new \DateTimeImmutable());
+    }
+
+    /**
+     * @param array<mixed> $array
+     * @param \DateTimeImmutable $dateTime
+     * @return self
+     */
+    public static function fromArrayAtSpecificPointInTime(array $array, \DateTimeImmutable $dateTime): self
+    {
+        return new self($array, $dateTime);
+    }
+
+
+
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function now(): \DateTimeImmutable
+    {
+        return $this->dateTime;
     }
 
     /**

@@ -161,4 +161,16 @@ final class Required
             throw new \InvalidArgumentException('"' . $this->name . '" was expected to be list but was ' . gettype($this->value) . '.');
         }
     }
+
+    /**
+     * @return array<mixed>
+     */
+    public function array(): array
+    {
+        if (is_array($this->value)) {
+            return $this->value;
+        } else {
+            throw new \InvalidArgumentException('"' . $this->name . '" was expected to be array but was ' . gettype($this->value) . '.');
+        }
+    }
 }

@@ -41,6 +41,14 @@ final class Presentation implements TypeDescriptionTemplateInterface
     }
 
     /**
+     * @return DistributionPackageInterface
+     */
+    public function getDistributionPackage(): DistributionPackageInterface
+    {
+        return $this->distributionPackage;
+    }
+
+    /**
      * @return PhpNamespace
      */
     public function getPhpNamespace(): PhpNamespace

@@ -1,0 +1,61 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Application\DataSource;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Neos\Flow\Annotations as Flow;
+use Neos\ContentRepository\Domain\Model\NodeInterface;
+use Neos\Flow\I18n\Translator;
+use Neos\Neos\Service\DataSource\AbstractDataSource;
+use Neos\Eel\ProtectedContextAwareInterface;
+use Vendor\Default\Presentation\Button\ButtonType;
+
+/**
+ * @Flow\Scope("singleton")
+ */
+class ButtonTypeProvider extends AbstractDataSource implements ProtectedContextAwareInterface
+{
+    /**
+     * @Flow\Inject
+     * @var Translator
+     */
+    protected $translator;
+
+    /**
+     * @var string
+     */
+    protected static $identifier = 'vendor-default-button-button-type';
+
+    /**
+     * @param null|NodeInterface $node
+     * @param array<mixed> $arguments
+     * @return array<mixed>
+     */
+    public function getData(NodeInterface $node = null, array $arguments = []): array
+    {
+        $result = [];
+        foreach (ButtonType::getValues() as $value) {
+            $result[$value]['label'] = $this->translator->translateById('buttonType.' . $value, [], null, null, 'Button.ButtonType', 'Vendor.Default') ?? $value;
+        }
+        return $result;
+    }
+
+    /**
+     * @return array|string[]
+     */
+    public function getValues(): array
+    {
+        return ButtonType::getValues();
+    }
+
+    /**
+     * @param string $methodName
+     * @return boolean
+     */
+    public function allowsCallOfMethod($methodName): bool
+    {
+        return true;
+    }
+}

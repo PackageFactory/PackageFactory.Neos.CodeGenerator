@@ -39,13 +39,13 @@ final class ValueTest extends PatternTestCase
      */
     public function createsValueObjectInDefaultPackage(): void
     {
-        $query = Query::fromArray([
+        $query = Query::fromArrayAtSpecificPointInTime([
             'name' => 'Alignment/Alignment',
             'props' => [
                 'horizontal' => 'HorizontalAlignment',
                 'vertical' => 'VerticalAlignment'
             ]
-        ]);
+        ], new \DateTimeImmutable('2006-03-24 22:22:00', new \DateTimeZone('Europe/Berlin')));
 
         $this->valueGenerator->generate($query);
 

@@ -39,14 +39,14 @@ final class ValueTest extends PatternTestCase
      */
     public function createsValueObjectInDefaultPackage(): void
     {
-        $query = Query::fromArray([
+        $query = Query::fromArrayAtSpecificPointInTime([
             'name' => 'Order/PostalAddress',
             'properties' => [
                 'streetAddress' => 'string',
                 'addressLocality' => 'string',
                 'postalCode' => 'PostalCode',
             ]
-        ]);
+        ], new \DateTimeImmutable('2006-03-24 22:22:00', new \DateTimeZone('Europe/Berlin')));
 
         $this->valueGenerator->generate($query);
 
@@ -59,13 +59,13 @@ final class ValueTest extends PatternTestCase
      */
     public function createsValueObjectInDefaultPackageWithDependenciesInDomain(): void
     {
-        $query = Query::fromArray([
+        $query = Query::fromArrayAtSpecificPointInTime([
             'name' => 'Cinema/Movie',
             'properties' => [
                 'actors' => 'Actor[]',
                 'musicBy' => 'Music/MusicGroup'
             ]
-        ]);
+        ], new \DateTimeImmutable('2006-03-24 22:22:00', new \DateTimeZone('Europe/Berlin')));
 
         $this->valueGenerator->generate($query);
 
@@ -78,14 +78,14 @@ final class ValueTest extends PatternTestCase
      */
     public function createsValueObjectInDefaultPackageWithDependenciesInOtherPackage(): void
     {
-        $query = Query::fromArray([
+        $query = Query::fromArrayAtSpecificPointInTime([
             'name' => 'Archive/Image/Photograph',
             'properties' => [
                 'uri' => '/Vendor/Shared/Domain/Uri',
                 'abstract' => 'string',
                 'author' => '/Vendor/Shared/Domain/Person'
             ]
-        ]);
+        ], new \DateTimeImmutable('2006-03-24 22:22:00', new \DateTimeZone('Europe/Berlin')));
 
         $this->valueGenerator->generate($query);
 

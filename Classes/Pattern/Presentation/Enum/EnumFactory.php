@@ -37,13 +37,25 @@ final class EnumFactory
         $distributionPackage = $this->distributionPackageResolver->resolve($query->optional('package')->string());
         $presentation = Presentation::fromDistributionPackage($distributionPackage);
         $name = $query->required('name')->type()->asString();
+        $timestamp = $query->now()->getTimestamp();
+        $type = EnumType::fromString($query->required('type')->type()->asString());
         $signature = $this->signatureFactory->forDistributionPackage($distributionPackage);
 
         $values = [];
-        foreach ($query->required('values')->list() as $value) {
-            $values[] = $value->string();
+        foreach ($query->required('values')->array() as $key => $value) {
+            if ($type->isInteger()) {
+                $values[] = new EnumValue(
+                    is_string($key) ? $key : (string) $value,
+                    (string) ($key + 1)
+                );
+            } elseif ($type->isString()) {
+                $values[] = new EnumValue(
+                    is_string($key) ? $key : (string) $value,
+                    (string) $value
+                );
+            }
         }
 
-        return new Enum($presentation, $name, $signature, $values);
+        return new Enum($presentation, $name, $timestamp, $type, $signature, $values);
     }
 }

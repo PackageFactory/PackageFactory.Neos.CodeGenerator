@@ -42,7 +42,9 @@ final class EnumGenerator implements GeneratorInterface
     {
         $enum = $this->enumFactory->fromQuery($query);
 
-        $this->fileWriter->write($enum->asPhpClassFile());
+        $this->fileWriter->write($enum->asPhpClassFileForValueObject());
+        $this->fileWriter->write($enum->asPhpClassFileForException());
+        $this->fileWriter->write($enum->asPhpClassFileForDataSource());
         $this->phpClassRepository->add($enum);
     }
 }

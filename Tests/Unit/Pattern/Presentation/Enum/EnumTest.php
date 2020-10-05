@@ -35,18 +35,43 @@ final class EnumTest extends PatternTestCase
 
     /**
      * @test
+     * @group isolated
      * @return void
      */
-    public function createsEnumInDefaultPackage(): void
+    public function createsStringEnumInDefaultPackage(): void
     {
-        $query = Query::fromArray([
+        $query = Query::fromArrayAtSpecificPointInTime([
             'name' => 'Button/ButtonType',
+            'type' => 'string',
             'values' => ['link', 'button', 'submit']
-        ]);
+        ], new \DateTimeImmutable('2006-03-24 22:22:00', new \DateTimeZone('Europe/Berlin')));
 
         $this->enumGenerator->generate($query);
 
         $this->assertFileWasWritten('Vendor.Default/Classes/Presentation/Button/ButtonType.php');
+        $this->assertFileWasWritten('Vendor.Default/Classes/Presentation/Button/ButtonTypeIsInvalid.php');
+        $this->assertFileWasWritten('Vendor.Default/Classes/Application/DataSource/ButtonTypeProvider.php');
         $this->assertPhpClassWasRegistered('\\Vendor\\Default\\Presentation\\Button\\ButtonType');
+    }
+
+    /**
+     * @test
+     * @group isolated
+     * @return void
+     */
+    public function createsIntegerEnumInDefaultPackage(): void
+    {
+        $query = Query::fromArrayAtSpecificPointInTime([
+            'name' => 'Alert/Severity',
+            'type' => 'int',
+            'values' => ['info', 'warning', 'error', 'fatal']
+        ], new \DateTimeImmutable('2006-03-24 22:22:00', new \DateTimeZone('Europe/Berlin')));
+
+        $this->enumGenerator->generate($query);
+
+        $this->assertFileWasWritten('Vendor.Default/Classes/Presentation/Alert/Severity.php');
+        $this->assertFileWasWritten('Vendor.Default/Classes/Presentation/Alert/SeverityIsInvalid.php');
+        $this->assertFileWasWritten('Vendor.Default/Classes/Application/DataSource/SeverityProvider.php');
+        $this->assertPhpClassWasRegistered('\\Vendor\\Default\\Presentation\\Alert\\Severity');
     }
 }

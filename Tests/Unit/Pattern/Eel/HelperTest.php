@@ -38,7 +38,9 @@ final class HelperTest extends PatternTestCase
      */
     public function createsEelHelperInDefaultPackage(): void
     {
-        $query = Query::fromArray(['name' => 'Essentials']);
+        $query = Query::fromArrayAtSpecificPointInTime([
+            'name' => 'Essentials'
+        ], new \DateTimeImmutable('2006-03-24 22:22:00', new \DateTimeZone('Europe/Berlin')));
 
         $this->helperGenerator->generate($query);
 

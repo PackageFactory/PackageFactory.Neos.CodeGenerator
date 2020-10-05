@@ -179,4 +179,18 @@ final class Optional
             throw new \InvalidArgumentException('"' . $this->name . '" was expected to be list or null but was ' . gettype($this->value) . '.');
         }
     }
+
+    /**
+     * @return array<mixed>
+     */
+    public function array(): array
+    {
+        if (is_array($this->value)) {
+            return $this->value;
+        } elseif ($this->value === null) {
+            return [];
+        } else {
+            throw new \InvalidArgumentException('"' . $this->name . '" was expected to be array but was ' . gettype($this->value) . '.');
+        }
+    }
 }
