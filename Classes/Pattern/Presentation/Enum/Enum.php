@@ -9,7 +9,6 @@ use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\Import;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFileBuilder;
 use PackageFactory\Neos\CodeGenerator\Framework\Util\StringUtil;
@@ -18,7 +17,7 @@ use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Presentation;
 /**
  * @Flow\Proxy(false)
  */
-final class Enum implements PhpClassInterface
+final class Enum
 {
     /**
      * @var Presentation
@@ -75,14 +74,6 @@ final class Enum implements PhpClassInterface
     }
 
     /**
-     * @return PhpClassName
-     */
-    public function getClassName(): PhpClassName
-    {
-        return $this->presentation->getPhpNamespace()->append($this->name)->asClassName();
-    }
-
-    /**
      * @return EnumValue[]
      */
     public function getValues(): array
@@ -91,12 +82,20 @@ final class Enum implements PhpClassInterface
     }
 
     /**
+     * @return PhpClassName
+     */
+    public function getPhpClassNameForValueObject(): PhpClassName
+    {
+        return $this->presentation->getPhpNamespace()->append($this->name)->asClassName();
+    }
+
+    /**
      * @return PhpFile
      */
     public function asPhpClassFileForValueObject(): PhpFile
     {
         $builder = new PhpFileBuilder();
-        $className = $this->getClassName();
+        $className = $this->getPhpClassNameForValueObject();
 
         $builder->setPath($this->presentation->getPhpFilePathForClassName($className));
         $builder->setNamespaceFromClassName($className);
@@ -198,15 +197,22 @@ final class Enum implements PhpClassInterface
     }
 
     /**
+     * @return PhpClassName
+     */
+    public function getPhpClassNameForException(): PhpClassName
+    {
+        return $this->getPhpClassNameForValueObject()->append('IsInvalid');
+    }
+
+    /**
      * @return PhpFile
      */
     public function asPhpClassFileForException(): PhpFile
     {
         $builder = new PhpFileBuilder();
-        $className = $this->getClassName()->append('IsInvalid');
 
-        $builder->setPath($this->presentation->getPhpFilePathForClassName($className));
-        $builder->setNamespaceFromClassName($className);
+        $builder->setPath($this->presentation->getPhpFilePathForClassName($this->getPhpClassNameForException()));
+        $builder->setNamespaceFromClassName($this->getPhpClassNameForException());
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()
             ->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
@@ -217,7 +223,7 @@ final class Enum implements PhpClassInterface
         $code[] = '/**';
         $code[] = ' * @Flow\Proxy(false)';
         $code[] = ' */';
-        $code[] = 'final class ' . $className->asDeclarationNameString() . ' extends \DomainException';
+        $code[] = 'final class ' . $this->getPhpClassNameForException()->asDeclarationNameString() . ' extends \DomainException';
         $code[] = '{';
         $code[] = '    /**';
         $code[] = '     * @param ' . $this->type->asPhpDocType() . ' $attemptedValue';
@@ -225,7 +231,7 @@ final class Enum implements PhpClassInterface
         $code[] = '     */';
         $code[] = '    public static function becauseItMustBeOneOfTheDefinedConstants(' . $this->type->asPhpTypeHint() . ' $attemptedValue): self';
         $code[] = '    {';
-        $code[] = '        return new self(\'The given value "\' . $attemptedValue . \'" is no valid ' . $this->getClassName()->asDeclarationNameString() . ', must be one of the defined constants. \', ' . $this->timestamp . ');';
+        $code[] = '        return new self(\'The given value "\' . $attemptedValue . \'" is no valid ' . $this->getPhpClassNameForValueObject()->asDeclarationNameString() . ', must be one of the defined constants. \', ' . $this->timestamp . ');';
         $code[] = '    }';
         $code[] = '}';
         $code[] = '';
@@ -244,16 +250,16 @@ final class Enum implements PhpClassInterface
 
         $package = $this->presentation->getDistributionPackage();
         $packageKey = $package->getPackageKey();
-        $enumName = $this->getClassName()->asDeclarationNameString();
+        $enumName = $this->getPhpClassNameForValueObject()->asDeclarationNameString();
 
         $namespace = $packageKey->asPhpNamespace()->append('Application\DataSource');
         $className = $namespace->append($enumName)->asClassName()->append('Provider');
 
-        $dataSourceIdentifier = $packageKey->asString() . '-' . $this->getClassName()->asNamespace()->truncateAscendant($this->presentation->getPhpNamespace())->asString();
+        $dataSourceIdentifier = $packageKey->asString() . '-' . $this->getPhpClassNameForValueObject()->asNamespace()->truncateAscendant($this->presentation->getPhpNamespace())->asString();
         $dataSourceIdentifier = StringUtil::kebabCase($dataSourceIdentifier);
         $dataSourceIdentifier = strtolower($dataSourceIdentifier);
 
-        $translationSourceName = $this->getClassName()->asNamespace()->truncateAscendant($this->presentation->getPhpNamespace())->asString();
+        $translationSourceName = $this->getPhpClassNameForValueObject()->asNamespace()->truncateAscendant($this->presentation->getPhpNamespace())->asString();
         $translationSourceName = str_replace('\\', '.', $translationSourceName);
 
         $builder->setPath($package->getPhpFilePathForClassName($className));
@@ -266,7 +272,7 @@ final class Enum implements PhpClassInterface
         $importBuilder->addImport(new Import('Neos\\Flow\\I18n\\Translator', null));
         $importBuilder->addImport(new Import('Neos\\Neos\\Service\\DataSource\\AbstractDataSource', null));
         $importBuilder->addImport(new Import('Neos\\Eel\\ProtectedContextAwareInterface', null));
-        $importBuilder->addImport(new Import($this->getClassName()->asNamespace()->asString(), null));
+        $importBuilder->addImport(new Import($this->getPhpClassNameForValueObject()->asNamespace()->asString(), null));
 
         $code = [];
 

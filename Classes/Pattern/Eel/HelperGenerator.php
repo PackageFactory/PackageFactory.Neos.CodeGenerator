@@ -17,6 +17,12 @@ final class HelperGenerator implements GeneratorInterface
 {
     /**
      * @Flow\Inject
+     * @var HelperRepository
+     */
+    protected $helperRepository;
+
+    /**
+     * @Flow\Inject
      * @var HelperFactory
      */
     protected $helperFactory;
@@ -37,5 +43,7 @@ final class HelperGenerator implements GeneratorInterface
 
         $this->fileWriter->write($helper->asPhpClassFile());
         $this->fileWriter->write($helper->asAppendedSettingForFusionDefaultContext());
+
+        $this->helperRepository->add($helper);
     }
 }

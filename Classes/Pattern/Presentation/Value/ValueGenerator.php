@@ -23,6 +23,12 @@ final class ValueGenerator implements GeneratorInterface
 
     /**
      * @Flow\Inject
+     * @var ValueRepository
+     */
+    protected $valueRepository;
+
+    /**
+     * @Flow\Inject
      * @var FileWriterInterface
      */
     protected $fileWriter;
@@ -36,5 +42,6 @@ final class ValueGenerator implements GeneratorInterface
         $value = $this->valueFactory->fromQuery($query);
 
         $this->fileWriter->write($value->asPhpClassFile());
+        $this->valueRepository->add($value);
     }
 }

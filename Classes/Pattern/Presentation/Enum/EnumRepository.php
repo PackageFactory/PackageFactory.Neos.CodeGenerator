@@ -1,41 +1,41 @@
 <?php declare(strict_types=1);
-namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass;
+namespace PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Enum;
 
 /*
  * This file is part of the PackageFactory.Neos.CodeGenerator package
  */
 
 use Neos\Flow\Annotations as Flow;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 
 /**
  * @Flow\Scope("singleton")
  */
-final class PhpClassRepository implements PhpClassRepositoryInterface
+final class EnumRepository
 {
     /**
-     * @var array<string, PhpClassInterface>
+     * @var array<string,Enum>
      */
     private $storage;
 
     /**
      * @param PhpClassName $className
-     * @return null|PhpClassInterface
+     * @return null|Enum
      */
-    public function findOneByClassName(PhpClassName $className): ?PhpClassInterface
+    public function findOneByPhpClassName(PhpClassName $className): ?Enum
     {
         if (isset($this->storage[$className->asFullyQualifiedNameString()])) {
             return $this->storage[$className->asFullyQualifiedNameString()];
         }
-
         return null;
     }
 
     /**
-     * @param PhpClassInterface $phpClass
+     * @param Enum $value
      * @return void
      */
-    public function add(PhpClassInterface $phpClass): void
+    public function add(Enum $enum): void
     {
-        $this->storage[$phpClass->getClassName()->asFullyQualifiedNameString()] = $phpClass;
+        $this->storage[$enum->getPhpClassNameForValueObject()->asFullyQualifiedNameString()] = $enum;
     }
 }

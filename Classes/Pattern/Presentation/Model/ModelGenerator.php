@@ -16,6 +16,11 @@ use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 final class ModelGenerator implements GeneratorInterface
 {
     /**
+     * @var ModelRepository
+     */
+    private $modelRepository;
+
+    /**
      * @Flow\Inject
      * @var ModelFactory
      */
@@ -38,5 +43,7 @@ final class ModelGenerator implements GeneratorInterface
         $this->fileWriter->write($model->asPhpClassFileForValueObject());
         $this->fileWriter->write($model->asPhpInterfaceFile());
         $this->fileWriter->write($model->asPhpClassFileForFactory());
+
+        $this->modelRepository->add($model);
     }
 }

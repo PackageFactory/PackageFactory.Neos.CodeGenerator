@@ -18,15 +18,15 @@ final class EnumGenerator implements GeneratorInterface
 {
     /**
      * @Flow\Inject
-     * @var EnumFactory
+     * @var EnumRepository
      */
-    protected $enumFactory;
+    protected $enumRepository;
 
     /**
      * @Flow\Inject
-     * @var PhpClassRepositoryInterface
+     * @var EnumFactory
      */
-    protected $phpClassRepository;
+    protected $enumFactory;
 
     /**
      * @Flow\Inject
@@ -45,6 +45,7 @@ final class EnumGenerator implements GeneratorInterface
         $this->fileWriter->write($enum->asPhpClassFileForValueObject());
         $this->fileWriter->write($enum->asPhpClassFileForException());
         $this->fileWriter->write($enum->asPhpClassFileForDataSource());
-        $this->phpClassRepository->add($enum);
+
+        $this->enumRepository->add($enum);
     }
 }

@@ -3,7 +3,6 @@ namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern;
 
 use Neos\Flow\Tests\UnitTestCase;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureFactoryInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassRepositoryInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property\PropertyFactory;
@@ -45,11 +44,6 @@ abstract class PatternTestCase extends UnitTestCase
      * @var PropertyFactory
      */
     protected $propertyFactory;
-
-    /**
-     * @var PhpClassRepositoryInterface
-     */
-    protected $phpClassRepository;
 
     /**
      * @return void
@@ -124,42 +118,6 @@ abstract class PatternTestCase extends UnitTestCase
         $this->typeFactory = new TypeFactory();
         $this->propertyFactory = new PropertyFactory();
         $this->inject($this->propertyFactory, 'typeFactory', $this->typeFactory);
-
-        $this->phpClassRepository = new class implements PhpClassRepositoryInterface {
-            /** @var PhpClassInterface[] */
-            private $classes = [];
-
-            /**
-             * @param PhpClassName $className
-             * @return null|PhpClassInterface
-             */
-            public function findOneByClassName(PhpClassName $className): ?PhpClassInterface
-            {
-                if (isset($this->classes[$className->asFullyQualifiedNameString()])) {
-                    return $this->classes[$className->asFullyQualifiedNameString()];
-                }
-
-                return null;
-            }
-
-            /**
-             * @param PhpClassInterface $phpClass
-             * @return void
-             */
-            public function add(PhpClassInterface $phpClass): void
-            {
-                $this->classes[$phpClass->getClassName()->asFullyQualifiedNameString()] = $phpClass;
-            }
-
-            /**
-             * @param string $className
-             * @return boolean
-             */
-            public function has(string $className): bool
-            {
-                return isset($this->classes[$className]);
-            }
-        };
     }
 
     /**
@@ -173,17 +131,5 @@ abstract class PatternTestCase extends UnitTestCase
 
         $this->assertTrue($fileWriter->has($filePath), 'File "' . $filePath . '" was not written.');
         $this->assertMatchesSnapshot($fileWriter->get($filePath)->getContents());
-    }
-
-    /**
-     * @param string $className
-     * @return void
-     */
-    protected function assertPhpClassWasRegistered(string $className): void
-    {
-        /** @var mixed $phpClassRepository */
-        $phpClassRepository = $this->phpClassRepository;
-
-        $this->assertTrue($phpClassRepository->has($className), 'Class "' . $className . '" was not registered.');
     }
 }

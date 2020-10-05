@@ -9,6 +9,7 @@ use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\Import;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\ImportCollectionInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFileBuilder;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property\PropertyInterface;
@@ -66,15 +67,22 @@ final class Value
     }
 
     /**
+     * @return PhpClassName
+     */
+    public function getPhpClassName(): PhpClassName
+    {
+        return $this->presentation->getPhpNamespace()->append($this->name)->asClassName();
+    }
+
+    /**
      * @return PhpFile
      */
     public function asPhpClassFile(): PhpFile
     {
         $builder = new PhpFileBuilder();
-        $className = $this->presentation->getPhpNamespace()->append($this->name)->asClassName();
 
-        $builder->setPath($this->presentation->getPhpFilePathForClassName($className));
-        $builder->setNamespaceFromClassName($className);
+        $builder->setPath($this->presentation->getPhpFilePathForClassName($this->getPhpClassName()));
+        $builder->setNamespaceFromClassName($this->getPhpClassName());
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
         $builder->getImportCollectionBuilder()->addImportCollection($this->imports);
@@ -84,7 +92,7 @@ final class Value
         $code[] = '/**';
         $code[] = ' * @Flow\Proxy(false)';
         $code[] = ' */';
-        $code[] = 'final class ' . $className->asDeclarationNameString();
+        $code[] = 'final class ' . $this->getPhpClassName()->asDeclarationNameString();
         $code[] = '{';
 
         if ($this->properties) {

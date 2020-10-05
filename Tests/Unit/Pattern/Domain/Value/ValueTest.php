@@ -1,9 +1,12 @@
 <?php declare(strict_types=1);
 namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\Domain\Value;
 
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
+use PackageFactory\Neos\CodeGenerator\Pattern\Domain\Value\Value;
 use PackageFactory\Neos\CodeGenerator\Pattern\Domain\Value\ValueFactory;
 use PackageFactory\Neos\CodeGenerator\Pattern\Domain\Value\ValueGenerator;
+use PackageFactory\Neos\CodeGenerator\Pattern\Domain\Value\ValueRepository;
 use PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\PatternTestCase;
 
 final class ValueTest extends PatternTestCase
@@ -18,10 +21,16 @@ final class ValueTest extends PatternTestCase
      */
     private $valueFactory;
 
+    /**
+     * @var ValueRepository
+     */
+    private $valueRepository;
+
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->valueRepository = new ValueRepository();
         $this->valueFactory = new ValueFactory();
         $this->valueGenerator = new ValueGenerator();
 
@@ -29,6 +38,7 @@ final class ValueTest extends PatternTestCase
         $this->inject($this->valueFactory, 'signatureFactory', $this->signatureFactory);
         $this->inject($this->valueFactory, 'propertyFactory', $this->propertyFactory);
 
+        $this->inject($this->valueGenerator, 'valueRepository', $this->valueRepository);
         $this->inject($this->valueGenerator, 'valueFactory', $this->valueFactory);
         $this->inject($this->valueGenerator, 'fileWriter', $this->fileWriter);
     }
@@ -51,6 +61,13 @@ final class ValueTest extends PatternTestCase
         $this->valueGenerator->generate($query);
 
         $this->assertFileWasWritten('Vendor.Default/Classes/Domain/Order/PostalAddress.php');
+
+        $value = $this->valueRepository->findOneByPhpClassName(
+            PhpClassName::fromString('\\Vendor\\Default\\Domain\\Order\\PostalAddress')
+        );
+
+        $this->assertNotNull($value);
+        $this->assertInstanceOf(Value::class, $value);
     }
 
     /**
@@ -70,6 +87,14 @@ final class ValueTest extends PatternTestCase
         $this->valueGenerator->generate($query);
 
         $this->assertFileWasWritten('Vendor.Default/Classes/Domain/Cinema/Movie.php');
+
+
+        $value = $this->valueRepository->findOneByPhpClassName(
+            PhpClassName::fromString('\\Vendor\\Default\\Domain\\Cinema\\Movie')
+        );
+
+        $this->assertNotNull($value);
+        $this->assertInstanceOf(Value::class, $value);
     }
 
     /**
@@ -90,5 +115,13 @@ final class ValueTest extends PatternTestCase
         $this->valueGenerator->generate($query);
 
         $this->assertFileWasWritten('Vendor.Default/Classes/Domain/Archive/Image/Photograph.php');
+
+
+        $value = $this->valueRepository->findOneByPhpClassName(
+            PhpClassName::fromString('\\Vendor\\Default\\Domain\\Archive\\Image\\Photograph')
+        );
+
+        $this->assertNotNull($value);
+        $this->assertInstanceOf(Value::class, $value);
     }
 }

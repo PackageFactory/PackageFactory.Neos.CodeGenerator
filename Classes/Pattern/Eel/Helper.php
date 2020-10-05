@@ -40,11 +40,6 @@ final class Helper
     private $defaultContextIdentifier;
 
     /**
-     * @var PhpClassName
-     */
-    private $className;
-
-    /**
      * @param DistributionPackageInterface $distributionPackage
      * @param string $name
      * @param SignatureInterface $signature
@@ -60,8 +55,14 @@ final class Helper
         $this->name = $name;
         $this->signature = $signature;
         $this->defaultContextIdentifier = $defaultContextIdentifier;
+    }
 
-        $this->className = $this->distributionPackage->getPackageKey()->asPhpNamespace()
+    /**
+     * @return PhpClassName
+     */
+    public function getPhpClassName(): PhpClassName
+    {
+        return $this->distributionPackage->getPackageKey()->asPhpNamespace()
             ->append('Application\\Eel')
             ->append($this->name . 'Helper')
             ->asClassName();
@@ -74,8 +75,8 @@ final class Helper
     {
         $builder = new PhpFileBuilder();
 
-        $builder->setPath($this->distributionPackage->getPhpFilePathForClassName($this->className));
-        $builder->setNamespaceFromClassName($this->className);
+        $builder->setPath($this->distributionPackage->getPhpFilePathForClassName($this->getPhpClassName()));
+        $builder->setNamespaceFromClassName($this->getPhpClassName());
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
         $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Eel\\ProtectedContextAwareInterface', null));
@@ -85,7 +86,7 @@ final class Helper
         $code[] = '/**';
         $code[] = ' * @Flow\Scope("singleton")';
         $code[] = ' */';
-        $code[] = 'final class ' . $this->className->asDeclarationNameString() . ' implements ProtectedContextAwareInterface';
+        $code[] = 'final class ' . $this->getPhpClassName()->asDeclarationNameString() . ' implements ProtectedContextAwareInterface';
         $code[] = '{';
         $code[] = '    /**';
         $code[] = '     * All methods are considered safe';
@@ -111,7 +112,7 @@ final class Helper
         $settingsFile = YamlFile::fromConfigurationInDistributionPackage($this->distributionPackage, 'Settings.Eel.Helpers.yaml');
 
         $settings = $settingsFile->getData();
-        $settings['Neos']['Fusion']['defaultContext'][$this->defaultContextIdentifier] = $this->className->asNamespace()->asString();
+        $settings['Neos']['Fusion']['defaultContext'][$this->defaultContextIdentifier] = $this->getPhpClassName()->asNamespace()->asString();
 
         return $settingsFile->withData($settings);
     }

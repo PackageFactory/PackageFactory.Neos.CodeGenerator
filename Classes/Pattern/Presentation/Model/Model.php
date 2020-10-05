@@ -9,6 +9,7 @@ use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\Import;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import\ImportCollectionInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpFileBuilder;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property\PropertyInterface;
@@ -66,15 +67,22 @@ final class Model
     }
 
     /**
+     * @return PhpClassName
+     */
+    public function getPhpClassNameForValueObject(): PhpClassName
+    {
+        return $this->presentation->getPhpNamespace()->append($this->name)->asClassName();
+    }
+
+    /**
      * @return PhpFile
      */
     public function asPhpClassFileForValueObject(): PhpFile
     {
         $builder = new PhpFileBuilder();
-        $className = $this->presentation->getPhpNamespace()->append($this->name)->asClassName();
 
-        $builder->setPath($this->presentation->getPhpFilePathForClassName($className));
-        $builder->setNamespaceFromClassName($className);
+        $builder->setPath($this->presentation->getPhpFilePathForClassName($this->getPhpClassNameForValueObject()));
+        $builder->setNamespaceFromClassName($this->getPhpClassNameForValueObject());
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
         $builder->getImportCollectionBuilder()->addImportCollection($this->imports);
@@ -84,7 +92,7 @@ final class Model
         $code[] = '/**';
         $code[] = ' * @Flow\Proxy(false)';
         $code[] = ' */';
-        $code[] = 'final class ' . $className->asDeclarationNameString();
+        $code[] = 'final class ' . $this->getPhpClassNameForValueObject()->asDeclarationNameString();
         $code[] = '{';
 
         if ($this->properties) {
@@ -127,21 +135,28 @@ final class Model
     }
 
     /**
+     * @return PhpClassName
+     */
+    public function getPhpInterfaceName(): PhpClassName
+    {
+        return $this->presentation->getPhpNamespace()->append($this->name)->asClassName()->append('Interface');
+    }
+
+    /**
      * @return PhpFile
      */
     public function asPhpInterfaceFile(): PhpFile
     {
         $builder = new PhpFileBuilder();
-        $interfaceName = $this->presentation->getPhpNamespace()->append($this->name)->asClassName()->append('Interface');
 
-        $builder->setPath($this->presentation->getPhpFilePathForClassName($interfaceName));
-        $builder->setNamespaceFromClassName($interfaceName);
+        $builder->setPath($this->presentation->getPhpFilePathForClassName($this->getPhpInterfaceName()));
+        $builder->setNamespaceFromClassName($this->getPhpInterfaceName());
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()->addImportCollection($this->imports);
 
         $code = [];
 
-        $code[] = 'interface ' . $interfaceName->asDeclarationNameString();
+        $code[] = 'interface ' . $this->getPhpInterfaceName()->asDeclarationNameString();
         $code[] = '{';
         if ($this->properties) {
             $code[] = join(PHP_EOL . PHP_EOL, array_map(function (PropertyInterface $property) {
@@ -157,15 +172,22 @@ final class Model
     }
 
     /**
+     * @return PhpClassName
+     */
+    public function getPhpClassNameForFactory(): PhpClassName
+    {
+        return $this->presentation->getPhpNamespace()->append($this->name)->asClassName()->append('Factory');
+    }
+
+    /**
      * @return PhpFile
      */
     public function asPhpClassFileForFactory(): PhpFile
     {
         $builder = new PhpFileBuilder();
-        $className = $this->presentation->getPhpNamespace()->append($this->name)->asClassName()->append('Factory');
 
-        $builder->setPath($this->presentation->getPhpFilePathForClassName($className));
-        $builder->setNamespaceFromClassName($className);
+        $builder->setPath($this->presentation->getPhpFilePathForClassName($this->getPhpClassNameForFactory()));
+        $builder->setNamespaceFromClassName($this->getPhpClassNameForFactory());
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
         $builder->getImportCollectionBuilder()->addImport(new Import('PackageFactory\\AtomicFusion\\Presentation\\Fusion\\AbstractComponentPresentationObjectFactory', null));
@@ -175,7 +197,7 @@ final class Model
         $code[] = '/**';
         $code[] = ' * @Flow\Scope("singleton")';
         $code[] = ' */';
-        $code[] = 'final class ' . $className->asDeclarationNameString() . ' extends AbstractComponentPresentationObjectFactory';
+        $code[] = 'final class ' . $this->getPhpClassNameForFactory()->asDeclarationNameString() . ' extends AbstractComponentPresentationObjectFactory';
         $code[] = '{';
         $code[] = '}';
         $code[] = '';

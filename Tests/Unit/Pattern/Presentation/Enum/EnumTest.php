@@ -1,9 +1,12 @@
 <?php declare(strict_types=1);
 namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\Presentation\Enum;
 
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
+use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Enum\Enum;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Enum\EnumFactory;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Enum\EnumGenerator;
+use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Enum\EnumRepository;
 use PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\PatternTestCase;
 
 final class EnumTest extends PatternTestCase
@@ -18,24 +21,29 @@ final class EnumTest extends PatternTestCase
      */
     private $enumFactory;
 
+    /**
+     * @var EnumRepository
+     */
+    private $enumRepository;
+
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->enumRepository = new EnumRepository();
         $this->enumFactory = new EnumFactory();
         $this->enumGenerator = new EnumGenerator();
 
         $this->inject($this->enumFactory, 'distributionPackageResolver', $this->distributionPackageResolver);
         $this->inject($this->enumFactory, 'signatureFactory', $this->signatureFactory);
 
-        $this->inject($this->enumGenerator, 'phpClassRepository', $this->phpClassRepository);
+        $this->inject($this->enumGenerator, 'enumRepository', $this->enumRepository);
         $this->inject($this->enumGenerator, 'enumFactory', $this->enumFactory);
         $this->inject($this->enumGenerator, 'fileWriter', $this->fileWriter);
     }
 
     /**
      * @test
-     * @group isolated
      * @return void
      */
     public function createsStringEnumInDefaultPackage(): void
@@ -51,12 +59,17 @@ final class EnumTest extends PatternTestCase
         $this->assertFileWasWritten('Vendor.Default/Classes/Presentation/Button/ButtonType.php');
         $this->assertFileWasWritten('Vendor.Default/Classes/Presentation/Button/ButtonTypeIsInvalid.php');
         $this->assertFileWasWritten('Vendor.Default/Classes/Application/DataSource/ButtonTypeProvider.php');
-        $this->assertPhpClassWasRegistered('\\Vendor\\Default\\Presentation\\Button\\ButtonType');
+
+        $enum = $this->enumRepository->findOneByPhpClassName(
+            PhpClassName::fromString('\\Vendor\\Default\\Presentation\\Button\\ButtonType')
+        );
+
+        $this->assertNotNull($enum);
+        $this->assertInstanceOf(Enum::class, $enum);
     }
 
     /**
      * @test
-     * @group isolated
      * @return void
      */
     public function createsIntegerEnumInDefaultPackage(): void
@@ -72,6 +85,12 @@ final class EnumTest extends PatternTestCase
         $this->assertFileWasWritten('Vendor.Default/Classes/Presentation/Alert/Severity.php');
         $this->assertFileWasWritten('Vendor.Default/Classes/Presentation/Alert/SeverityIsInvalid.php');
         $this->assertFileWasWritten('Vendor.Default/Classes/Application/DataSource/SeverityProvider.php');
-        $this->assertPhpClassWasRegistered('\\Vendor\\Default\\Presentation\\Alert\\Severity');
+
+        $enum = $this->enumRepository->findOneByPhpClassName(
+            PhpClassName::fromString('\\Vendor\\Default\\Presentation\\Alert\\Severity')
+        );
+
+        $this->assertNotNull($enum);
+        $this->assertInstanceOf(Enum::class, $enum);
     }
 }

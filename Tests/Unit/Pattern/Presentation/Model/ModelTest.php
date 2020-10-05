@@ -1,9 +1,12 @@
 <?php declare(strict_types=1);
 namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\Presentation\Model;
 
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
+use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Model\Model;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Model\ModelFactory;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Model\ModelGenerator;
+use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Model\ModelRepository;
 use PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern\PatternTestCase;
 
 final class ModelTest extends PatternTestCase
@@ -18,10 +21,16 @@ final class ModelTest extends PatternTestCase
      */
     private $modelFactory;
 
+    /**
+     * @var ModelRepository
+     */
+    private $modelRepository;
+
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->modelRepository = new ModelRepository();
         $this->modelFactory = new ModelFactory();
         $this->modelGenerator = new ModelGenerator();
 
@@ -29,6 +38,7 @@ final class ModelTest extends PatternTestCase
         $this->inject($this->modelFactory, 'signatureFactory', $this->signatureFactory);
         $this->inject($this->modelFactory, 'propertyFactory', $this->propertyFactory);
 
+        $this->inject($this->modelGenerator, 'modelRepository', $this->modelRepository);
         $this->inject($this->modelGenerator, 'modelFactory', $this->modelFactory);
         $this->inject($this->modelGenerator, 'fileWriter', $this->fileWriter);
     }
@@ -54,5 +64,12 @@ final class ModelTest extends PatternTestCase
         $this->assertFileWasWritten('Vendor.Default/Classes/Presentation/Button/Button.php');
         $this->assertFileWasWritten('Vendor.Default/Classes/Presentation/Button/ButtonInterface.php');
         $this->assertFileWasWritten('Vendor.Default/Classes/Presentation/Button/ButtonFactory.php');
+
+        $model = $this->modelRepository->findOneByPhpClassName(
+            PhpClassName::fromString('\\Vendor\\Default\\Presentation\\Button\\Button')
+        );
+
+        $this->assertNotNull($model);
+        $this->assertInstanceOf(Model::class, $model);
     }
 }
