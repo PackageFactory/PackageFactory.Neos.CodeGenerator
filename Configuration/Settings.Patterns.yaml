@@ -45,7 +45,7 @@ PackageFactory:
           usageExample: >
             ./flow pattern:generate po:enum Vendor.Site Block/Button ButtonSize xs,s,m,l,xl
           generatorClassName: >
-            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Enum\EnumGenerator
+            PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Enum\EnumGenerator
 
         'presentation:value':
           shortDescription: >
@@ -60,7 +60,7 @@ PackageFactory:
           usageExample: >
             ./flow pattern:generate po:value Vendor.Site Block/Button Href value:string
           generatorClassName: >
-            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Value\ValueGenerator
+            PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Value\ValueGenerator
 
         'presentation:model':
           shortDescription: >
@@ -75,7 +75,7 @@ PackageFactory:
           usageExample: >
             ./flow pattern:generate po:model Vendor.Site Block/Button Button size:ButtonSize,label:string,disabled:?boolean
           generatorClassName: >
-            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Model\ModelGenerator
+            PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Model\ModelGenerator
 
         'presentation:component':
           shortDescription: >
@@ -90,4 +90,4 @@ PackageFactory:
           usageExample: >
             ./flow pattern:generate po:component Vendor.Site Block/Headline Headline content:string
           generatorClassName: >
-            PackageFactory\Neos\CodeGenerator\Pattern\PresentationObjects\Component\ComponentGenerator
+            PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Component\ComponentGenerator
