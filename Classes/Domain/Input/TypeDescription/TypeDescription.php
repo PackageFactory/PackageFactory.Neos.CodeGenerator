@@ -54,6 +54,19 @@ final class TypeDescription implements TypeDescriptionInterface
     }
 
     /**
+     * @return string
+     */
+    public function asAtomicString(): string
+    {
+        $string = $this->asString();
+
+        preg_match('/[-_\.\:a-zA-Z0-9\/\\\\]+/', $string, $matches);
+        $string = $matches[0];
+
+        return $string;
+    }
+
+    /**
      * @param TypeDescriptionTemplateInterface $template
      * @return TypeDescriptionInterface
      */
@@ -71,7 +84,7 @@ final class TypeDescription implements TypeDescriptionInterface
                 );
             },
             $string
-        );
+        ) ?? $string;
 
         $string = preg_replace_callback(
             '/(^|[\?\<\{\s])([A-Z][_a-zA-Z0-9]+(\\\\[A-Z][_a-zA-Z0-9]+)+)/',
@@ -79,7 +92,7 @@ final class TypeDescription implements TypeDescriptionInterface
                 return $matches[1] . $template->resolveRelativeNamespace(ltrim($matches[2], '\\'));
             },
             $string
-        );
+        ) ?? $string;
 
         return new self($string);
     }

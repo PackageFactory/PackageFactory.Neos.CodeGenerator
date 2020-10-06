@@ -16,7 +16,7 @@ final class ValueRepository
     /**
      * @var array<string,Value>
      */
-    private $storage;
+    private $storage = [];
 
     /**
      * @param PhpClassName $className

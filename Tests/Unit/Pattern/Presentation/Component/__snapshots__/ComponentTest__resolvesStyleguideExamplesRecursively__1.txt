@@ -1,0 +1,72 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Presentation\Block\Card;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Neos\Flow\Annotations as Flow;
+use PackageFactory\AtomicFusion\PresentationObjects\Fusion\AbstractComponentPresentationObject;
+use Vendor\Default\Presentation\Element\Image;
+use Vendor\Default\Presentation\Element\Text;
+use Vendor\Default\Presentation\Element\Link;
+
+/**
+ * @Flow\Proxy(false)
+ */
+final class Card extends AbstractComponentPresentationObject implements CardInterface
+{
+    /**
+     * @var null|Image
+     */
+    private $image;
+
+    /**
+     * @var Text
+     */
+    private $text;
+
+    /**
+     * @var Link
+     */
+    private $link;
+
+    /**
+     * @param null|Image $image
+     * @param Text $text
+     * @param Link $link
+     */
+    public function __construct(
+        ?Image $image,
+        Text $text,
+        Link $link
+    ) {
+        $this->image = $image;
+        $this->text = $text;
+        $this->link = $link;
+    }
+
+    /**
+     * @return null|Image
+     */
+    public function getImage(): ?Image
+    {
+        return $this->image;
+    }
+
+    /**
+     * @return Text
+     */
+    public function getText(): Text
+    {
+        return $this->text;
+    }
+
+    /**
+     * @return Link
+     */
+    public function getLink(): Link
+    {
+        return $this->link;
+    }
+}

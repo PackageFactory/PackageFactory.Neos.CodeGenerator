@@ -21,7 +21,7 @@ interface ImageInterface extends ComponentPresentationObjectInterface
     public function getAlt(): string;
 
     /**
-     * @return string
+     * @return null|string
      */
-    public function getTitle(): string;
+    public function getTitle(): ?string;
 }

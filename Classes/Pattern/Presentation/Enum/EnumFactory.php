@@ -44,10 +44,16 @@ final class EnumFactory
         $values = [];
         foreach ($query->required('values')->array() as $key => $value) {
             if ($type->isInteger()) {
-                $values[] = new EnumValue(
-                    is_string($key) ? $key : (string) $value,
-                    (string) ($key + 1)
-                );
+                if (is_string($key) && is_int($value)) {
+                    $values[] = new EnumValue($key, (string) $value);
+                } elseif (is_int($key) && is_string($value)) {
+                    $values[] = new EnumValue($value, (string) ($key + 1));
+                } else {
+                    throw new \InvalidArgumentException(
+                        'Could not build Enum value for key-value pair: ' . json_encode([$key => $value], JSON_PRETTY_PRINT),
+                        1602014635
+                    );
+                }
             } elseif ($type->isString()) {
                 $values[] = new EnumValue(
                     is_string($key) ? $key : (string) $value,

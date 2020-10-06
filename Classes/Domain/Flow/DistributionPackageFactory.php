@@ -46,14 +46,15 @@ final class DistributionPackageFactory implements DistributionPackageFactoryInte
         ]);
 
         if (is_file($pathToComposerJson) && is_readable($pathToComposerJson)) {
-            $composerJsonAsString = file_get_contents($pathToComposerJson);
-            $composerJson = json_decode($composerJsonAsString, true);
-
-            return new DistributionPackage(
-                $packageKey,
-                Path::fromString(dirname($pathToComposerJson)),
-                $composerJson
-            );
+            if ($composerJsonAsString = file_get_contents($pathToComposerJson)) {
+                if ($composerJson = json_decode($composerJsonAsString, true)) {
+                    return new DistributionPackage(
+                        $packageKey,
+                        Path::fromString(dirname($pathToComposerJson)),
+                        $composerJson
+                    );
+                }
+            }
         }
 
         return null;

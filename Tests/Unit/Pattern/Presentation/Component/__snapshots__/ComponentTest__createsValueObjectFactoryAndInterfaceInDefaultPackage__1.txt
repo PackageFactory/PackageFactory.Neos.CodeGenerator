@@ -25,19 +25,19 @@ final class Image extends AbstractComponentPresentationObject implements ImageIn
     private $alt;
 
     /**
-     * @var string
+     * @var null|string
      */
     private $title;
 
     /**
      * @param ImageSourceHelperInterface $src
      * @param string $alt
-     * @param string $title
+     * @param null|string $title
      */
     public function __construct(
         ImageSourceHelperInterface $src,
         string $alt,
-        string $title
+        ?string $title
     ) {
         $this->src = $src;
         $this->alt = $alt;
@@ -61,9 +61,9 @@ final class Image extends AbstractComponentPresentationObject implements ImageIn
     }
 
     /**
-     * @return string
+     * @return null|string
      */
-    public function getTitle(): string
+    public function getTitle(): ?string
     {
         return $this->title;
     }

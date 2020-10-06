@@ -33,13 +33,8 @@ final class DistributionPackageResolver implements DistributionPackageResolverIn
     protected $stringHelper;
 
     /**
-     * @var null|FlowPackageInterface
-     */
-    protected $cachedPromptResult = null;
-
-    /**
      * @param null|string $input
-     * @return FlowPackageInterface
+     * @return DistributionPackageInterface
      */
     public function resolve(?string $input): DistributionPackageInterface
     {

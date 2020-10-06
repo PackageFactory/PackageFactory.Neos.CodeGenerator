@@ -9,6 +9,7 @@ use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Fusion\FusionFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Fusion\FusionFileBuilder;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Fusion\Identifier\PrototypeName;
 use PackageFactory\Neos\CodeGenerator\Framework\Util\StringUtil;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Model\Model;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Prop\Prop;
@@ -82,6 +83,22 @@ final class Component
     }
 
     /**
+     * @return PrototypeName
+     */
+    public function getFusionPrototypeName(): PrototypeName
+    {
+        return PrototypeName::fromString($this->presentation->getFusionPrototypeNamePrefix() . $this->name);
+    }
+
+    /**
+     * @return Prop[]
+     */
+    public function getProps(): array
+    {
+        return $this->props;
+    }
+
+    /**
      * @return FusionFile
      */
     public function asFusionPrototypeFile(): FusionFile
@@ -92,7 +109,7 @@ final class Component
 
         $code = [];
 
-        $code[] = 'prototype(' . $this->presentation->getFusionPrototypeNamePrefix() . $this->name . ') < prototype(PackageFactory.AtomicFusion.PresentationObjects:PresentationObjectComponent) {';
+        $code[] = 'prototype(' . $this->getFusionPrototypeName()->asString() . ') < prototype(PackageFactory.AtomicFusion.PresentationObjects:PresentationObjectComponent) {';
         $code[] = '    @presentationObjectInterface = \'' . str_replace('\\', '\\\\', $this->model->getPhpInterfaceName()->asNamespace()->asString()) . '\'';
         $code[] = '';
         $code[] = '    @styleguide {';
@@ -106,11 +123,16 @@ final class Component
         $code[] = '    }';
         $code[] = '';
         $code[] = '    renderer = afx`';
-        $code[] = '        <dl>';
+        $code[] = '        <figure>';
+        $code[] = '            <figcaption>';
+        $code[] = '                ' . $this->title . ' (' . $this->getFusionPrototypeName()->asString() . ')';
+        $code[] = '            </figcaption>';
+        $code[] = '            <dl>';
         foreach ($this->props as $prop) {
-            $code[] = StringUtil::indent($prop->getAfxExample(), '            ');
+            $code[] = StringUtil::indent($prop->getAfxExample(), '                ');
         }
-        $code[] = '        </dl>';
+        $code[] = '            </dl>';
+        $code[] = '        </figure>';
         $code[] = '    `';
         $code[] = '}';
         $code[] = '';

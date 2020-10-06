@@ -6,11 +6,10 @@ namespace PackageFactory\Neos\CodeGenerator\Infrastructure;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Cli\ConsoleOutput;
 use Neos\Utility\Files;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriterInterface;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use PackageFactory\Neos\CodeGenerator\Framework\IO\ConsoleIO;
 
 /**
  * @Flow\Scope("singleton")
@@ -18,15 +17,13 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 final class FileWriter implements FileWriterInterface
 {
     /**
-     * @Flow\Inject
-     * @var ConsoleOutput
+     * @Flow\Inject(lazy=false)
+     * @var ConsoleIO
      */
-    protected $output;
+    protected $io;
 
     public function write(FileInterface $file): void
     {
-        $this->output->getOutput()->getFormatter()->setStyle('warning', new OutputFormatterStyle('yellow'));
-
         $directoryPath = $file->getPath()->getParentDirectoryPath()->asString();
         if (!file_exists($directoryPath)) {
             Files::createDirectoryRecursively($directoryPath);
@@ -38,13 +35,13 @@ final class FileWriter implements FileWriterInterface
             $cwd = getcwd();
             $pathAsString = $file->getPath()->asString();
 
-            if (strpos($pathAsString, $cwd) === 0) {
+            if ($cwd && strpos($pathAsString, $cwd) === 0) {
                 $pathAsString = '.' . substr($pathAsString, strlen($cwd));
             }
 
-            $this->output->outputLine('Wrote file %s', [$pathAsString]);
+            $this->io->out(sprintf('Wrote file %s', $pathAsString));
         } else {
-            $this->output->outputLine('<warning>File %s was not written</warning>', [$file->getPath()->asString()]);
+            $this->io->yellow()->out(sprintf('File %s was not written', $file->getPath()->asString()));
         }
     }
 
@@ -52,16 +49,22 @@ final class FileWriter implements FileWriterInterface
     {
         if (file_exists($file->getPath()->asString())) {
             if (is_writeable($file->getPath()->asString())) {
-                $this->output->outputLine('File <b>%s</b> already exists.', [$file->getPath()->asString()]);
-                return $this->output->askConfirmation('Should it be overwritten? (y/N) ', false);
+                $this->io->out(sprintf('File <bold>%s</bold> already exists.', $file->getPath()->asString()));
+
+                if ($this->io->arguments->get('overwrite')) {
+                    $this->io->yellow()->out('Flag --overwrite was set.');
+                    return true;
+                } else {
+                    return $this->io->confirm('Should it be overwritten?')->defaultTo('N')->confirmed();
+                }
             } else {
-                $this->output->outputLine('<error>File %s is not writable!</error>', [$file->getPath()->asString()]);
+                $this->io->red()->out(sprintf('File %s is not writable!', $file->getPath()->asString()));
                 return false;
             }
         } elseif (is_writable($file->getPath()->getParentDirectoryPath()->asString())) {
             return true;
         } else {
-            $this->output->outputLine('<error>Directory %s is not writable!</error>', [$file->getPath()->getParentDirectoryPath()->getValue()]);
+            $this->io->red()->out(sprintf('Directory %s is not writable!', $file->getPath()->getParentDirectoryPath()->asString()));
             return false;
         }
     }

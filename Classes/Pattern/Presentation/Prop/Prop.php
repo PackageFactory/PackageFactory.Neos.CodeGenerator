@@ -59,10 +59,10 @@ final class Prop
 
         $code = [];
 
-        $code[] = '<dd>' . $this->name . ':</dd>';
-        $code[] = '<dt>';
+        $code[] = '<dt>' . $this->name . ':</dt>';
+        $code[] = '<dd>';
         $code[] = StringUtil::indent($example, '    ');
-        $code[] = '</dt>';
+        $code[] = '</dd>';
 
         return join(PHP_EOL, $code);
     }

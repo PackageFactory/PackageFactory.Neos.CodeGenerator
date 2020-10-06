@@ -15,23 +15,28 @@ prototype(Vendor.Default:Component.Image) < prototype(PackageFactory.AtomicFusio
     }
 
     renderer = afx`
-        <dl>
-            <dd>src:</dd>
-            <dt>
-                <Sitegeist.Kaleidoscope:Image
-                    imageSource={presentationObject.src}
-                    srcset="@TODO: srcset"
-                    sizes="@TODO: sizes"
-                    />
-            </dt>
-            <dd>alt:</dd>
-            <dt>
-                {presentationObject.alt}
-            </dt>
-            <dd>title:</dd>
-            <dt>
-                {presentationObject.title}
-            </dt>
-        </dl>
+        <figure>
+            <figcaption>
+                Image (Vendor.Default:Component.Image)
+            </figcaption>
+            <dl>
+                <dt>src:</dt>
+                <dd>
+                    <Sitegeist.Kaleidoscope:Image
+                        imageSource={presentationObject.src}
+                        srcset="@TODO: srcset"
+                        sizes="@TODO: sizes"
+                        />
+                </dd>
+                <dt>alt:</dt>
+                <dd>
+                    {presentationObject.alt}
+                </dd>
+                <dt>title:</dt>
+                <dd>
+                    {presentationObject.title}
+                </dd>
+            </dl>
+        </figure>
     `
 }

@@ -16,7 +16,7 @@ final class HelperRepository
     /**
      * @var array<string,Helper>
      */
-    private $storage;
+    private $storage = [];
 
     /**
      * @param PhpClassName $className
@@ -31,7 +31,7 @@ final class HelperRepository
     }
 
     /**
-     * @param Helper $value
+     * @param Helper $helper
      * @return void
      */
     public function add(Helper $helper): void

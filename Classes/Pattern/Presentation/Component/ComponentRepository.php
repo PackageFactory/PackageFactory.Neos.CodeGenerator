@@ -16,7 +16,7 @@ final class ComponentRepository
     /**
      * @var array<string,Component>
      */
-    private $storage;
+    private $storage = [];
 
     /**
      * @param PhpClassName $className
@@ -31,7 +31,7 @@ final class ComponentRepository
     }
 
     /**
-     * @param Component $value
+     * @param Component $component
      * @return void
      */
     public function add(Component $component): void

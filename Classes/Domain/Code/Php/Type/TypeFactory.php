@@ -24,7 +24,7 @@ final class TypeFactory
 {
     /**
      * @Flow\InjectConfiguration(path="shorthands")
-     * @phpstan-var array<string, array{type: string, example: array{presentation: {styleguide: string, afx: string}}}>
+     * @phpstan-var array<string, array{type: string, example: array{presentation: array{styleguide: string, afx: string}}}>
      * @var array
      */
     protected $shorthands;

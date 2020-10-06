@@ -38,7 +38,7 @@ class PatternCommandController extends CommandController
     protected $generatorResolver;
 
     /**
-     * @Flow\Inject
+     * @Flow\Inject(lazy=false)
      * @var ConsoleIO
      */
     protected $io;
@@ -47,10 +47,21 @@ class PatternCommandController extends CommandController
      * Generates code with the given pattern in the given package
      *
      * @param string $fileName
+     * @param boolean $overwrite
      * @return void
      */
-    public function generateCommand(string $fileName): void
+    public function generateCommand(string $fileName, bool $overwrite = false): void
     {
+        $this->io->arguments->add([
+            'overwrite' => [
+                'longPrefix' => 'overwrite',
+                'defaultValue' => $overwrite,
+                'castTo' => 'bool'
+            ]
+        ]);
+
+        $this->io->arguments->parse(array_slice($_SERVER['argv'], 3));
+
         $input = file_get_contents($fileName);
 
         if ($input = file_get_contents($fileName)) {

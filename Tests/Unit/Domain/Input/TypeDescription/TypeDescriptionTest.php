@@ -20,6 +20,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 'string',
                 [
                     'asString' => 'string',
+                    'asAtomicString' => 'string',
                     'with adopted namespace' => 'string',
                 ],
             ],
@@ -27,6 +28,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 'mixed',
                 [
                     'asString' => 'mixed',
+                    'asAtomicString' => 'mixed',
                     'with adopted namespace' => 'mixed',
                 ],
             ],
@@ -34,6 +36,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 'custom:descriptor',
                 [
                     'asString' => 'custom:descriptor',
+                    'asAtomicString' => 'custom:descriptor',
                     'with adopted namespace' => 'custom:descriptor',
                 ],
             ],
@@ -41,6 +44,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 'even.more:custom.descriptor',
                 [
                     'asString' => 'even.more:custom.descriptor',
+                    'asAtomicString' => 'even.more:custom.descriptor',
                     'with adopted namespace' => 'even.more:custom.descriptor',
                 ],
             ],
@@ -48,6 +52,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 'alternative-custom-descriptor',
                 [
                     'asString' => 'alternative-custom-descriptor',
+                    'asAtomicString' => 'alternative-custom-descriptor',
                     'with adopted namespace' => 'alternative-custom-descriptor',
                 ],
             ],
@@ -55,6 +60,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 '\\DateTimeInterface',
                 [
                     'asString' => '\\DateTimeInterface',
+                    'asAtomicString' => '\\DateTimeInterface',
                     'with adopted namespace' => '\\DateTimeInterface',
                 ],
             ],
@@ -62,6 +68,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 '\\Iterator<mixed, string>',
                 [
                     'asString' => '\\Iterator<mixed, string>',
+                    'asAtomicString' => '\\Iterator',
                     'with adopted namespace' => '\\Iterator<mixed, string>',
                 ],
             ],
@@ -69,6 +76,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 '/Neos/Eel/Helper/StringHelper',
                 [
                     'asString' => '\\Neos\\Eel\\Helper\\StringHelper',
+                    'asAtomicString' => '\\Neos\\Eel\\Helper\\StringHelper',
                     'with adopted namespace' => '\\Neos\\Eel\\Helper\\StringHelper',
                 ],
             ],
@@ -76,6 +84,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 'Vendor.Site/Application',
                 [
                     'asString' => '\\Vendor\\Site\\Application',
+                    'asAtomicString' => '\\Vendor\\Site\\Application',
                     'with adopted namespace' => '\\Vendor\\Site\\Domain\\Service\\Application',
                 ],
             ],
@@ -83,6 +92,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 'Vendor.Site/Foo<Vendor.Shared/Bar>',
                 [
                     'asString' => '\\Vendor\\Site\\Foo<\\Vendor\\Shared\\Bar>',
+                    'asAtomicString' => '\\Vendor\\Site\\Foo',
                     'with adopted namespace' => '\\Vendor\\Site\\Domain\\Service\\Foo<\\Vendor\\Shared\\Domain\\Service\\Bar>',
                 ],
             ],
@@ -90,6 +100,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 'Alignment/Horizontal',
                 [
                     'asString' => 'Alignment\\Horizontal',
+                    'asAtomicString' => 'Alignment\\Horizontal',
                     'with adopted namespace' => '\\Vendor\\Adopted\\Domain\\Service\\Alignment\\Horizontal',
                 ],
             ],
@@ -97,6 +108,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 '?Alignment/Horizontal',
                 [
                     'asString' => '?Alignment\\Horizontal',
+                    'asAtomicString' => 'Alignment\\Horizontal',
                     'with adopted namespace' => '?\\Vendor\\Adopted\\Domain\\Service\\Alignment\\Horizontal',
                 ],
             ]
@@ -115,6 +127,20 @@ final class TypeDescriptionTest extends UnitTestCase
         $typeDescription = TypeDescription::fromString($input);
 
         $this->assertEquals($expectations['asString'], $typeDescription->asString());
+    }
+
+    /**
+     * @test
+     * @dataProvider validTypeDescriptions
+     * @param string $input
+     * @param array<string,string> $expectations
+     * @return void
+     */
+    public function aomtizesValidTypeDescriptions(string $input, array $expectations): void
+    {
+        $typeDescription = TypeDescription::fromString($input);
+
+        $this->assertEquals($expectations['asAtomicString'], $typeDescription->asAtomicString());
     }
 
     /**

@@ -15,6 +15,11 @@ interface TypeDescriptionInterface
     public function asString(): string;
 
     /**
+     * @return string
+     */
+    public function asAtomicString(): string;
+
+    /**
      * @param TypeDescriptionTemplateInterface $template
      * @return TypeDescriptionInterface
      */

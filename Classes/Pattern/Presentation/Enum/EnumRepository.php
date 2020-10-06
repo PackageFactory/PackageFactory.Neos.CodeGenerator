@@ -16,7 +16,7 @@ final class EnumRepository
     /**
      * @var array<string,Enum>
      */
-    private $storage;
+    private $storage = [];
 
     /**
      * @param PhpClassName $className
@@ -31,7 +31,7 @@ final class EnumRepository
     }
 
     /**
-     * @param Enum $value
+     * @param Enum $enum
      * @return void
      */
     public function add(Enum $enum): void

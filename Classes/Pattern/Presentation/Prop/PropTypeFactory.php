@@ -7,6 +7,7 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Prop;
 
 use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
+use PackageFactory\Neos\CodeGenerator\Framework\Util\StringUtil;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Component\Component;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Component\ComponentRepository;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Enum\Enum;
@@ -23,7 +24,7 @@ final class PropTypeFactory
 {
     /**
      * @Flow\InjectConfiguration(path="shorthands")
-     * @phpstan-var array<string, array{type: string, example: array{presentation: {styleguide: string, afx: string}}}>
+     * @phpstan-var array<string, array{type: string, example: array{presentation: array{styleguide: string, afx: string}}}>
      * @var array
      */
     protected $shorthands;
@@ -65,20 +66,34 @@ final class PropTypeFactory
                 $examples['styleguide'] ?? 'null',
                 $examples['afx'] ?? '{{prop}}'
             );
-        } elseif (PhpClassName::isValid($string)) {
-            $className = PhpClassName::fromString($string);
+        } else {
+            $className = null;
+            if (PhpClassName::isValid($string)) {
+                $className = PhpClassName::fromString($string);
+            } elseif(PhpClassName::isValid('\\' . $string)) {
+                $className = PhpClassName::fromString('\\' . $string);
+            }
 
-            if ($component = $this->componentRepository->findOneByPhpClassName($className)) {
-                return $this->fromComponent($component);
-            } elseif ($model = $this->modelRepository->findOneByPhpClassName($className)) {
-                return $this->fromModel($model);
-            } elseif ($value = $this->valueRepository->findOneByPhpClassName($className)) {
-                return $this->fromValue($value);
-            } elseif ($enum = $this->enumRepository->findOneByPhpClassName($className)) {
-                return $this->fromEnum($enum);
+            if ($className) {
+                $modelClassName = $className->asNamespace()->append($className->asDeclarationNameString())->asClassName();
+
+                if ($component = $this->componentRepository->findOneByPhpClassName($className)) {
+                    return $this->fromComponent($component);
+                } elseif ($component = $this->componentRepository->findOneByPhpClassName($modelClassName)) {
+                    return $this->fromComponent($component);
+                } elseif ($model = $this->modelRepository->findOneByPhpClassName($className)) {
+                    return $this->fromModel($model);
+                } elseif ($model = $this->modelRepository->findOneByPhpClassName($modelClassName)) {
+                    return $this->fromModel($model);
+                } elseif ($value = $this->valueRepository->findOneByPhpClassName($className)) {
+                    return $this->fromValue($value);
+                } elseif ($enum = $this->enumRepository->findOneByPhpClassName($className)) {
+                    return $this->fromEnum($enum);
+                }
             }
         }
 
+        // @phpstan-ignore-next-line
         return new PropType('{' . PHP_EOL . '}', '{{prop}}');
     }
 
@@ -88,7 +103,20 @@ final class PropTypeFactory
      */
     public function fromComponent(Component $component): PropType
     {
-        throw new \Exception('@TODO: Create examples for component');
+        return new PropType(
+            join(PHP_EOL, [
+                '{',
+                join(PHP_EOL, array_map(function (Prop $prop) {
+                    return StringUtil::indent($prop->getStyleguideExample(), '    ');
+                }, $component->getProps())),
+                '}',
+            ]),
+            join(PHP_EOL, [
+                '<' . $component->getFusionPrototypeName()->asString(),
+                '    presentationObject={{prop}}',
+                '    />',
+            ])
+        );
     }
 
     /**
@@ -115,6 +143,11 @@ final class PropTypeFactory
      */
     public function fromEnum(Enum $enum): PropType
     {
-        return new PropType($enum->getType()->quoteValue($enum->getValues()[0]), '{{prop}.value}');
+        $value = $enum->getValues()[0];
+
+        return new PropType(
+            '${{ ' . $value->asComparatorMethodName() . ': true, value: ' . $enum->getType()->quoteValue($value) . ' }}',
+            '{{prop}.value}'
+        );
     }
 }

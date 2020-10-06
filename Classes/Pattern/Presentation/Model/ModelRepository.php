@@ -16,7 +16,7 @@ final class ModelRepository
     /**
      * @var array<string,Model>
      */
-    private $storage;
+    private $storage = [];
 
     /**
      * @param PhpClassName $className
@@ -31,7 +31,7 @@ final class ModelRepository
     }
 
     /**
-     * @param Model $value
+     * @param Model $model
      * @return void
      */
     public function add(Model $model): void

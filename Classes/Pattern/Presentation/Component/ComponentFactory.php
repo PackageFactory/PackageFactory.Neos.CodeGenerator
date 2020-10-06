@@ -56,7 +56,14 @@ final class ComponentFactory
         $props = [];
         foreach ($query->optional('props')->dictionary() as $propName => $typeDescription) {
             $typeDescription = $typeDescription->type()->withTemplate($presentation);
-            $props[] = new Prop($propName, $propTypeFactory->fromString($typeDescription->asString()));
+            $typeName = $typeDescription->asAtomicString();
+            if (preg_match('/^[A-Z][_a-zA-Z0-9]+$/', $typeName)) {
+                $typeName = $model->getPhpClassNameForValueObject()
+                    ->replaceDeclarationNameWith($typeName)
+                    ->asFullyQualifiedNameString();
+            }
+
+            $props[] = new Prop($propName, $propTypeFactory->fromString($typeName));
         }
 
         return new Component($presentation, $name, $model, $signature, $title, $props);

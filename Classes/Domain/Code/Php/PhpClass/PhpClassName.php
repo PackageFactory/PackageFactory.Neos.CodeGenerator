@@ -6,9 +6,8 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass;
  */
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Package\FlowPackageInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpNamespace\PhpNamespace;
-use PackageFactory\Neos\CodeGenerator\Domain\Files\Path;
+use PackageFactory\Neos\CodeGenerator\Framework\Util\StringUtil;
 
 /**
  * @Flow\Proxy(false)
@@ -71,7 +70,7 @@ final class PhpClassName
 
         assert($lastSegment !== null);
 
-        return $lastSegment;
+        return StringUtil::tail('\\', $lastSegment);
     }
 
     /**
@@ -92,26 +91,15 @@ final class PhpClassName
     }
 
     /**
-     * @param FlowPackageInterface $flowPackage
-     * @return Path
+     * @param string $declarationName
+     * @return self
      */
-    public function asClassFilePathInFlowPackage(FlowPackageInterface $flowPackage): Path
+    public function replaceDeclarationNameWith(string $declarationName): self
     {
-        $composerManifest = $flowPackage->getComposerManifest();
+        $segments = explode('\\', $this->value);
+        array_pop($segments);
+        $segments[] = $declarationName;
 
-        if (isset($composerManifest['autoload']['psr-4'])) {
-            foreach ($composerManifest['autoload']['psr-4'] as $namespaceAsString => $pathAsString) {
-                $psr4Namespace = PhpNamespace::fromString(rtrim($namespaceAsString, '\\'));
-
-                if ($this->asNamespace()->isDescendantOf($psr4Namespace)) {
-                    return Path::fromString($flowPackage->getPackagePath())
-                        ->appendString($pathAsString)
-                        ->append($this->asNamespace()->truncateAscendant($psr4Namespace)->asPath())
-                        ->withExtension('php');
-                }
-            }
-        }
-
-        throw new \DomainException('Could not find a suitable autload configuration for package "' . $flowPackage->getPackageKey() . '".');
+        return new self(join('\\', $segments));
     }
 }
