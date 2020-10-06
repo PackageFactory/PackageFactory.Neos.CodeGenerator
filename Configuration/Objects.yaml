@@ -1,9 +1,6 @@
 PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriterInterface:
   className: PackageFactory\Neos\CodeGenerator\Infrastructure\FileWriter
 
-PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassRepositoryInterface:
-  className: PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassRepository
-
 PackageFactory\Neos\CodeGenerator\Domain\Code\Fusion\Prototype\PrototypeRepositoryInterface:
   className: PackageFactory\Neos\CodeGenerator\Domain\Code\Fusion\Prototype\PrototypeRepository
 

@@ -74,6 +74,14 @@ final class Enum
     }
 
     /**
+     * @return EnumType
+     */
+    public function getType(): EnumType
+    {
+        return $this->type;
+    }
+
+    /**
      * @return EnumValue[]
      */
     public function getValues(): array

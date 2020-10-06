@@ -2,39 +2,81 @@ PackageFactory:
   Neos:
     CodeGenerator:
       shorthands:
+
         string:
           type: string
-          example: >
-            'Lorem ipsum...'
+          example:
+            presentation:
+              styleguide: >
+                'Lorem ipsum...'
+              afx: '{{prop}}'
+
         lorem:
           type: string
-          example: |
-            '
-                Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
-                eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
-                voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita
-                kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-            '
-        int:
+          example:
+            presentation:
+              styleguide: |
+                '
+                    Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
+                    eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
+                    voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita
+                    kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+                '
+              afx: '{{prop}}'
+
+        int: &int
           type: integer
-          example: '42'
-        integer:
-          type: integer
-          example: '42'
+          example:
+            presentation:
+              styleguide: '42'
+              afx: '{{prop}}'
+        integer: *int
+
         float:
           type: float
-          example: '12.3'
-        boolean:
+          example:
+            presentation:
+              styleguide: '12.34'
+              afx: '{{prop}}'
+
+        bool: &bool
           type: boolean
-          example: 'true'
-        bool:
-          type: boolean
-          example: 'true'
+          example:
+            presentation:
+              styleguide: 'true'
+              afx: >
+                {{prop} ? 'true' : 'false'}
+        boolean: *bool
+
         imagesource:
-          type: Sitegeist\Kaleidoscope\EelHelpers\ImageSourceHelperInterface
-          example: |
-            Sitegeist.Kaleidoscope:DummyImageSource {
-                width = 300
-                height = 200
-            }
+          type: \Sitegeist\Kaleidoscope\EelHelpers\ImageSourceHelperInterface
+          example:
+            presentation:
+              styleguide: |
+                Sitegeist.Kaleidoscope:DummyImageSource {
+                    width = 300
+                    height = 200
+                }
+              afx: |
+                <Sitegeist.Kaleidoscope:Image
+                    imageSource={{prop}}
+                    srcset="@TODO: srcset"
+                    sizes="@TODO: sizes"
+                    />
+
+        imagesource:hd:
+          type: \Sitegeist\Kaleidoscope\EelHelpers\ImageSourceHelperInterface
+          example:
+            presentation:
+              styleguide: |
+                Sitegeist.Kaleidoscope:DummyImageSource {
+                    width = 1920
+                    height = 1080
+                }
+              afx: |
+                <Sitegeist.Kaleidoscope:Image
+                    imageSource={{prop}}
+                    srcset="@TODO: srcset"
+                    sizes="@TODO: sizes"
+                    />
 

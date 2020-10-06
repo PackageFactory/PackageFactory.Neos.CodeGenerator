@@ -4,7 +4,6 @@ namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Pattern;
 use Neos\Flow\Tests\UnitTestCase;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureFactoryInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassRepositoryInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property\PropertyFactory;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Type\TypeFactory;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileInterface;
@@ -15,10 +14,17 @@ use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageResolverInt
 use PackageFactory\Neos\CodeGenerator\Domain\Flow\PackageKey;
 use PackageFactory\Neos\CodeGenerator\Infrastructure\SignatureFactory;
 use Spatie\Snapshots\MatchesSnapshots;
+use Symfony\Component\Yaml;
 
 abstract class PatternTestCase extends UnitTestCase
 {
     use MatchesSnapshots;
+
+    /**
+     * @phpstan-var array<string, array{type: string, example: array{presentation: {styleguide: string, afx: string}}}>
+     * @var array
+     */
+    protected $shorthands;
 
     /**
      * @var FileWriterInterface
@@ -51,6 +57,11 @@ abstract class PatternTestCase extends UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $parser = new Yaml\Parser();
+        $settings = $parser->parseFile($_SERVER['FLOW_ROOTPATH'] . 'Configuration/Settings.Shorthands.yaml');
+        $this->shorthands = $settings['PackageFactory']['Neos']['CodeGenerator']['shorthands'] ?? [];
+
         $this->fileWriter = new class implements FileWriterInterface {
             /** @var FileInterface[] */
             private $files = [];
@@ -116,6 +127,8 @@ abstract class PatternTestCase extends UnitTestCase
         $this->signatureFactory = new SignatureFactory();
 
         $this->typeFactory = new TypeFactory();
+        $this->inject($this->typeFactory, 'shorthands', $this->shorthands);
+
         $this->propertyFactory = new PropertyFactory();
         $this->inject($this->propertyFactory, 'typeFactory', $this->typeFactory);
     }

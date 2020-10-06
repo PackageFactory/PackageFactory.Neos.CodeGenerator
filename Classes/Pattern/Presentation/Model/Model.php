@@ -85,6 +85,7 @@ final class Model
         $builder->setNamespaceFromClassName($this->getPhpClassNameForValueObject());
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
+        $builder->getImportCollectionBuilder()->addImport(new Import('PackageFactory\\AtomicFusion\\PresentationObjects\\Fusion\\AbstractComponentPresentationObject', null));
         $builder->getImportCollectionBuilder()->addImportCollection($this->imports);
 
         $code = [];
@@ -92,7 +93,7 @@ final class Model
         $code[] = '/**';
         $code[] = ' * @Flow\Proxy(false)';
         $code[] = ' */';
-        $code[] = 'final class ' . $this->getPhpClassNameForValueObject()->asDeclarationNameString();
+        $code[] = 'final class ' . $this->getPhpClassNameForValueObject()->asDeclarationNameString() . ' extends AbstractComponentPresentationObject implements ' . $this->getPhpInterfaceName()->asDeclarationNameString();
         $code[] = '{';
 
         if ($this->properties) {
@@ -152,11 +153,12 @@ final class Model
         $builder->setPath($this->presentation->getPhpFilePathForClassName($this->getPhpInterfaceName()));
         $builder->setNamespaceFromClassName($this->getPhpInterfaceName());
         $builder->setSignature($this->signature);
+        $builder->getImportCollectionBuilder()->addImport(new Import('PackageFactory\\AtomicFusion\\PresentationObjects\\Fusion\\ComponentPresentationObjectInterface', null));
         $builder->getImportCollectionBuilder()->addImportCollection($this->imports);
 
         $code = [];
 
-        $code[] = 'interface ' . $this->getPhpInterfaceName()->asDeclarationNameString();
+        $code[] = 'interface ' . $this->getPhpInterfaceName()->asDeclarationNameString() . ' extends ComponentPresentationObjectInterface';
         $code[] = '{';
         if ($this->properties) {
             $code[] = join(PHP_EOL . PHP_EOL, array_map(function (PropertyInterface $property) {
@@ -190,7 +192,7 @@ final class Model
         $builder->setNamespaceFromClassName($this->getPhpClassNameForFactory());
         $builder->setSignature($this->signature);
         $builder->getImportCollectionBuilder()->addImport(new Import('Neos\\Flow\\Annotations', 'Flow'));
-        $builder->getImportCollectionBuilder()->addImport(new Import('PackageFactory\\AtomicFusion\\Presentation\\Fusion\\AbstractComponentPresentationObjectFactory', null));
+        $builder->getImportCollectionBuilder()->addImport(new Import('PackageFactory\\AtomicFusion\\PresentationObjects\\Fusion\\AbstractComponentPresentationObjectFactory', null));
 
         $code = [];
 

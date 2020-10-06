@@ -10,9 +10,10 @@ use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureFact
 use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageResolverInterface;
 use PackageFactory\Neos\CodeGenerator\Framework\Util\StringUtil;
-use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Component\Prop\Prop;
-use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Component\PropType\PropTypeFactory;
+use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Model\ModelFactory;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Presentation;
+use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Prop\Prop;
+use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Prop\PropTypeFactory;
 
 /**
  * @Flow\Scope("singleton")
@@ -33,16 +34,18 @@ final class ComponentFactory
 
     /**
      * @Flow\Inject
-     * @var PropTypeFactory
+     * @var ModelFactory
      */
-    protected $propTypeFactory;
+    protected $modelFactory;
 
     /**
      * @param Query $query
+     * @param PropTypeFactory $propTypeFactory
      * @return Component
      */
-    public function fromQuery(Query $query): Component
+    public function fromQuery(Query $query, PropTypeFactory $propTypeFactory): Component
     {
+        $model = $this->modelFactory->fromQuery($query);
         $distributionPackage = $this->distributionPackageResolver->resolve($query->optional('package')->string());
         $presentation = Presentation::fromDistributionPackage($distributionPackage);
         $name = str_replace('\\', '.', $query->required('name')->type()->asString());
@@ -53,9 +56,9 @@ final class ComponentFactory
         $props = [];
         foreach ($query->optional('props')->dictionary() as $propName => $typeDescription) {
             $typeDescription = $typeDescription->type()->withTemplate($presentation);
-            $props[] = new Prop($propName, $this->propTypeFactory->fromString($typeDescription->asString()));
+            $props[] = new Prop($propName, $propTypeFactory->fromString($typeDescription->asString()));
         }
 
-        return new Component($presentation, $name, $signature, $title, $props);
+        return new Component($presentation, $name, $model, $signature, $title, $props);
     }
 }

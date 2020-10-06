@@ -50,7 +50,7 @@ final class ModelTest extends PatternTestCase
     public function createsValueObjectFactoryAndInterfaceInDefaultPackage(): void
     {
         $query = Query::fromArrayAtSpecificPointInTime([
-            'name' => 'Button/Button',
+            'name' => 'Button',
             'props' => [
                 'type' => 'ButtonType',
                 'look' => 'ButtonLook',

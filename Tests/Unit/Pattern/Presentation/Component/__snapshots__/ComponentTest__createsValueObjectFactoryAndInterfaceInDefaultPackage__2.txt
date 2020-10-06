@@ -1,0 +1,27 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Presentation\Image;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use PackageFactory\AtomicFusion\PresentationObjects\Fusion\ComponentPresentationObjectInterface;
+use Sitegeist\Kaleidoscope\EelHelpers\ImageSourceHelperInterface;
+
+interface ImageInterface extends ComponentPresentationObjectInterface
+{
+    /**
+     * @return ImageSourceHelperInterface
+     */
+    public function getSrc(): ImageSourceHelperInterface;
+
+    /**
+     * @return string
+     */
+    public function getAlt(): string;
+
+    /**
+     * @return string
+     */
+    public function getTitle(): string;
+}

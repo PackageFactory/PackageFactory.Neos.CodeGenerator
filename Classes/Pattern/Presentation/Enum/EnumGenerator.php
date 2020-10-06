@@ -6,7 +6,6 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Enum;
  */
 
 use Neos\Flow\Annotations as Flow;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassRepositoryInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriterInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;

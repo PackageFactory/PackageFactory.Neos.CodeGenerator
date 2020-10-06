@@ -9,7 +9,7 @@ use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\FileWriterInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Pattern\GeneratorInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
-use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Model\ModelFactory;
+use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Prop\PropTypeFactory;
 
 /**
  * @Flow\Scope("singleton")
@@ -17,16 +17,22 @@ use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Model\ModelFactory;
 final class ComponentGenerator implements GeneratorInterface
 {
     /**
-     * @Flow\Inject
-     * @var ModelFactory
+     * @Flow\Inject(lazy=false)
+     * @var PropTypeFactory
      */
-    protected $modelFactory;
+    protected $propTypeFactory;
 
     /**
      * @Flow\Inject
      * @var ComponentFactory
      */
     protected $componentFactory;
+
+    /**
+     * @Flow\Inject
+     * @var ComponentRepository
+     */
+    protected $componentRepository;
 
     /**
      * @Flow\Inject
@@ -40,12 +46,13 @@ final class ComponentGenerator implements GeneratorInterface
      */
     public function generate(Query $query): void
     {
-        $model = $this->modelFactory->fromQuery($query);
-        $component = $this->componentFactory->fromQuery($query);
+        $component = $this->componentFactory->fromQuery($query, $this->propTypeFactory);
 
-        $this->fileWriter->write($model->asPhpClassFileForValueObject());
-        $this->fileWriter->write($model->asPhpInterfaceFile());
-        $this->fileWriter->write($model->asPhpClassFileForFactory());
+        $this->fileWriter->write($component->getModel()->asPhpClassFileForValueObject());
+        $this->fileWriter->write($component->getModel()->asPhpInterfaceFile());
+        $this->fileWriter->write($component->getModel()->asPhpClassFileForFactory());
         $this->fileWriter->write($component->asFusionPrototypeFile());
+
+        $this->componentRepository->add($component);
     }
 }

@@ -9,8 +9,9 @@ use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Fusion\FusionFile;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Fusion\FusionFileBuilder;
-use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Component\Prop\PropInterface;
 use PackageFactory\Neos\CodeGenerator\Framework\Util\StringUtil;
+use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Model\Model;
+use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Prop\Prop;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Presentation;
 
 /**
@@ -29,6 +30,11 @@ final class Component
     private $name;
 
     /**
+     * @var Model
+     */
+    private $model;
+
+    /**
      * @var SignatureInterface
      */
     private $signature;
@@ -39,29 +45,40 @@ final class Component
     private $title;
 
     /**
-     * @var PropInterface[]
+     * @var Prop[]
      */
     private $props;
 
     /**
      * @param Presentation $presentation
      * @param string $name
+     * @param Model $model
      * @param SignatureInterface $signature
      * @param string $title
-     * @param PropInterface[] $props
+     * @param Prop[] $props
      */
     public function __construct(
         Presentation $presentation,
         string $name,
+        Model $model,
         SignatureInterface $signature,
         string $title,
         array $props
     ) {
         $this->presentation = $presentation;
         $this->name = $name;
+        $this->model = $model;
         $this->signature = $signature;
         $this->title = $title;
         $this->props = $props;
+    }
+
+    /**
+     * @return Model
+     */
+    public function getModel(): Model
+    {
+        return $this->model;
     }
 
     /**
@@ -75,15 +92,15 @@ final class Component
 
         $code = [];
 
-        $code[] = 'prototype(' . $this->presentation->getFusionPrototypeNamePrefix() . $this->name . ') < prototype(PackageFactory.Neos.CodeGenerator:PresentationObjectComponent) {';
-        $code[] = '    @presentationObjectInterface = \'' . str_replace('\\', '\\\\', $this->name->asPhpInterfaceName()->asNamespace()->asString()) . '\'';
+        $code[] = 'prototype(' . $this->presentation->getFusionPrototypeNamePrefix() . $this->name . ') < prototype(PackageFactory.AtomicFusion.PresentationObjects:PresentationObjectComponent) {';
+        $code[] = '    @presentationObjectInterface = \'' . str_replace('\\', '\\\\', $this->model->getPhpInterfaceName()->asNamespace()->asString()) . '\'';
         $code[] = '';
         $code[] = '    @styleguide {';
         $code[] = '        title = \'' . $this->title . '\'';
         $code[] = '';
         $code[] = '        props {';
         foreach ($this->props as $prop) {
-            $code[] = StringUtil::indent($prop->asExampleValueAssignment(), '            ');
+            $code[] = StringUtil::indent($prop->getStyleguideExample(), '            ');
         }
         $code[] = '        }';
         $code[] = '    }';
@@ -91,7 +108,7 @@ final class Component
         $code[] = '    renderer = afx`';
         $code[] = '        <dl>';
         foreach ($this->props as $prop) {
-            $code[] = StringUtil::indent($prop->asDummyAfxMarkup(), '            ');
+            $code[] = StringUtil::indent($prop->getAfxExample(), '            ');
         }
         $code[] = '        </dl>';
         $code[] = '    `';

@@ -1,0 +1,37 @@
+prototype(Vendor.Default:Component.Image) < prototype(PackageFactory.AtomicFusion.PresentationObjects:PresentationObjectComponent) {
+    @presentationObjectInterface = 'Vendor\\Default\\Presentation\\Image\\ImageInterface'
+
+    @styleguide {
+        title = 'Image'
+
+        props {
+            src = Sitegeist.Kaleidoscope:DummyImageSource {
+                width = 300
+                height = 200
+            }
+            alt = 'Lorem ipsum...'
+            title = 'Lorem ipsum...'
+        }
+    }
+
+    renderer = afx`
+        <dl>
+            <dd>src:</dd>
+            <dt>
+                <Sitegeist.Kaleidoscope:Image
+                    imageSource={presentationObject.src}
+                    srcset="@TODO: srcset"
+                    sizes="@TODO: sizes"
+                    />
+            </dt>
+            <dd>alt:</dd>
+            <dt>
+                {presentationObject.alt}
+            </dt>
+            <dd>title:</dd>
+            <dt>
+                {presentationObject.title}
+            </dt>
+        </dl>
+    `
+}

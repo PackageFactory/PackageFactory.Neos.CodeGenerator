@@ -13,6 +13,7 @@ use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property\PropertyFactory;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Type\ClassType;
 use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageResolverInterface;
+use PackageFactory\Neos\CodeGenerator\Framework\Util\StringUtil;
 use PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Presentation;
 
 /**
@@ -46,7 +47,10 @@ final class ModelFactory
     {
         $distributionPackage = $this->distributionPackageResolver->resolve($query->optional('package')->string());
         $presentation = Presentation::fromDistributionPackage($distributionPackage);
-        $name = $query->required('name')->type()->asString();
+
+        $name = str_replace('/', '\\', $query->required('name')->type()->asString());
+        $name = $name . '\\' . StringUtil::tail('\\', $name);
+
         $signature = $this->signatureFactory->forDistributionPackage($distributionPackage);
 
         $importCollectionBuilder = new ImportCollectionBuilder();

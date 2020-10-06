@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace Vendor\Default\Presentation\Button;
+namespace Vendor\Default\Presentation\Image;
 
 /*
  * This file is part of the Vendor.Default package
@@ -11,6 +11,6 @@ use PackageFactory\AtomicFusion\PresentationObjects\Fusion\AbstractComponentPres
 /**
  * @Flow\Scope("singleton")
  */
-final class ButtonFactory extends AbstractComponentPresentationObjectFactory
+final class ImageFactory extends AbstractComponentPresentationObjectFactory
 {
 }

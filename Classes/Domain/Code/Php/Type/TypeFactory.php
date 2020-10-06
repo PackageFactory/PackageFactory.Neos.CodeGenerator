@@ -23,6 +23,13 @@ use PHPStan\PhpDocParser\Parser\TypeParser;
 final class TypeFactory
 {
     /**
+     * @Flow\InjectConfiguration(path="shorthands")
+     * @phpstan-var array<string, array{type: string, example: array{presentation: {styleguide: string, afx: string}}}>
+     * @var array
+     */
+    protected $shorthands;
+
+    /**
      * @var Lexer
      */
     private $lexer;
@@ -66,6 +73,10 @@ final class TypeFactory
         } else {
             $nullable = false;
             $string = $string;
+        }
+
+        if (isset($this->shorthands[$string]['type'])) {
+            $string = $this->shorthands[$string]['type'];
         }
 
         $type = $this->fromPhpDocTypeNode(
