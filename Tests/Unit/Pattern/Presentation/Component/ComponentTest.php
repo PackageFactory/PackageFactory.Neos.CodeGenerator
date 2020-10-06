@@ -123,7 +123,6 @@ final class ComponentTest extends PatternTestCase
 
     /**
      * @test
-     * @group isolated
      * @return void
      */
     public function resolvesStyleguideExamplesRecursively(): void

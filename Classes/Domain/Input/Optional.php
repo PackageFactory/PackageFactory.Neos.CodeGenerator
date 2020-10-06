@@ -7,8 +7,7 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Input;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Utility\ObjectAccess;
-use PackageFactory\Neos\CodeGenerator\Domain\Input\TypeDescription\TypeDescription;
-use PackageFactory\Neos\CodeGenerator\Domain\Input\TypeDescription\TypeDescriptionInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\TypeTemplate\TypeTemplate;
 
 /**
  * @Flow\Proxy(false)
@@ -87,12 +86,12 @@ final class Optional
     }
 
     /**
-     * @return null|TypeDescriptionInterface
+     * @return null|TypeTemplate
      */
-    public function type(): ?TypeDescriptionInterface
+    public function type(): ?TypeTemplate
     {
         if ($string = $this->string()) {
-            return TypeDescription::fromString($string);
+            return TypeTemplate::fromString($string);
         } else {
             return null;
         }

@@ -10,12 +10,11 @@ use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpClass\PhpClassName;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpNamespace\PhpNamespace;
 use PackageFactory\Neos\CodeGenerator\Domain\Files\Path;
 use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageInterface;
-use PackageFactory\Neos\CodeGenerator\Domain\Input\TypeDescription\TypeDescriptionTemplateInterface;
 
 /**
  * @Flow\Proxy(false)
  */
-final class Domain implements TypeDescriptionTemplateInterface
+final class Domain
 {
     /**
      * @var DistributionPackageInterface

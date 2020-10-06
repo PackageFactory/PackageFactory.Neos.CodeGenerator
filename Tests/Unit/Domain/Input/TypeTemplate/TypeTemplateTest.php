@@ -2,18 +2,14 @@
 namespace PackageFactory\Neos\CodeGenerator\Tests\Unit\Domain\Code\Php\Import;
 
 use Neos\Flow\Tests\UnitTestCase;
-use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\PhpNamespace\PhpNamespace;
-use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageNamespace;
-use PackageFactory\Neos\CodeGenerator\Domain\Flow\PackageKey;
-use PackageFactory\Neos\CodeGenerator\Domain\Input\TypeDescription\TypeDescription;
-use PackageFactory\Neos\CodeGenerator\Domain\Input\TypeDescription\TypeDescriptionTemplateInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Input\TypeTemplate\TypeTemplate;
 
-final class TypeDescriptionTest extends UnitTestCase
+final class TypeTemplateTest extends UnitTestCase
 {
     /**
      * @return array<string,array{string,array<mixed>}>
      */
-    public function validTypeDescriptions(): array
+    public function validTypeTemplates(): array
     {
         return [
             'string' => [
@@ -21,7 +17,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => 'string',
                     'asAtomicString' => 'string',
-                    'with adopted namespace' => 'string',
+                    'substitute' => 'string',
                 ],
             ],
             'mixed' => [
@@ -29,7 +25,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => 'mixed',
                     'asAtomicString' => 'mixed',
-                    'with adopted namespace' => 'mixed',
+                    'substitute' => 'mixed',
                 ],
             ],
             'custom:descriptor' => [
@@ -37,7 +33,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => 'custom:descriptor',
                     'asAtomicString' => 'custom:descriptor',
-                    'with adopted namespace' => 'custom:descriptor',
+                    'substitute' => 'custom:descriptor',
                 ],
             ],
             'even.more:custom.descriptor' => [
@@ -45,7 +41,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => 'even.more:custom.descriptor',
                     'asAtomicString' => 'even.more:custom.descriptor',
-                    'with adopted namespace' => 'even.more:custom.descriptor',
+                    'substitute' => 'even.more:custom.descriptor',
                 ],
             ],
             'alternative-custom-descriptor' => [
@@ -53,7 +49,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => 'alternative-custom-descriptor',
                     'asAtomicString' => 'alternative-custom-descriptor',
-                    'with adopted namespace' => 'alternative-custom-descriptor',
+                    'substitute' => 'alternative-custom-descriptor',
                 ],
             ],
             '\\DateTimeInterface' => [
@@ -61,7 +57,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => '\\DateTimeInterface',
                     'asAtomicString' => '\\DateTimeInterface',
-                    'with adopted namespace' => '\\DateTimeInterface',
+                    'substitute' => '\\DateTimeInterface',
                 ],
             ],
             '\\Iterator<mixed, string>' => [
@@ -69,7 +65,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => '\\Iterator<mixed, string>',
                     'asAtomicString' => '\\Iterator',
-                    'with adopted namespace' => '\\Iterator<mixed, string>',
+                    'substitute' => '\\Iterator<mixed, string>',
                 ],
             ],
             '/Neos/Eel/Helper/StringHelper' => [
@@ -77,7 +73,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => '\\Neos\\Eel\\Helper\\StringHelper',
                     'asAtomicString' => '\\Neos\\Eel\\Helper\\StringHelper',
-                    'with adopted namespace' => '\\Neos\\Eel\\Helper\\StringHelper',
+                    'substitute' => '\\Neos\\Eel\\Helper\\StringHelper',
                 ],
             ],
             'Vendor.Site/Application' => [
@@ -85,7 +81,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => '\\Vendor\\Site\\Application',
                     'asAtomicString' => '\\Vendor\\Site\\Application',
-                    'with adopted namespace' => '\\Vendor\\Site\\Domain\\Service\\Application',
+                    'substitute' => '\\Vendor\\Site\\Domain\\Service\\Application',
                 ],
             ],
             'Vendor.Site/Foo<Vendor.Shared/Bar>' => [
@@ -93,7 +89,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => '\\Vendor\\Site\\Foo<\\Vendor\\Shared\\Bar>',
                     'asAtomicString' => '\\Vendor\\Site\\Foo',
-                    'with adopted namespace' => '\\Vendor\\Site\\Domain\\Service\\Foo<\\Vendor\\Shared\\Domain\\Service\\Bar>',
+                    'substitute' => '\\Vendor\\Site\\Domain\\Service\\Foo<\\Vendor\\Shared\\Domain\\Service\\Bar>',
                 ],
             ],
             'Alignment/Horizontal' => [
@@ -101,7 +97,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => 'Alignment\\Horizontal',
                     'asAtomicString' => 'Alignment\\Horizontal',
-                    'with adopted namespace' => '\\Vendor\\Adopted\\Domain\\Service\\Alignment\\Horizontal',
+                    'substitute' => '\\Vendor\\Adopted\\Domain\\Service\\Alignment\\Horizontal',
                 ],
             ],
             '?Alignment/Horizontal' => [
@@ -109,7 +105,7 @@ final class TypeDescriptionTest extends UnitTestCase
                 [
                     'asString' => '?Alignment\\Horizontal',
                     'asAtomicString' => 'Alignment\\Horizontal',
-                    'with adopted namespace' => '?\\Vendor\\Adopted\\Domain\\Service\\Alignment\\Horizontal',
+                    'substitute' => '?\\Vendor\\Adopted\\Domain\\Service\\Alignment\\Horizontal',
                 ],
             ]
         ];
@@ -117,54 +113,48 @@ final class TypeDescriptionTest extends UnitTestCase
 
     /**
      * @test
-     * @dataProvider validTypeDescriptions
+     * @dataProvider validTypeTemplates
      * @param string $input
      * @param array<string,string> $expectations
      * @return void
      */
-    public function acceptsValidTypeDescriptions(string $input, array $expectations): void
+    public function acceptsValidTypeTemplates(string $input, array $expectations): void
     {
-        $typeDescription = TypeDescription::fromString($input);
+        $TypeTemplate = TypeTemplate::fromString($input);
 
-        $this->assertEquals($expectations['asString'], $typeDescription->asString());
+        $this->assertEquals($expectations['asString'], $TypeTemplate->asString());
     }
 
     /**
      * @test
-     * @dataProvider validTypeDescriptions
+     * @dataProvider validTypeTemplates
      * @param string $input
      * @param array<string,string> $expectations
      * @return void
      */
-    public function aomtizesValidTypeDescriptions(string $input, array $expectations): void
+    public function aomtizesValidTypeTemplates(string $input, array $expectations): void
     {
-        $typeDescription = TypeDescription::fromString($input);
+        $TypeTemplate = TypeTemplate::fromString($input);
 
-        $this->assertEquals($expectations['asAtomicString'], $typeDescription->asAtomicString());
+        $this->assertEquals($expectations['asAtomicString'], $TypeTemplate->asAtomicString());
     }
 
     /**
      * @test
-     * @dataProvider validTypeDescriptions
+     * @group isolated
+     * @dataProvider validTypeTemplates
      * @param string $input
      * @param array<string,string> $expectations
      * @return void
      */
     public function adoptsDistributionPackageNamespace(string $input, array $expectations): void
     {
-        $template = new class implements TypeDescriptionTemplateInterface {
-            public function resolvePackageReference(string $package, string $namespace): string
-            {
-                return '\\' . $package . '\\Domain\\Service\\' . $namespace;
-            }
+        $typeTemplate = TypeTemplate::fromString($input)->substitute([
+            'foreignNamespace' => '\\{package}\\Domain\\Service\\{namespace}',
+            'domesticNamespace' => '\\Vendor\\Adopted\\Domain\\Service\\{namespace}',
+            'localNamespace' => '\\Vendor\\Adopted\\Domain\\Service\\TelephoneService',
+        ]);
 
-            public function resolveRelativeNamespace(string $namespace): string
-            {
-                return '\\Vendor\\Adopted\\Domain\\Service\\' . $namespace;
-            }
-        };
-        $typeDescription = TypeDescription::fromString($input)->withTemplate($template);
-
-        $this->assertEquals($expectations['with adopted namespace'], $typeDescription->asString());
+        $this->assertEquals($expectations['substitute'], $typeTemplate->asString());
     }
 }

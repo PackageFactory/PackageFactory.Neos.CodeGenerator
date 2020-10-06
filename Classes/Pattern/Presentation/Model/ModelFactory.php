@@ -56,9 +56,13 @@ final class ModelFactory
         $importCollectionBuilder = new ImportCollectionBuilder();
         $properties = [];
 
-        foreach ($query->optional('props')->dictionary() as $propertyName => $typeDescription) {
-            $typeDescription = $typeDescription->type()->withTemplate($presentation);
-            $property = $this->propertyFactory->fromKeyValuePair([$propertyName, $typeDescription->asString()]);
+        foreach ($query->optional('props')->dictionary() as $propertyName => $type) {
+            $type = $type->type()->substitute([
+                'foreignNamespace' => '\\{package}\\Presentation\\{namespace}',
+                'domesticNamespace' => '\\' . $presentation->getPhpNamespace()->asString() . '\\{namespace}'
+            ]);
+
+            $property = $this->propertyFactory->fromKeyValuePair([$propertyName, $type->asString()]);
             $type = $property->getType();
 
             if ($type instanceof ClassType && $import = Import::fromType($type)) {

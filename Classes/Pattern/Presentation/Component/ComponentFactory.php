@@ -54,16 +54,14 @@ final class ComponentFactory
         $title = $query->optional('title')->string() ?? StringUtil::tail('.', $name);
 
         $props = [];
-        foreach ($query->optional('props')->dictionary() as $propName => $typeDescription) {
-            $typeDescription = $typeDescription->type()->withTemplate($presentation);
-            $typeName = $typeDescription->asAtomicString();
-            if (preg_match('/^[A-Z][_a-zA-Z0-9]+$/', $typeName)) {
-                $typeName = $model->getPhpClassNameForValueObject()
-                    ->replaceDeclarationNameWith($typeName)
-                    ->asFullyQualifiedNameString();
-            }
+        foreach ($query->optional('props')->dictionary() as $propName => $type) {
+            $type = $type->type()->substitute([
+                'foreignNamespace' => '\\{package}\\Presentation\\{namespace}',
+                'domesticNamespace' => '\\' . $presentation->getPhpNamespace()->asString() . '\\{namespace}',
+                'localNamespace' => StringUtil::tail('\\', $model->getPhpClassNameForValueObject()->asFullyQualifiedNameString()) . '\\{className}'
+            ]);
 
-            $props[] = new Prop($propName, $propTypeFactory->fromString($typeName));
+            $props[] = new Prop($propName, $propTypeFactory->fromString($type->asAtomicString()));
         }
 
         return new Component($presentation, $name, $model, $signature, $title, $props);
