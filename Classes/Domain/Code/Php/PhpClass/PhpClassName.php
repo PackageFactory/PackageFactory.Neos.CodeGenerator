@@ -15,6 +15,7 @@ use PackageFactory\Neos\CodeGenerator\Framework\Util\StringUtil;
 final class PhpClassName
 {
     /**
+     * @phpstan-var class-string
      * @var string
      */
     private $value;
@@ -28,6 +29,7 @@ final class PhpClassName
             throw new \InvalidArgumentException('Invalid PhpClassName "' . $value . '".');
         }
 
+        // @phpstan-ignore-next-line
         $this->value = $value;
     }
 
@@ -53,6 +55,7 @@ final class PhpClassName
     }
 
     /**
+     * @phpstan-return class-string
      * @return string
      */
     public function asFullyQualifiedNameString(): string

@@ -67,6 +67,22 @@ final class Model
     }
 
     /**
+     * @return ImportCollectionInterface
+     */
+    public function getImports(): ImportCollectionInterface
+    {
+        return $this->imports;
+    }
+
+    /**
+     * @return PropertyInterface[]
+     */
+    public function getProperties(): array
+    {
+        return $this->properties;
+    }
+
+    /**
      * @return PhpClassName
      */
     public function getPhpClassNameForValueObject(): PhpClassName

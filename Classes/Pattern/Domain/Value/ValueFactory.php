@@ -63,7 +63,7 @@ final class ValueFactory
 
             if ($type instanceof ClassType && $import = Import::fromType($type)) {
                 $import = $importCollectionBuilder->addImport($import);
-                $property = $property->withType($type->withNativeName($import->getName()));
+                $property = $property->withType($type->withAlias($import->getName()));
             }
 
             $properties[] = $property;

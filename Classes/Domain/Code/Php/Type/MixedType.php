@@ -12,9 +12,32 @@ use Neos\Flow\Annotations as Flow;
  */
 final class MixedType implements TypeInterface
 {
+    public function getName(): string
+    {
+        throw new \BadMethodCallException();
+    }
+
     public function getNativeName(): string
     {
         throw new \BadMethodCallException();
+    }
+
+    /**
+     * @param string $nativeName
+     * @return TypeInterface
+     */
+    public function withNativeName(string $nativeName): TypeInterface
+    {
+        return $this;
+    }
+
+    /**
+     * @param string $alias
+     * @return TypeInterface
+     */
+    public function withAlias(string $alias): TypeInterface
+    {
+        return $this;
     }
 
     public function getPhpDocName(): string

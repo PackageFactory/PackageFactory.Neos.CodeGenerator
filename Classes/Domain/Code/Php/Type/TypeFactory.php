@@ -6,6 +6,7 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Type;
  */
 
 use Neos\Flow\Annotations as Flow;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Method\GetterSpecification;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
@@ -98,7 +99,7 @@ final class TypeFactory
      */
     public function fromReflectionType(\ReflectionType $reflectionType): TypeInterface
     {
-        throw new \Exception('not implemented');
+        throw new \Exception('@TODO: TypeFactory->fromReflectionType is not implemented yet.');
     }
 
     /**
@@ -117,6 +118,23 @@ final class TypeFactory
     }
 
     /**
+     * @param \ReflectionMethod $reflectionMethod
+     * @return TypeInterface
+     */
+    public function fromReflectionGetterMethod(\ReflectionMethod $reflectionMethod): TypeInterface
+    {
+        assert(GetterSpecification::isSatisfiedByReflectionMethod($reflectionMethod));
+
+        if ($docComment = $reflectionMethod->getDocComment()) {
+            return $this->fromGetterMethodDocComment($docComment);
+        } elseif ($reflectionType = $reflectionMethod->getReturnType()) {
+            return $this->fromReflectionType($reflectionType);
+        } else {
+            throw new \Exception('@TODO: Could not infer type from reflection getter method');
+        }
+    }
+
+    /**
      * @param string $docComment
      * @return TypeInterface
      */
@@ -127,6 +145,22 @@ final class TypeFactory
 
         foreach ($actualPhpDocNode->getVarTagValues() as $varTagvalue) {
             return $this->fromPhpDocTypeNode($varTagvalue->type);
+        }
+
+        throw new \InvalidArgumentException('@TODO: Invalid doc comment');
+    }
+
+    /**
+     * @param string $docComment
+     * @return TypeInterface
+     */
+    public function fromGetterMethodDocComment(string $docComment): TypeInterface
+    {
+        $tokens = new TokenIterator($this->lexer->tokenize($docComment));
+        $actualPhpDocNode = $this->phpDocParser->parse($tokens);
+
+        foreach ($actualPhpDocNode->getReturnTagValues() as $returnTagValue) {
+            return $this->fromPhpDocTypeNode($returnTagValue->type);
         }
 
         throw new \InvalidArgumentException('@TODO: Invalid doc comment');
@@ -165,7 +199,7 @@ final class TypeFactory
         } elseif (IterableType::isValidName($node->name)) {
             return new IterableType(ScalarType::int(), new MixedType, false);
         } else {
-            return new ClassType($node->name, [], false);
+            return new ClassType($node->name, null, [], false);
         }
     }
 
@@ -244,6 +278,7 @@ final class TypeFactory
         } else {
             return new ClassType(
                 $node->type->name,
+                null,
                 array_map(
                     function (TypeNode $node) { return $this->fromPhpDocTypeNode($node); },
                     $node->genericTypes

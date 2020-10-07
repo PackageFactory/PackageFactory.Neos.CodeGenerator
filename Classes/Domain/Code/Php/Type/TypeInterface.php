@@ -10,7 +10,24 @@ interface TypeInterface
     /**
      * @return string
      */
+    public function getName(): string;
+
+    /**
+     * @return string
+     */
     public function getNativeName(): string;
+
+    /**
+     * @param string $nativeName
+     * @return TypeInterface
+     */
+    public function withNativeName(string $nativeName): TypeInterface;
+
+    /**
+     * @param string $alias
+     * @return TypeInterface
+     */
+    public function withAlias(string $alias): TypeInterface;
 
     /**
      * @return string

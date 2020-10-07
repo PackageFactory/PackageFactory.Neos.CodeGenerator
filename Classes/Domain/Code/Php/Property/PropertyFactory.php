@@ -6,7 +6,9 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Property;
  */
 
 use Neos\Flow\Annotations as Flow;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Method\GetterSpecification;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Type\TypeFactory;
+use PackageFactory\Neos\CodeGenerator\Framework\Util\StringUtil;
 
 /**
  * @Flow\Scope("singleton")
@@ -37,6 +39,20 @@ final class PropertyFactory
         return new Property(
             $this->typeFactory->fromReflectionProperty($reflectionProperty),
             $reflectionProperty->getName()
+        );
+    }
+
+    /**
+     * @param \ReflectionMethod $reflectionMethod
+     * @return PropertyInterface
+     */
+    public function fromReflectionGetterMethod(\ReflectionMethod $reflectionMethod): PropertyInterface
+    {
+        assert(GetterSpecification::isSatisfiedByReflectionMethod($reflectionMethod));
+
+        return new Property(
+            $this->typeFactory->fromReflectionGetterMethod($reflectionMethod),
+            lcfirst(StringUtil::truncateStart($reflectionMethod->getName(), 'get'))
         );
     }
 }

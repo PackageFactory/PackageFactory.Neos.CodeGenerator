@@ -54,9 +54,35 @@ final class IterableType implements TypeInterface
     /**
      * @return string
      */
+    public function getName(): string
+    {
+        return 'iterable';
+    }
+
+    /**
+     * @return string
+     */
     public function getNativeName(): string
     {
         return 'iterable';
+    }
+
+    /**
+     * @param string $nativeName
+     * @return TypeInterface
+     */
+    public function withNativeName(string $nativeName): TypeInterface
+    {
+        return $this;
+    }
+
+    /**
+     * @param string $alias
+     * @return TypeInterface
+     */
+    public function withAlias(string $alias): TypeInterface
+    {
+        return $this;
     }
 
     /**

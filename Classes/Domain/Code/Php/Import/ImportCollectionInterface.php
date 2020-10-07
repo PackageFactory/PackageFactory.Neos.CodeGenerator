@@ -10,4 +10,9 @@ namespace PackageFactory\Neos\CodeGenerator\Domain\Code\Php\Import;
  */
 interface ImportCollectionInterface extends \Countable, \IteratorAggregate
 {
+    /**
+     * @param string $alias
+     * @return null|ImportInterface
+     */
+    public function getByAlias(string $alias): ?ImportInterface;
 }

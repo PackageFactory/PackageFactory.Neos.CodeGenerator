@@ -40,4 +40,19 @@ final class ImportCollection implements ImportCollectionInterface
     {
         return count($this->imports);
     }
+
+    /**
+     * @param string $alias
+     * @return null|ImportInterface
+     */
+    public function getByAlias(string $alias): ?ImportInterface
+    {
+        foreach ($this->imports as $import) {
+            if ($import->getAlias() === $alias) {
+                return $import;
+            }
+        }
+
+        return null;
+    }
 }

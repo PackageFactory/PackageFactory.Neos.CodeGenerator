@@ -7,6 +7,7 @@ namespace PackageFactory\Neos\CodeGenerator\Pattern\Presentation\Component;
 
 use Neos\Flow\Annotations as Flow;
 use PackageFactory\Neos\CodeGenerator\Domain\Code\Common\Signature\SignatureFactoryInterface;
+use PackageFactory\Neos\CodeGenerator\Domain\Code\Fusion\Prototype\PrototypeInterface;
 use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 use PackageFactory\Neos\CodeGenerator\Domain\Flow\DistributionPackageResolverInterface;
 use PackageFactory\Neos\CodeGenerator\Framework\Util\StringUtil;
@@ -39,6 +40,12 @@ final class ComponentFactory
     protected $modelFactory;
 
     /**
+     * @Flow\Inject
+     * @var PropTypeFactory
+     */
+    protected $propTypeFactory;
+
+    /**
      * @param Query $query
      * @param PropTypeFactory $propTypeFactory
      * @return Component
@@ -62,6 +69,34 @@ final class ComponentFactory
             ]);
 
             $props[] = new Prop($propName, $propTypeFactory->fromString($type->asAtomicString()));
+        }
+
+        return new Component($presentation, $name, $model, $signature, $title, $props);
+    }
+
+    /**
+     * @param \ReflectionClass<object> $modelReflection
+     * @param PrototypeInterface $prototype
+     * @return Component
+     */
+    public function fromExisitingComponent(\ReflectionClass $modelReflection, PrototypeInterface $prototype): Component
+    {
+        $model = $this->modelFactory->fromExistingModel($modelReflection);
+        $distributionPackage = $this->distributionPackageResolver->resolve($prototype->getName()->getPackageKey());
+        $presentation = Presentation::fromDistributionPackage($distributionPackage);
+        $name = StringUtil::truncateStart(StringUtil::dropHead(':', $prototype->getName()->asString()), 'Component.');
+
+        $signature = $this->signatureFactory->forDistributionPackage($distributionPackage);
+        $title = $prototype->getMeta()['styleguide']['title'] ?? 'Unknown';
+
+        $props = [];
+        foreach ($model->getProperties() as $property) {
+            $props[] = new Prop(
+                $property->getName(),
+                $this->propTypeFactory->fromExistingStyleguideExample(
+                    $prototype->getMeta()['styleguide']['props'][$property->getName()] ?? null
+                )
+            );
         }
 
         return new Component($presentation, $name, $model, $signature, $title, $props);

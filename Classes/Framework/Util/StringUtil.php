@@ -43,6 +43,52 @@ final class StringUtil
     }
 
     /**
+     * @param string $string
+     * @param string $truncateString
+     * @return string
+     */
+    public static function truncateStart(string $string, string $truncateString): string
+    {
+        $length = strlen($truncateString);
+
+        if (substr($string, 0, $length) === $truncateString) {
+            return substr($string, $length);
+        } else {
+            return $string;
+        }
+    }
+
+    /**
+     * @param string $delimiter
+     * @param string $string
+     * @return string
+     */
+    public static function head(string $delimiter, string $string): string
+    {
+        $segments = explode($delimiter, $string);
+        assert(is_array($segments));
+
+        $head = $segments[0];
+        assert(is_string($head));
+
+        return $head;
+    }
+
+    /**
+     * @param string $delimiter
+     * @param string $string
+     * @return string
+     */
+    public static function dropHead(string $delimiter, string $string): string
+    {
+        $segments = explode($delimiter, $string);
+        assert(is_array($segments));
+        array_shift($segments);
+
+        return join($delimiter, $segments);
+    }
+
+    /**
      * @param string $delimiter
      * @param string $string
      * @return string
@@ -56,6 +102,20 @@ final class StringUtil
         assert(is_string($tail));
 
         return $tail;
+    }
+
+    /**
+     * @param string $delimiter
+     * @param string $string
+     * @return string
+     */
+    public static function dropTail(string $delimiter, string $string): string
+    {
+        $segments = explode($delimiter, $string);
+        assert(is_array($segments));
+        array_pop($segments);
+
+        return join($delimiter, $segments);
     }
 
     /**

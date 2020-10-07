@@ -73,9 +73,35 @@ final class ScalarType implements TypeInterface
     /**
      * @return string
      */
+    public function getName(): string
+    {
+        return $this->nativeName;
+    }
+
+    /**
+     * @return string
+     */
     public function getNativeName(): string
     {
         return $this->nativeName;
+    }
+
+    /**
+     * @param string $nativeName
+     * @return TypeInterface
+     */
+    public function withNativeName(string $nativeName): TypeInterface
+    {
+        return $this;
+    }
+
+    /**
+     * @param string $alias
+     * @return TypeInterface
+     */
+    public function withAlias(string $alias): TypeInterface
+    {
+        return $this;
     }
 
     /**

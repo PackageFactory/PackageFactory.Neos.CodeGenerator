@@ -20,6 +20,11 @@ final class ClassType implements TypeInterface
     private $name;
 
     /**
+     * @var null|string
+     */
+    private $alias;
+
+    /**
      * @var TypeInterface[]
      */
     private $parameterTypes;
@@ -31,12 +36,14 @@ final class ClassType implements TypeInterface
 
     /**
      * @param string $name
+     * @param null|string $alias
      * @param TypeInterface[] $parameterTypes
      * @param boolean $nullable
      */
-    public function __construct(string $name, array $parameterTypes, bool $nullable)
+    public function __construct(string $name, ?string $alias, array $parameterTypes, bool $nullable)
     {
         $this->name = $name;
+        $this->alias = $alias;
         $this->parameterTypes = $parameterTypes;
         $this->nullable = $nullable;
     }
@@ -53,18 +60,35 @@ final class ClassType implements TypeInterface
     /**
      * @return string
      */
+    public function getName(): string
+    {
+        return $this->alias ?? $this->name;
+    }
+
+    /**
+     * @return string
+     */
     public function getNativeName(): string
     {
         return $this->name;
     }
 
     /**
-     * @param string $name
-     * @return self
+     * @param string $nativeName
+     * @return TypeInterface
      */
-    public function withNativeName(string $name): self
+    public function withNativeName(string $nativeName): TypeInterface
     {
-        return new self($name, $this->parameterTypes, $this->nullable);
+        return new self($nativeName, $this->alias, $this->parameterTypes, $this->nullable);
+    }
+
+    /**
+     * @param string $alias
+     * @return TypeInterface
+     */
+    public function withAlias(string $alias): TypeInterface
+    {
+        return new self($this->name, $alias, $this->parameterTypes, $this->nullable);
     }
 
     /**
@@ -75,14 +99,14 @@ final class ClassType implements TypeInterface
         if (count($this->parameterTypes) > 0) {
             return sprintf(
                 '%s<%s>',
-                $this->name,
+                $this->alias ?? $this->name,
                 join(', ', array_map(
                     static function (TypeInterface $type) { return $type->getPhpDocName(); },
                     $this->parameterTypes
                 ))
             );
         } else {
-            return $this->name;
+            return $this->alias ?? $this->name;
         }
     }
 
@@ -99,7 +123,7 @@ final class ClassType implements TypeInterface
      */
     public function asNullable(): TypeInterface
     {
-        return new self($this->name, $this->parameterTypes, true);
+        return new self($this->name, $this->alias, $this->parameterTypes, true);
     }
 
     /**
@@ -115,7 +139,7 @@ final class ClassType implements TypeInterface
      */
     public function asPhpTypeHint(): string
     {
-        return ($this->nullable ? '?' : '') . $this->getNativeName();
+        return ($this->nullable ? '?' : '') . ($this->alias ?? $this->name);
     }
 
     /**
