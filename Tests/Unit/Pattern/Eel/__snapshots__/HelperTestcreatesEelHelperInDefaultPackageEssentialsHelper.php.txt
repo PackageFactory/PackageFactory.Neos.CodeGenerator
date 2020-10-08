@@ -1,0 +1,25 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Application\Eel;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Neos\Flow\Annotations as Flow;
+use Neos\Eel\ProtectedContextAwareInterface;
+
+/**
+ * @Flow\Scope("singleton")
+ */
+final class EssentialsHelper implements ProtectedContextAwareInterface
+{
+    /**
+     * All methods are considered safe
+     *
+     * @return boolean
+     */
+    public function allowsCallOfMethod($methodName)
+    {
+        return true;
+    }
+}

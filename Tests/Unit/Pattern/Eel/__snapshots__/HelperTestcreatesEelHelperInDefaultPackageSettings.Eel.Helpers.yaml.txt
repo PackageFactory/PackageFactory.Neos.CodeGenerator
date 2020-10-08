@@ -1,0 +1,4 @@
+Neos:
+  Fusion:
+    defaultContext:
+      Vendor.Default.Essentials: Vendor\Default\Application\Eel\EssentialsHelper

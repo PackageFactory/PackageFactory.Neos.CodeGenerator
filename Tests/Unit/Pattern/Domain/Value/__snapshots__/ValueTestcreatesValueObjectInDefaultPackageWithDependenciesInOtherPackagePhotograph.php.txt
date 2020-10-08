@@ -1,0 +1,70 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Domain\Archive\Image;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Neos\Flow\Annotations as Flow;
+use Vendor\Shared\Domain\Uri;
+use Vendor\Shared\Domain\Person;
+
+/**
+ * @Flow\Proxy(false)
+ */
+final class Photograph
+{
+    /**
+     * @var Uri
+     */
+    private $uri;
+
+    /**
+     * @var string
+     */
+    private $abstract;
+
+    /**
+     * @var Person
+     */
+    private $author;
+
+    /**
+     * @param Uri $uri
+     * @param string $abstract
+     * @param Person $author
+     */
+    public function __construct(
+        Uri $uri,
+        string $abstract,
+        Person $author
+    ) {
+        $this->uri = $uri;
+        $this->abstract = $abstract;
+        $this->author = $author;
+    }
+
+    /**
+     * @return Uri
+     */
+    public function getUri(): Uri
+    {
+        return $this->uri;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAbstract(): string
+    {
+        return $this->abstract;
+    }
+
+    /**
+     * @return Person
+     */
+    public function getAuthor(): Person
+    {
+        return $this->author;
+    }
+}

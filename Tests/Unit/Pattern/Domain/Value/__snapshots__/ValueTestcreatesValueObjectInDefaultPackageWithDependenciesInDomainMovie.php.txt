@@ -1,0 +1,53 @@
+<?php declare(strict_types=1);
+namespace Vendor\Default\Domain\Cinema;
+
+/*
+ * This file is part of the Vendor.Default package
+ */
+
+use Neos\Flow\Annotations as Flow;
+use Vendor\Default\Domain\Music\MusicGroup;
+
+/**
+ * @Flow\Proxy(false)
+ */
+final class Movie
+{
+    /**
+     * @var Actor[]
+     */
+    private $actors;
+
+    /**
+     * @var MusicGroup
+     */
+    private $musicBy;
+
+    /**
+     * @param Actor[] $actors
+     * @param MusicGroup $musicBy
+     */
+    public function __construct(
+        array $actors,
+        MusicGroup $musicBy
+    ) {
+        $this->actors = $actors;
+        $this->musicBy = $musicBy;
+    }
+
+    /**
+     * @return Actor[]
+     */
+    public function getActors(): array
+    {
+        return $this->actors;
+    }
+
+    /**
+     * @return MusicGroup
+     */
+    public function getMusicBy(): MusicGroup
+    {
+        return $this->musicBy;
+    }
+}
