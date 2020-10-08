@@ -16,9 +16,10 @@ use PackageFactory\Neos\CodeGenerator\Domain\Input\Query;
 final class ModelGenerator implements GeneratorInterface
 {
     /**
+     * @Flow\Inject
      * @var ModelRepository
      */
-    private $modelRepository;
+    protected $modelRepository;
 
     /**
      * @Flow\Inject
